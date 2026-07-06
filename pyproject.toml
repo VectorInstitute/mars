@@ -1,18 +1,41 @@
 [project]
-name = "aieng-template-uv"
-version = "0.1.1"
-description = "Add your description here"
+name = "deepfake-moe"
+version = "0.1.0"
+description = "Qwen3-Omni audio-video deepfake-detection foundation."
 readme = "README.md"
 authors = [ {name = "Vector AI Engineering", email = "ai_engineering@vectorinstitute.ai"}]
 license = "Apache-2.0"
-repository = "https://github.com/VectorInstitute/aieng-template-uv"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
-    "filelock==3.29.4",
-    "requests>=2.33.0", # Pinning version to address vulnerability CVE-2026-25645
-    "urllib3==2.7.0",
-    "pygments>=2.20.0", # Pinning version to address vulnerability CVE-2026-4539
+    "numpy>=1.26",
+    # --- Qwen3-Omni model stack ---
+    # NOTE: Qwen3-Omni needs a recent transformers; bump if load fails.
+    "torch==2.11.0",
+    "transformers>=5.5.3",
+    "accelerate>=1.0.0",
+    "qwen-omni-utils>=0.0.8",
+    # --- media I/O ---
+    "av>=12.0",
+    "librosa>=0.10",
+    "soundfile>=0.12",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    # torchvision>=0.23 dropped io.read_video; qwen-omni-utils falls back to it
+    # unless torchcodec/decord is present, so pin torchcodec as the video backend.
+    "torchcodec>=0.14.0",
+    "torchvision==0.26.0",
+    "nvidia-cudnn-cu12>=9.10.2.21",
+    "nvidia-cusparselt-cu12>=0.7.1",
+    "torchaudio==2.11.0",
+    "vllm==0.24.0",
 ]
+
+[project.urls]
+repository = "https://github.com/VectorInstitute/deepfake-moe"
+
+[project.scripts]
+deepfake-moe-forward = "deepfake_moe.run_forward:main"
+deepfake-moe-eval = "deepfake_moe.run_eval:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -21,7 +44,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "codecov>=2.1.13",
-    "mypy>=1.20.1",
+    "mypy>=1.19.1,<2",
     "nbqa>=1.9.1",
     "pip>=26.1", # Pinning version to address vulnerabilities CVE-2026-1703, CVE-2026-3219
     "pip-audit>=2.7.3",
@@ -143,5 +166,5 @@ markers = [
 
 [tool.coverage]
     [tool.coverage.run]
-    source=["src/aieng_template_uv"]
+    source=["src/deepfake_moe"]
     omit=["tests/*", "*__init__.py"]

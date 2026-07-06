@@ -1,74 +1,110 @@
-# AI Engineering template (with uv)
+# deepfake-moe
 
-----------------------------------------------------------------------------------------
+Audio–video deepfake detection with **Qwen3-Omni**. Phase 1 evaluates the model
+zero-shot on public benchmarks (LAV-DF, ArEnAV); the codebase is the traceable
+foundation for later Mixture-of-Experts work.
 
-[![code checks](https://github.com/VectorInstitute/aieng-template-uv/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/aieng-template-uv/actions/workflows/code_checks.yml)
-[![unit tests](https://github.com/VectorInstitute/aieng-template-uv/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/VectorInstitute/aieng-template-uv/actions/workflows/unit_tests.yml)
-[![integration tests](https://github.com/VectorInstitute/aieng-template-uv/actions/workflows/integration_tests.yml/badge.svg)](https://github.com/VectorInstitute/aieng-template-uv/actions/workflows/integration_tests.yml)
-[![docs](https://github.com/VectorInstitute/aieng-template-uv/actions/workflows/docs.yml/badge.svg)](https://github.com/VectorInstitute/aieng-template-uv/actions/workflows/docs.yml)
-[![codecov](https://codecov.io/github/VectorInstitute/aieng-template-uv/graph/badge.svg?token=83MYFZ3UPA)](https://codecov.io/github/VectorInstitute/aieng-template-uv)
-![GitHub License](https://img.shields.io/github/license/VectorInstitute/aieng-template-uv)
+## Overview
 
-A template repo for AI Engineering projects (using ``python``) and ``uv``. This
-template is like our original AI Engineering [template](https://github.com/VectorInstitute/aieng-template),
-however, unlike how that template uses poetry, this one uses uv for dependency
-management (as well as packaging and publishing).
+- **Model access** — load Qwen3-Omni via HF Transformers (raw forward pass with
+  encoder/router hooks for inspection) or vLLM (tensor-parallel inference).
+- **Evaluation** — prompt the model to classify video/audio as real/fake and
+  localize fake intervals as JSON, then score against manifest ground truth
+  (video/audio AUC & F1, temporal IoU).
+- **Configuration** — models live in a single registry and are selected at run
+  time; results are grouped by experiment and model.
 
-## 🧑🏿‍💻 Developing
+## Structure
 
-### Installing dependencies
+```
+configs/
+  models.yaml            # model registry — one entry per model (hf | vllm)
+  eval.yaml              # eval settings; data paths come from .env as ${VAR}
+scripts/
+  eval.sh               # run eval — local (bash) or Slurm (sbatch; array = shards)
+  forward.sh            # run one raw forward pass
+  patch_vllm_qwen3.py   # optional vLLM fix for Qwen3-Omni
+src/deepfake_moe/
+  run_eval.py           # eval entry point
+  run_forward.py        # forward entry point
+  models/               # registry, factory, typed configs, hf + vllm backends
+  eval/                 # dataset, runner, metrics
+  utils/                # env/.env loading, logging, media / audio / video I/O
+.env.example            # copy to .env; machine paths + FFMPEG_SHARED
+```
 
-The development environment can be set up using
-[uv](https://github.com/astral-sh/uv?tab=readme-ov-file#installation). Hence, make sure it is
-installed and then run:
+## Setup
+
+Uses [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync
-source .venv/bin/activate
+cp .env.example .env      # set data paths (and FFMPEG_SHARED for vLLM video)
 ```
 
-In order to install dependencies for testing (codestyle, unit tests, integration tests),
-run:
+Machine-specific paths live in `.env`; the committed configs reference them as
+`${VAR}`, so you never edit paths inside YAML. vLLM video decode requires a
+shared FFmpeg 7.x build — point `FFMPEG_SHARED` at it in `.env`.
+
+## Models
+
+Every model is an entry in `configs/models.yaml`. The key is the model name (used
+to select the model and to name result folders); `backend` is `hf` or `vllm`.
+Add a model by adding an entry — no code changes:
+
+```yaml
+my-model:
+  backend: vllm
+  model_id: "org/checkpoint-name"
+  # ... backend-specific settings ...
+```
+
+## Run
+
+**Forward pass** (inspection — prints logits, hidden-state, and encoder shapes):
 
 ```bash
-uv sync --dev
-source .venv/bin/activate
+bash scripts/forward.sh --video clip.mp4 --audio clip.wav --generate
 ```
 
-In order to exclude installation of packages from a specific group (e.g. docs),
-run:
+**Eval** — the same `scripts/eval.sh` runs locally or on Slurm. Results are
+written to `results/<experiment-name>/<model>/`.
 
 ```bash
-uv sync --no-group docs
+# local smoke test
+bash scripts/eval.sh --dry-run
+
+# single Slurm job
+sbatch scripts/eval.sh --experiment-name Qwen3-Baseline --model qwen3-omni
+
+# sharded across a Slurm array (shards derived from the array size)
+sbatch --array=0-4 scripts/eval.sh --experiment-name Qwen3-Baseline --model qwen3-omni
 ```
 
-If you're coming from `poetry` then you'll notice that the virtual environment
-is actually stored in the project root folder and is by default named as `.venv`.
-The other important note is that while `poetry` uses a "flat" layout of the project,
-`uv` opts for the the "src" layout. (For more info, see [here](https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/))
+Metrics are aggregated automatically: a single job writes them at the end, and a
+sharded array queues a dependent (afterok) job that combines all shards into one
+report. To (re)compute metrics from existing shard predictions manually:
 
-### Poetry to UV
+```bash
+bash scripts/eval.sh --metrics-only --experiment-name Qwen3-Baseline --model qwen3-omni
+```
 
-The table below provides the `uv` equivalent counterparts for some of the more
-common `poetry` commands.
+Re-run only the clips that failed (load/predict/parse errors) in a prior run:
 
-| Poetry                                               | UV                                          |
-|------------------------------------------------------|---------------------------------------------|
-| `poetry new <project-name>`  # creates new project   | `uv init <project-name>`                    |
-| `poetry install`  # installs existing project        | `uv sync`                                   |
-| `poetry install --with docs,test`                    | `uv sync --group docs --group test`         |
-| `poetry add numpy`                                   | `uv add numpy`                              |
-| `poetry add pytest pytest-asyncio --groups dev`      | `uv add pytest pytest-asyncio --groups dev` |
-| `poetry remove numpy`                                | `uv remove numpy`                           |
-| `poetry lock`                                        | `uv lock`                                   |
-| `poetry run <cmd>`  # runs cmd with the project venv | `uv run <cmd>`                              |
-| `poetry build`                                       | `uv build`                                  |
-| `poetry publish`                                     | `uv publish`                                |
-| `poetry cache clear pypi --all`                      | `uv cache clean`                            |
+```bash
+bash scripts/eval.sh --retry-failed --experiment-name Qwen3-Baseline --model qwen3-omni
+```
 
-For the full list of `uv` commands, you can visit the official [docs](https://docs.astral.sh/uv/reference/cli/#uv).
+If you hit the vLLM Qwen3-Omni `cu_seqlens` bug, apply the patch once:
 
-### Tidbit
+```bash
+uv run python scripts/patch_vllm_qwen3.py
+```
 
-If you're curious about what "uv" stands for, it appears to have been more or
-less chosen [randomly](https://github.com/astral-sh/uv/issues/1349#issuecomment-1986451785).
+## Development
+
+```bash
+uv run pytest -m "not integration_test"
+```
+
+See `docs/user_guide.md` for tooling (pre-commit, mypy, docs, CI).
