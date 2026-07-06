@@ -10,18 +10,19 @@ import torch
 from qwen_omni_utils import process_mm_info
 from transformers import Qwen3OmniMoeProcessor
 
+
 try:
     from vllm import LLM, SamplingParams
 except ModuleNotFoundError:
-    LLM = None
-    SamplingParams = None
+    LLM = None  # type: ignore[assignment, misc]
+    SamplingParams = None  # type: ignore[assignment, misc]
 
 from deepfake_moe.eval.parser import parse_response
 from deepfake_moe.eval.prompts import AV_USER_PROMPT, SYSTEM_PROMPT, VIDEO_ONLY_USER_PROMPT
-from deepfake_moe.utils.logging_utils import get_logger
 from deepfake_moe.models.base import ClipData, PredictionOutput
 from deepfake_moe.models.vllm.media import build_conversation
 from deepfake_moe.models.vllm_config import VllmConfig
+from deepfake_moe.utils.logging_utils import get_logger
 
 
 logger = get_logger(__name__)
@@ -38,7 +39,7 @@ def _patch_qwen3_processor_for_vllm() -> bool:
         n_items = len(image_sizes) if image_sizes is not None else 1
         return {"num_image_tokens": [8192] * n_items}
 
-    setattr(Qwen3OmniMoeProcessor, "_get_num_multimodal_tokens", _get_num_multimodal_tokens)
+    setattr(Qwen3OmniMoeProcessor, "_get_num_multimodal_tokens", _get_num_multimodal_tokens)  # noqa: B010
     logger.warning("Patched Qwen3OmniMoeProcessor with _get_num_multimodal_tokens for vLLM compatibility.")
     return True
 
@@ -58,7 +59,7 @@ def _version_tuple(version: str) -> tuple[int, int, int]:
             break
     while len(parts) < 3:
         parts.append(0)
-    return tuple(parts[:3])
+    return parts[0], parts[1], parts[2]
 
 
 def _assert_supported_vllm_stack() -> None:
@@ -95,10 +96,7 @@ class QwenOmniVLLM:
     def load(self) -> QwenOmniVLLM:
         """Load vLLM engine and processor."""
         if LLM is None:
-            raise RuntimeError(
-                "vLLM is not installed in this environment. "
-                "Install vllm and retry, or use backend: hf."
-            )
+            raise RuntimeError("vLLM is not installed in this environment. Install vllm and retry, or use backend: hf.")
         _assert_supported_vllm_stack()
         cfg = self.config
         tp = cfg.tensor_parallel_size if cfg.tensor_parallel_size is not None else torch.cuda.device_count()
@@ -173,7 +171,7 @@ class QwenOmniVLLM:
             max_tokens=self.config.max_new_tokens,
         )
         outputs = self.llm.generate(
-            [
+            [  # type: ignore[arg-type]
                 {
                     "prompt": text,
                     "multi_modal_data": mm_data,

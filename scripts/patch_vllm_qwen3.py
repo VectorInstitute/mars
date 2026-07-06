@@ -11,7 +11,8 @@ from pathlib import Path
 
 
 def _find_target_file() -> Path:
-    import vllm
+    # Imported lazily so the script fails gracefully when vllm is not installed.
+    import vllm  # noqa: PLC0415
 
     vllm_root = Path(vllm.__file__).parent
     target = vllm_root / "model_executor" / "layers" / "attention" / "mm_encoder_attention.py"
@@ -46,6 +47,7 @@ def _apply_patch(path: Path) -> str:
 
 
 def main() -> None:
+    """Locate the installed vLLM and apply the Qwen3-Omni cu_seqlens patch."""
     try:
         target = _find_target_file()
         state = _apply_patch(target)

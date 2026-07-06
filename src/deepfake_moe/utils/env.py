@@ -23,7 +23,7 @@ _loaded = False
 
 def load_env() -> None:
     """Load ``<repo>/.env`` into ``os.environ`` once (real env vars win)."""
-    global _loaded
+    global _loaded  # noqa: PLW0603
     if not _loaded:
         load_dotenv(ENV_PATH, override=False)
         _loaded = True

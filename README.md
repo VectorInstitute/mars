@@ -1,5 +1,11 @@
 # deepfake-moe
 
+[![code checks](https://github.com/VectorInstitute/deepfake-moe/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/deepfake-moe/actions/workflows/code_checks.yml)
+[![unit tests](https://github.com/VectorInstitute/deepfake-moe/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/VectorInstitute/deepfake-moe/actions/workflows/unit_tests.yml)
+[![integration tests](https://github.com/VectorInstitute/deepfake-moe/actions/workflows/integration_tests.yml/badge.svg)](https://github.com/VectorInstitute/deepfake-moe/actions/workflows/integration_tests.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE.md)
+[![Contact](https://img.shields.io/badge/Contact-shaina.raza%40vectorinstitute.ai-green)](mailto:shaina.raza@vectorinstitute.ai)
+
 Audio–video deepfake detection with **Qwen3-Omni**. Phase 1 evaluates the model
 zero-shot on public benchmarks (LAV-DF, ArEnAV); the codebase is the traceable
 foundation for later Mixture-of-Experts work.
@@ -7,12 +13,14 @@ foundation for later Mixture-of-Experts work.
 ## Overview
 
 - **Model access** — load Qwen3-Omni via HF Transformers (raw forward pass with
-  encoder/router hooks for inspection) or vLLM (tensor-parallel inference).
+encoder/router hooks for inspection) or vLLM (tensor-parallel inference).
 - **Evaluation** — prompt the model to classify video/audio as real/fake and
-  localize fake intervals as JSON, then score against manifest ground truth
-  (video/audio AUC & F1, temporal IoU).
+localize fake intervals as JSON, then score against manifest ground truth
+(video/audio AUC & F1, temporal IoU).
 - **Configuration** — models live in a single registry and are selected at run
-  time; results are grouped by experiment and model.
+time; results are grouped by experiment and model.
+
+
 
 ## Structure
 
@@ -32,6 +40,8 @@ src/deepfake_moe/
   utils/                # env/.env loading, logging, media / audio / video I/O
 .env.example            # copy to .env; machine paths + FFMPEG_SHARED
 ```
+
+
 
 ## Setup
 
@@ -58,6 +68,8 @@ my-model:
   model_id: "org/checkpoint-name"
   # ... backend-specific settings ...
 ```
+
+
 
 ## Run
 
@@ -100,6 +112,8 @@ If you hit the vLLM Qwen3-Omni `cu_seqlens` bug, apply the patch once:
 ```bash
 uv run python scripts/patch_vllm_qwen3.py
 ```
+
+
 
 ## Development
 

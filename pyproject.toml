@@ -164,6 +164,10 @@ markers = [
     "integration_test: marks tests as integration tests",
 ]
 
+# `thw` (grid_thw = temporal/height/width) is a Qwen tensor name, not a typo.
+[tool.typos.default.extend-words]
+thw = "thw"
+
 [tool.coverage]
     [tool.coverage.run]
     source=["src/deepfake_moe"]
