@@ -56,9 +56,17 @@ jobs:
       - name: Install the project
         run: uv sync --all-extras --dev
 
-      - name: Install dependencies and check code
+      - name: Run integration tests
         run: |
-          uv run pytest -m "integration_test" --cov src/deepfake_moe --cov-report=xml tests
+          uv run pytest -m "integration_test" --cov src/deepfake_moe --cov-report=xml tests || rc=$?
+          rc=${rc:-0}
+          # exit code 5 = "no tests collected"; there are no integration tests yet, so
+          # treat that as success instead of failing the job.
+          if [ "$rc" -eq 5 ]; then
+            echo "No integration tests collected yet; skipping."
+            exit 0
+          fi
+          exit "$rc"
 
       # Uncomment this once this repo is configured on Codecov
       - name: Upload coverage to Codecov

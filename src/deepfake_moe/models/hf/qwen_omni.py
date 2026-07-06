@@ -8,11 +8,11 @@ import torch
 from qwen_omni_utils import process_mm_info
 from transformers import Qwen3OmniMoeForConditionalGeneration, Qwen3OmniMoeProcessor
 
-from deepfake_moe.models.config import Config
 from deepfake_moe.eval.parser import parse_response
 from deepfake_moe.eval.prompts import AV_USER_PROMPT, SYSTEM_PROMPT, VIDEO_ONLY_USER_PROMPT
-from deepfake_moe.utils.logging_utils import get_logger
 from deepfake_moe.models.base import ClipData, PredictionOutput
+from deepfake_moe.models.config import Config
+from deepfake_moe.utils.logging_utils import get_logger
 
 
 logger = get_logger(__name__)

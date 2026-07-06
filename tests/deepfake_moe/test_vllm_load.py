@@ -6,8 +6,7 @@ from unittest.mock import MagicMock
 from pytest import MonkeyPatch
 from transformers import Qwen3OmniMoeProcessor
 
-from deepfake_moe.models.vllm.qwen_omni_vllm import QwenOmniVLLM
-from deepfake_moe.models.vllm.qwen_omni_vllm import _patch_qwen3_processor_for_vllm
+from deepfake_moe.models.vllm.qwen_omni_vllm import QwenOmniVLLM, _patch_qwen3_processor_for_vllm
 from deepfake_moe.models.vllm_config import VllmConfig
 
 
