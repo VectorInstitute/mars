@@ -135,24 +135,47 @@ The documentation will be automatically built and deployed to GitHub Pages whene
 
 ## github actions
 
-The template consists of some github action continuous integration workflows that you
-can add to your repository.
+This repository carries a few GitHub Actions continuous-integration workflows.
 
-The available workflows are:
+The available workflows (under `.github/workflows/`) are:
 
-- [code checks](https://github.com/VectorInstitute/aieng-template/blob/main/.github/workflows/code_checks.yml): Static code analysis, code formatting and unit tests
-- [documentation](https://github.com/VectorInstitute/aieng-template/blob/main/.github/workflows/docs.yml): Project documentation including example API reference
-- [integration tests](https://github.com/VectorInstitute/aieng-template/blob/main/.github/workflows/integration_tests.yml): Integration tests
-- [publish](https://github.com/VectorInstitute/aieng-template/blob/main/.github/workflows/publish.yml):
-Publishing python package to PyPI. Create a `PYPI_API_TOKEN` and add it to the
-repository's actions [secret variables](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
-in order to publish PyPI packages when new software releases are created on Github.
+- `code_checks.yml`: Static code analysis, code formatting and unit tests
+- `docs.yml`: Build and deploy project documentation
+- `integration_tests.yml`: Integration tests
+- `publish.yml`: Publishing a python package to PyPI. Create a `PYPI_API_TOKEN`
+  and add it to the repository's actions [secret variables](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
+  in order to publish PyPI packages when new software releases are created on Github.
 
 The test workflows also compute coverage and upload code coverage metrics to
-[codecov.io](https://app.codecov.io/gh/VectorInstitute/aieng-template). Create a
-`CODECOV_TOKEN` and add it to the repository's actions [secret variables](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
+[codecov.io](https://about.codecov.io/). Create a `CODECOV_TOKEN` and add it to
+the repository's actions [secret variables](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
 
 !!! warning "codecov"
-    The [codecov](https://app.codecov.io/github/VectorInstitute) tool is subscribed under the free tier
+    The [codecov](https://about.codecov.io/) tool's free tier
     which makes it usable only for public open-source repos. Hence, if you would like to develop in a
     private repo, it is recommended to remove the codecov actions from the github workflow files.
+
+
+## Cluster / Slurm
+
+Machine-specific values live in a gitignored `.env` (copy from `.env.example`).
+The launchers `scripts/eval.sh` and `scripts/forward.sh` are self-contained: the
+same file runs locally (`bash scripts/eval.sh`) or on Slurm (`sbatch
+scripts/eval.sh`). When submitted with `sbatch`, each script:
+
+1. Loads `.env` into the environment
+2. Loads the cluster modules (`StdEnv/2023`, `gcc/12.3`, `cuda/12.2`) when a
+   `module` command is available
+3. Puts the shared FFmpeg from `FFMPEG_SHARED` on `PATH` / `LD_LIBRARY_PATH`
+
+vLLM video decode (via TorchCodec) needs a shared FFmpeg 7.x build, not a static
+binary. Set `FFMPEG_SHARED` in `.env` to the install prefix (a directory
+containing `bin/` and `lib/`):
+
+```bash
+# .env
+FFMPEG_SHARED=/path/to/ffmpeg-shared-7
+```
+
+Adjust `#SBATCH` resource directives (GPU type/count, time, `--mail-user`)
+directly at the top of `scripts/eval.sh` / `scripts/forward.sh`.

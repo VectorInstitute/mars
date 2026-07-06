@@ -1,0 +1,46 @@
+# Model registry.
+#
+# Each top-level key is a MODEL NAME. It is:
+#   * selected with `model:` in configs/eval.yaml or `--model NAME` on the CLI, and
+#   * used as the results path segment: results/<experiment_name>/<model_name>/
+#
+# `backend` picks the loader and which fields are valid:
+#   hf   -> Transformers (raw forward / inspection)         see src/deepfake_moe/config.py
+#   vllm -> vLLM tensor-parallel inference (Phase 1 eval)   see src/deepfake_moe/vllm_config.py
+#
+# Add a new model by adding an entry — no code changes required.
+
+qwen3-omni:                                   # vLLM — Phase 1 eval default
+  backend: vllm
+  model_id: "Qwen/Qwen3-Omni-30B-A3B-Instruct"
+  tensor_parallel_size: null                  # null -> all GPUs visible to the job
+  gpu_memory_utilization: 0.85
+  max_model_len: 65536
+  max_num_seqs: 1
+  limit_mm_per_prompt:
+    image: 1
+    video: 1
+    audio: 1
+  mm_processor_kwargs:
+    cache_gb: 0
+  enable_prefix_caching: false
+  seed: 1234
+  worker_multiproc_method: "fork"
+  audio_sample_rate: 16000
+  video_min_frames: 16
+  video_max_frames: 64
+  use_audio_in_video: false
+  max_new_tokens: 512                         # room for JSON + fake_periods list
+
+qwen3-omni-hf:                                # HF Transformers — raw forward / inspection
+  backend: hf
+  model_id: "Qwen/Qwen3-Omni-30B-A3B-Instruct"
+  device_map: "auto"
+  dtype: "auto"
+  attn_implementation: sdpa                   # e.g. "flash_attention_2"
+  audio_sample_rate: 16000
+  video_fps: 1.0
+  video_min_frames: 16
+  video_max_frames: 64
+  use_audio_in_video: false
+  max_new_tokens: 256

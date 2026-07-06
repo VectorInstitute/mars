@@ -1,0 +1,35 @@
+# Phase 1 eval configuration (Qwen3-Omni). Loaded by EvalConfig.from_yaml().
+# Machine-specific paths come from .env (see .env.example) and are referenced
+# here as ${VAR}. Unknown keys raise ValueError.
+#
+# Split policy: this config uses the `test` split (pre/post-training baseline).
+# Held-out sets (celebdf, dfeval) and train-only sets are intentionally excluded.
+
+# ── Data (paths from .env) ───────────────────────────────────────────────────
+manifest_dir: "${MANIFEST_DIR}"
+raw_data_dir: "${RAW_DATA_DIR}"
+
+# by_dataset/*.jsonl files to combine per dataset.
+dataset_sources:
+  lavdf:
+    - "lavdf_test.jsonl"
+  arenav:
+    - "arenav_test.jsonl"
+
+# ── Sampling ─────────────────────────────────────────────────────────────────
+num_clips_per_dataset: 2000
+num_frames: 64          # frames sampled uniformly per clip
+seed: 42
+
+# ── Metrics ──────────────────────────────────────────────────────────────────
+# Datasets with fake_periods ground truth → temporal IoU computed.
+temporal_datasets:
+  - "lavdf"
+
+# ── Model & output ───────────────────────────────────────────────────────────
+# `model` is a key in configs/models.yaml.       Override: --model NAME
+# Results are written to <output_dir>/<experiment_name>/<model>/.
+#                                                 Override: --experiment-name NAME
+model: "qwen3-omni"
+experiment_name: "default"
+output_dir: "results"
