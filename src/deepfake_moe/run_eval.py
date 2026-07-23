@@ -33,12 +33,22 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--output-dir", default=None, help="Override eval config output_dir")
     p.add_argument("--dry-run", action="store_true", help="5 clips per dataset")
     p.add_argument(
-        "--retry-failed",
+        "--predict-only",
         action="store_true",
-        help="Re-run only the clips that failed in a previous run of this experiment/model",
+        help="Inference only: write predictions.jsonl, skip report/metrics generation",
     )
     p.add_argument(
-        "--metrics-only",
+        "--resume-predictions",
+        action="store_true",
+        help="Skip clips already present in an existing predictions.jsonl (resume an interrupted run)",
+    )
+    p.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help="Re-run only the clips that failed/parsed badly in a previous run of this experiment/model",
+    )
+    p.add_argument(
+        "--score-only",
         action="store_true",
         help="Skip inference: aggregate existing shard predictions and (re)compute metrics",
     )
@@ -75,7 +85,22 @@ def _dedup(rows: list[dict]) -> list[dict]:
     return [by_key[key] for key in sorted(by_key)]
 
 
-def _metrics_only(eval_cfg: EvalConfig, base_dir: Path) -> None:
+def _filter_unpredicted(entries: list[dict], preds_path: Path) -> list[dict]:
+    """Drop entries already present in ``preds_path`` (resume after interruption)."""
+    if not preds_path.exists():
+        return entries
+    done_keys = {_record_key(r) for r in _read_jsonl(preds_path)}
+    remaining = [e for e in entries if (str(e.get("dataset", "")), str(e.get("clip_id", ""))) not in done_keys]
+    logger.info(
+        "Resume: %d/%d clips already predicted, %d remaining",
+        len(entries) - len(remaining),
+        len(entries),
+        len(remaining),
+    )
+    return remaining
+
+
+def _score_only(eval_cfg: EvalConfig, base_dir: Path) -> None:
     """Aggregate shard predictions (or a single run) and write metrics + report.
 
     Each shard writes its own ``shard_*/predictions.jsonl`` (safe under parallel
@@ -95,7 +120,7 @@ def _metrics_only(eval_cfg: EvalConfig, base_dir: Path) -> None:
     logger.info("Aggregated %d rows -> %d unique from %d file(s)", len(rows), len(records), len(sources))
 
     _write_jsonl(base_dir / "predictions.jsonl", records)
-    generate_report(records, eval_cfg.temporal_datasets, base_dir)
+    generate_report(records, eval_cfg.temporal_datasets, base_dir, eval_cfg.inference_only_datasets)
     logger.info("Metrics written to %s", base_dir)
 
 
@@ -107,7 +132,7 @@ def _retry_failed(
 ) -> None:
     preds_path = base_dir / "predictions.jsonl"
     if not preds_path.exists():
-        raise FileNotFoundError(f"No {preds_path} (run eval, or --metrics-only for a sharded run, before retrying)")
+        raise FileNotFoundError(f"No {preds_path} (run eval, or --score-only for a sharded run, before retrying)")
     existing = _read_jsonl(preds_path)
     failed_keys = {_record_key(r) for r in existing if not r.get("parse_ok", False)}
     if not failed_keys:
@@ -130,7 +155,7 @@ def _retry_failed(
 
     _write_jsonl(preds_path, merged)
     (base_dir / "retry_predictions.jsonl").unlink(missing_ok=True)
-    generate_report(merged, eval_cfg.temporal_datasets, base_dir)
+    generate_report(merged, eval_cfg.temporal_datasets, base_dir, eval_cfg.inference_only_datasets)
     logger.info("Retry complete. Updated %s", preds_path)
 
 
@@ -147,9 +172,9 @@ def main() -> None:
     base_dir = Path(eval_cfg.output_dir) / experiment_name / model_name
     logger.info("Experiment : %s   Model: %s", experiment_name, model_name)
 
-    # Metrics-only skips inference entirely (no model load).
-    if args.metrics_only:
-        _metrics_only(eval_cfg, base_dir)
+    # Score-only skips inference entirely (no model load).
+    if args.score_only:
+        _score_only(eval_cfg, base_dir)
         return
 
     if args.dry_run:
@@ -170,8 +195,26 @@ def main() -> None:
     logger.info("Shard      : %d/%d", args.shard_id, args.num_shards)
 
     entries = load_manifest_entries(eval_cfg, num_shards=args.num_shards, shard_id=args.shard_id)
-    records = run_eval(model, entries, eval_cfg, model_cfg, preds_path)
-    generate_report(records, eval_cfg.temporal_datasets, output_dir)
+
+    if args.resume_predictions and preds_path.exists():
+        remaining = _filter_unpredicted(entries, preds_path)
+        if remaining:
+            partial_path = output_dir / "resume_predictions.jsonl"
+            new_records = run_eval(model, remaining, eval_cfg, model_cfg, partial_path)
+            merged = _dedup(_read_jsonl(preds_path) + new_records)
+            _write_jsonl(preds_path, merged)
+            partial_path.unlink(missing_ok=True)
+            records = merged
+        else:
+            records = _read_jsonl(preds_path)
+    else:
+        records = run_eval(model, entries, eval_cfg, model_cfg, preds_path)
+
+    if args.predict_only:
+        logger.info("Predict-only: skipping report generation. Predictions at %s", preds_path)
+        return
+
+    generate_report(records, eval_cfg.temporal_datasets, output_dir, eval_cfg.inference_only_datasets)
 
     logger.info("Done. Results in %s", output_dir)
 

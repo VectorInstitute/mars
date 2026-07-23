@@ -17,9 +17,10 @@ class _FakePredictor:
         return PredictionOutput(
             video_fake=clip.label_video == 1,
             audio_fake=False,
-            video_confidence=7,
-            audio_confidence=0,
+            video_fake_prob=0.7,
+            audio_fake_prob=0.0,
             fake_periods=[],
+            evidence=[],
             reason="mock",
             raw_response="{}",
             parse_ok=True,
@@ -53,7 +54,7 @@ def test_run_eval_writes_jsonl(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
             assert clip.clip_id == "clip-1"
             return super().predict(clip)
 
-    def _fake_load_clip(entry, *, num_frames, sample_rate):
+    def _fake_load_clip(entry, *, num_frames, sample_rate, **_kwargs):
         return clip if entry["clip_id"] == "clip-1" else None
 
     monkeypatch.setattr("deepfake_moe.eval.runner.load_clip", _fake_load_clip)
@@ -80,3 +81,8 @@ def test_run_eval_writes_jsonl(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     assert len(lines) == 1
     parsed = json.loads(lines[0])
     assert parsed["clip_id"] == "clip-1"
+    assert parsed["video_fake_prob"] == 0.7
+    assert parsed["audio_fake_prob"] == 0.0
+    assert parsed["evidence"] == []
+    assert "video_confidence" not in parsed
+    assert "audio_confidence" not in parsed

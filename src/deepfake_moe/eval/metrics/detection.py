@@ -53,8 +53,9 @@ def compute_detection_metrics(records: list[dict], head: str) -> dict:
 
     labels = np.array([r[f"label_{head}"] for r in valid], dtype=int)
     preds = np.array([int(r[f"{head}_fake"]) for r in valid], dtype=int)
-    confs = np.array([r[f"{head}_confidence"] for r in valid], dtype=float)
-    scores = np.where(preds == 1, confs / 10.0, 1.0 - confs / 10.0)
+    # Calibrated P(fake) in [0, 1] — from first-token generation logprobs where
+    # captured, parser fallback otherwise. Never derived from written confidence.
+    scores = np.array([r[f"{head}_fake_prob"] for r in valid], dtype=float)
 
     if _SKLEARN:
         result["accuracy"] = round(float(accuracy_score(labels, preds)), 4)
@@ -82,3 +83,48 @@ def compute_detection_metrics(records: list[dict], head: str) -> dict:
         result["auc_note"] = "sklearn not installed"
 
     return result
+
+
+_JOINT_AV_CLASSES: dict[tuple[int, int], str] = {
+    (0, 0): "real",
+    (1, 0): "fake_video",
+    (0, 1): "fake_audio",
+    (1, 1): "fake_both",
+}
+
+
+def compute_joint_av_breakdown(records: list[dict]) -> dict:
+    """Per-clip joint AV ground-truth breakdown: real / fake_video / fake_audio / fake_both.
+
+    Buckets each parsed clip by ``(label_video, label_audio)`` and reports, per
+    bucket, the clip count and the fraction where both heads' predictions match
+    the ground truth exactly (see §1.2 of REBUILD_PLAN.md).
+
+    Parameters
+    ----------
+    records :
+        Per-clip result dicts from the JSONL output.
+
+    Returns
+    -------
+    dict
+        Keyed by ``real``/``fake_video``/``fake_audio``/``fake_both``, each with
+        ``n`` and ``accuracy`` (``None`` when ``n == 0``).
+    """
+    valid = [r for r in records if r.get("parse_ok", False)]
+    breakdown: dict[str, dict] = {name: {"n": 0, "n_correct": 0} for name in _JOINT_AV_CLASSES.values()}
+
+    for r in valid:
+        key = (int(r["label_video"]), int(r["label_audio"]))
+        name = _JOINT_AV_CLASSES.get(key)
+        if name is None:
+            continue
+        stats = breakdown[name]
+        stats["n"] += 1
+        if bool(r["video_fake"]) == bool(key[0]) and bool(r["audio_fake"]) == bool(key[1]):
+            stats["n_correct"] += 1
+
+    for stats in breakdown.values():
+        stats["accuracy"] = round(stats["n_correct"] / stats["n"], 4) if stats["n"] else None
+
+    return breakdown

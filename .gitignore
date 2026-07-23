@@ -28,6 +28,14 @@ slurm-*.out
 
 # Local machine / cluster values (paths, mail-user, data roots)
 .env
+**/skills/
+/checkpoints/**
+.cursor/**
+/wandb/
+
+# Local agent context (personal, not shared with the team)
+/CLAUDE.md
+/CLAUDE.local.md
 
 # Eval / inference outputs (large; may reference dataset paths)
 results/

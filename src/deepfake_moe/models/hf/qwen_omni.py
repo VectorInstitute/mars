@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import torch
 from qwen_omni_utils import process_mm_info
 from transformers import Qwen3OmniMoeForConditionalGeneration, Qwen3OmniMoeProcessor
 
+from deepfake_moe.eval.logprob import bool_token_ids, field_value_step_indices, stream_probs_from_step_logprobs
 from deepfake_moe.eval.parser import parse_response
 from deepfake_moe.eval.prompts import AV_USER_PROMPT, SYSTEM_PROMPT, VIDEO_ONLY_USER_PROMPT
 from deepfake_moe.models.base import ClipData, PredictionOutput
 from deepfake_moe.models.config import Config
+from deepfake_moe.models.hf import device_routing
 from deepfake_moe.utils.logging_utils import get_logger
 
 
@@ -28,7 +30,8 @@ class QwenOmni:
         self.config = config
         self.model: Any = None
         self.processor: Any = None
-        self._logged_sharded_input_routing = False
+        self._true_token_ids: set[int] = set()
+        self._false_token_ids: set[int] = set()
 
     def load(self) -> "QwenOmni":
         """Load model + processor; returns self for chaining."""
@@ -41,6 +44,9 @@ class QwenOmni:
         self.model = Qwen3OmniMoeForConditionalGeneration.from_pretrained(cfg.model_id, **kwargs)
         self.model.eval()
         self.processor = Qwen3OmniMoeProcessor.from_pretrained(cfg.model_id)
+        self._true_token_ids, self._false_token_ids = bool_token_ids(self.processor.tokenizer)
+        if not self._true_token_ids or not self._false_token_ids:
+            logger.warning("Tokenizer has no single-token JSON true/false pair; logprob capture disabled.")
         return self
 
     def predict(self, clip: ClipData) -> PredictionOutput:
@@ -63,8 +69,34 @@ class QwenOmni:
             videos=videos,
             system_prompt=SYSTEM_PROMPT,
         )
-        raw = self._generate_from_inputs(inputs)
-        return parse_response(raw, has_audio=clip.has_audio, clip_id=clip.clip_id)
+        generated = self._generate_from_inputs(inputs, capture_logprobs=True)
+        raw, token_ids, step_logprobs = cast(tuple[str, list[int], list[dict[int, float]]], generated)
+        prediction = parse_response(raw, has_audio=clip.has_audio, clip_id=clip.clip_id)
+        steps = field_value_step_indices(
+            token_ids,
+            self.processor.tokenizer,
+            self._true_token_ids,
+            self._false_token_ids,
+        )
+        video_step = steps.get("video_fake")
+        if video_step is not None:
+            video_prob = stream_probs_from_step_logprobs(
+                step_logprobs[video_step],
+                self._true_token_ids,
+                self._false_token_ids,
+            )
+            if video_prob is not None:
+                prediction.video_fake_prob = video_prob
+        audio_step = steps.get("audio_fake")
+        if clip.has_audio and audio_step is not None:
+            audio_prob = stream_probs_from_step_logprobs(
+                step_logprobs[audio_step],
+                self._true_token_ids,
+                self._false_token_ids,
+            )
+            if audio_prob is not None:
+                prediction.audio_fake_prob = audio_prob
+        return prediction
 
     def _eval_prompt(
         self,
@@ -148,104 +180,33 @@ class QwenOmni:
             use_audio_in_video=self.config.use_audio_in_video,
         )
 
+    # Device routing (multi-GPU device_map placement) lives in device_routing.py,
+    # shared with train/qlora_sft/trainer.py's SFTTrainer. These stay as thin
+    # delegating wrappers so the public QwenOmni surface (and existing tests)
+    # don't need to change.
     @staticmethod
     def _parse_hf_device(dev: Any) -> torch.device:
-        if isinstance(dev, torch.device):
-            return dev
-        if isinstance(dev, int):
-            return torch.device(f"cuda:{dev}" if dev >= 0 else "cpu")
-        if isinstance(dev, str):
-            return torch.device(dev)
-        if isinstance(dev, (list, tuple)) and dev:
-            return QwenOmni._parse_hf_device(dev[0])
-        raise TypeError(f"Unsupported device entry in hf_device_map: {dev!r}")
+        return device_routing.parse_hf_device(dev)
 
     @staticmethod
     def _module_device(module: Any) -> torch.device:
-        try:
-            return next(module.parameters()).device
-        except StopIteration:
-            return torch.device("cpu")
-
-    def _device_from_hf_map(self, hf_map: dict[str, Any], *name_fragments: str) -> torch.device | None:
-        for name, dev in hf_map.items():
-            if any(fragment in name for fragment in name_fragments):
-                return self._parse_hf_device(dev)
-        return None
+        return device_routing.module_device(module)
 
     def _thinker_input_devices(self, module: Any) -> dict[str, torch.device]:
         """Resolve per-modality devices when the model is sharded via ``device_map``."""
-        root = self.model if self.model is not None else module
-        thinker = getattr(root, "thinker", module)
-        hf_map = getattr(root, "hf_device_map", None) or getattr(module, "hf_device_map", None) or {}
-
-        embed = getattr(getattr(thinker, "model", None), "embed_tokens", None)
-        default = (
-            self._device_from_hf_map(hf_map, "thinker.model.embed_tokens", "model.embed_tokens", "embed_tokens")
-            or (self._module_device(embed) if embed is not None else None)
-            or self._module_device(thinker)
-        )
-        visual_mod = getattr(thinker, "visual", None)
-        audio_mod = getattr(thinker, "audio_tower", None)
-        visual = self._device_from_hf_map(hf_map, "thinker.visual", ".visual") or (
-            self._module_device(visual_mod) if visual_mod is not None else default
-        )
-        audio = self._device_from_hf_map(hf_map, "thinker.audio_tower", "audio_tower") or (
-            self._module_device(audio_mod) if audio_mod is not None else default
-        )
-        return {"default": default, "visual": visual, "audio": audio}
+        return device_routing.thinker_input_devices(self.model, module)
 
     def _is_sharded_hf_model(self, module: Any) -> bool:
         """Return True when Accelerate dispatched submodules across multiple devices."""
-        root = self.model if self.model is not None else module
-        hf_map = getattr(root, "hf_device_map", None) or getattr(module, "hf_device_map", None) or {}
-        if not hf_map:
-            return False
-        devices = {str(self._parse_hf_device(dev)) for dev in hf_map.values()}
-        return len(devices) > 1
+        return device_routing.is_sharded_hf_model(self.model, module)
 
     @staticmethod
     def _tensor_device(key: str, devices: dict[str, torch.device]) -> torch.device:
-        key_lower = key.lower()
-        if key_lower in {"input_features", "feature_attention_mask", "audio_feature_lengths"} or "audio" in key_lower:
-            return devices["audio"]
-        if any(token in key_lower for token in ("video", "pixel", "image", "grid_thw")):
-            return devices["visual"]
-        return devices["default"]
+        return device_routing.tensor_device(key, devices)
 
     def _prepare_inputs(self, inputs: Any, module: Any | None = None) -> Any:
         """Move tensors to the right devices for sharded Qwen3-Omni modules."""
-        module = module or self.model
-        devices = self._thinker_input_devices(module)
-        dtype = getattr(module, "dtype", torch.float16)
-        # For HF model-parallel dispatch (device_map with >1 device), multimodal tensors
-        # must enter on one anchor device; splitting input tensors across modalities can
-        # trigger internal concat/ops with mixed devices (cuda:0 vs cuda:1).
-        if self._is_sharded_hf_model(module):
-            target = devices["default"]
-            if not self._logged_sharded_input_routing:
-                logger.info("HF sharded device_map detected; routing all model inputs to %s", target)
-                self._logged_sharded_input_routing = True
-            for key in list(inputs.keys()):
-                value = inputs[key]
-                if not isinstance(value, torch.Tensor):
-                    continue
-                if value.is_floating_point():
-                    inputs[key] = value.to(device=target, dtype=dtype)
-                else:
-                    inputs[key] = value.to(device=target)
-            return inputs
-
-        for key in list(inputs.keys()):
-            value = inputs[key]
-            if not isinstance(value, torch.Tensor):
-                continue
-            dev = self._tensor_device(key, devices)
-            if value.is_floating_point():
-                inputs[key] = value.to(device=dev, dtype=dtype)
-            else:
-                inputs[key] = value.to(device=dev)
-        return inputs
+        return device_routing.prepare_inputs(self.model, inputs, module=module)
 
     def raw_forward(
         self,
@@ -293,19 +254,29 @@ class QwenOmni:
             )
         return captured, handles
 
-    def _generate_from_inputs(self, inputs: Any, *, max_new_tokens: int | None = None) -> str:
+    def _generate_from_inputs(
+        self,
+        inputs: Any,
+        *,
+        max_new_tokens: int | None = None,
+        capture_logprobs: bool = False,
+    ) -> str | tuple[str, list[int], list[dict[int, float]]]:
         """Decode generated tokens from prepared processor inputs."""
         if max_new_tokens is None:
             max_new_tokens = self.config.max_new_tokens
         use_av = self.config.use_audio_in_video
         inputs = self._prepare_inputs(inputs)
 
+        generate_kwargs: dict[str, Any] = {}
+        if capture_logprobs:
+            generate_kwargs.update(return_dict_in_generate=True, output_scores=True)
         with torch.inference_mode():
             out = self.model.generate(
                 **inputs,
                 max_new_tokens=max_new_tokens,
                 return_audio=False,
                 use_audio_in_video=use_av,
+                **generate_kwargs,
             )
         if hasattr(out, "sequences"):
             ids = out.sequences
@@ -314,7 +285,16 @@ class QwenOmni:
         else:
             ids = out
         ids = ids[:, inputs.input_ids.shape[1] :]
-        return self.processor.batch_decode(ids, skip_special_tokens=True)[0]
+        raw = self.processor.batch_decode(ids, skip_special_tokens=True)[0]
+        if not capture_logprobs:
+            return raw
+
+        wanted_ids = self._true_token_ids | self._false_token_ids
+        step_logprobs: list[dict[int, float]] = []
+        for scores in out.scores:
+            logprobs = torch.log_softmax(scores[0], dim=-1)
+            step_logprobs.append({token_id: float(logprobs[token_id].item()) for token_id in wanted_ids})
+        return raw, ids[0].tolist(), step_logprobs
 
     def chat_generate(self, conversation: list[dict[str, Any]], *, max_new_tokens: int | None = None) -> str:
         """Generate decoded text via chat template (no speech)."""

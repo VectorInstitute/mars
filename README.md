@@ -17,6 +17,8 @@ encoder/router hooks for inspection) or vLLM (tensor-parallel inference).
 - **Evaluation** — prompt the model to classify video/audio as real/fake and
 localize fake intervals as JSON, then score against manifest ground truth
 (video/audio AUC & F1, temporal IoU).
+- **Training** — two-stage QLoRA SFT (Stage 1: thinker LoRA; Stage 2: frozen
+LoRA + modality-projector bridges), same launcher for both stages.
 - **Configuration** — models live in a single registry and are selected at run
 time; results are grouped by experiment and model.
 
@@ -28,17 +30,22 @@ time; results are grouped by experiment and model.
 configs/
   models.yaml            # model registry — one entry per model (hf | vllm)
   eval.yaml              # eval settings; data paths come from .env as ${VAR}
+  qlora_train.yaml       # Stage 1 QLoRA SFT training config
+  projector_train.yaml   # Stage 2 modality-projector training config
 scripts/
-  eval.sh               # run eval — local (bash) or Slurm (sbatch; array = shards)
-  forward.sh            # run one raw forward pass
-  patch_vllm_qwen3.py   # optional vLLM fix for Qwen3-Omni
+  eval.sh                # run eval — local (bash) or Slurm (sbatch; array = shards)
+  forward.sh             # run one raw forward pass
+  qlora_train.sh         # run training — local (bash) or Slurm (sbatch); same for both stages
+  patch_vllm_qwen3.py    # optional vLLM fix for Qwen3-Omni
 src/deepfake_moe/
-  run_eval.py           # eval entry point
-  run_forward.py        # forward entry point
-  models/               # registry, factory, typed configs, hf + vllm backends
-  eval/                 # dataset, runner, metrics
-  utils/                # env/.env loading, logging, media / audio / video I/O
-.env.example            # copy to .env; machine paths + FFMPEG_SHARED
+  run_eval.py            # eval entry point
+  run_forward.py         # forward entry point
+  run_train.py           # training entry point
+  models/                # registry, factory, typed configs, hf + vllm backends
+  eval/                  # dataset, runner, metrics
+  train/                 # common data/collator/targets + two-stage QLoRA SFT (qlora_sft/)
+  utils/                 # env/.env loading, logging, media / audio / video I/O
+.env.example             # copy to .env; machine paths + FFMPEG_SHARED
 ```
 
 
@@ -111,6 +118,35 @@ If you hit the vLLM Qwen3-Omni `cu_seqlens` bug, apply the patch once:
 
 ```bash
 uv run python scripts/patch_vllm_qwen3.py
+```
+
+**Training** — two-stage QLoRA SFT, same `scripts/qlora_train.sh` launcher for
+both stages, local or Slurm. Stage 2 requires Stage 1's `final_artifact/` as
+`init_checkpoint` in `configs/projector_train.yaml`.
+
+```bash
+# Stage 1 — thinker LoRA
+sbatch scripts/qlora_train.sh --config configs/qlora_train.yaml
+
+# Stage 2 — modality projectors (frozen Stage-1 LoRA)
+sbatch scripts/qlora_train.sh --config configs/projector_train.yaml
+```
+
+Run `--smoke-test` (tiny, validates the pipeline end-to-end) before every real
+launch, and `--profile` (10 real-sized steps) to size the Slurm `--time`:
+
+```bash
+bash scripts/qlora_train.sh --config configs/qlora_train.yaml --smoke-test
+bash scripts/qlora_train.sh --config configs/qlora_train.yaml --profile
+```
+
+Merge a finished stage's LoRA (+ projectors, if Stage 2) into a standalone
+BF16 model for eval:
+
+```bash
+uv run deepfake-moe-qlora-merge \
+    --config configs/qlora_train.yaml \
+    --artifact-dir checkpoints/<run_name>/final_artifact
 ```
 
 
