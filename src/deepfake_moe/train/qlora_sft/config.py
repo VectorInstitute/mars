@@ -1,8 +1,7 @@
 """YAML/CLI-backed config for the two-stage QLoRA SFT pipeline.
 
 Stage selection is entirely config/CLI driven (``tuning_mode``); there is no
-separate package per stage. See REBUILD_PLAN.md §1.5 for the locked mechanics
-this schema implements.
+separate package per stage.
 """
 
 from __future__ import annotations
@@ -19,7 +18,7 @@ _TUNING_MODES = ("thinker_lora", "modality_projectors")
 
 # HF TrainingArguments fields that must stay string-typed end-to-end: YAML/CLI
 # parsing must preserve "no" as the *string* "no" (e.g. for eval_strategy /
-# save_strategy), not coerce it to boolean False. See REBUILD_PLAN.md §1.5.
+# save_strategy), not coerce it to boolean False.
 _STRING_ONLY_FIELDS = frozenset({"eval_strategy", "save_strategy"})
 
 
@@ -34,9 +33,9 @@ class QLoraSFTConfig:
 
     # ── Base model ───────────────────────────────────────────────────────────
     model_id: str = "Qwen/Qwen3-Omni-30B-A3B-Instruct"
-    attn_implementation: str = "sdpa"  # flash-attn explicitly parked, see §2 "Explicitly parked"
+    attn_implementation: str = "sdpa"  # qlora_train.yaml overrides to flash_attention_2 for Stage 1
 
-    # ── Data (paths from .env, scope from REBUILD_PLAN.md §1.1) ────────────────
+    # ── Data (paths from .env) ──────────────────────────────────────────────
     manifest_dir: str = ""
     data_root: str = ""
     dataset_video_roots: dict[str, str] = field(default_factory=dict)
@@ -128,8 +127,7 @@ def parse_set_override(key: str, raw_value: str) -> object:
     ``key`` is checked against :data:`_STRING_ONLY_FIELDS` first so
     ``eval_strategy=no`` / ``save_strategy=no`` stay the *string* ``"no"``
     (HF's ``TrainingArguments`` treats these as enum-like strings, not
-    booleans) — re-coercing them to ``False`` is a known bug, see
-    REBUILD_PLAN.md §1.5 and §3.
+    booleans) — re-coercing them to ``False`` would be a real bug.
 
     Otherwise the value is parsed with ``yaml.safe_load`` for int/float/bool/
     null/list coercion, falling back to the raw string if that fails or

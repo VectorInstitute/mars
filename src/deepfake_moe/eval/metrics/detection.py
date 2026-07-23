@@ -94,11 +94,11 @@ _JOINT_AV_CLASSES: dict[tuple[int, int], str] = {
 
 
 def compute_joint_av_breakdown(records: list[dict]) -> dict:
-    """Per-clip joint AV ground-truth breakdown: real / fake_video / fake_audio / fake_both.
+    """Per-clip joint AV breakdown: real / fake_video / fake_audio / fake_both.
 
     Buckets each parsed clip by ``(label_video, label_audio)`` and reports, per
     bucket, the clip count and the fraction where both heads' predictions match
-    the ground truth exactly (see §1.2 of REBUILD_PLAN.md).
+    the ground truth exactly.
 
     Parameters
     ----------

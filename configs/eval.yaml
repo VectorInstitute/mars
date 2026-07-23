@@ -35,7 +35,7 @@ temporal_datasets: ["av1m", "lavdf"]
 inference_only_datasets: ["dfeval"]
 
 output_dir: "results"
-experiment_name: "row2-2stage-2026-07-19-v1"
+experiment_name: "qwen3omni-5k-2stage"
 
 # Entry in configs/models.yaml. merge.py registers the merged model as
 # 'qwen3-omni-qlora-sft' (model_id: ${QLORA_SFT_MERGED_DIR}). Use 'qwen3-omni'
@@ -54,10 +54,10 @@ model: "qwen3-omni-qlora-sft"
 # Smoke the eval path (5 clips/dataset, local, still loads the model):
 #   bash scripts/eval.sh --dry-run
 # Single-job full eval of the merged 2-stage model:
-#   sbatch scripts/eval.sh --experiment-name row2-2stage-2026-07-19-v1 --model qwen3-omni-qlora-sft
+#   sbatch scripts/eval.sh --experiment-name qwen3omni-5k-2stage --model qwen3-omni-qlora-sft
 # Sharded across 5 array tasks (faster; first shard queues the metrics job):
-#   sbatch --array=0-4 scripts/eval.sh --experiment-name row2-2stage-2026-07-19-v1 --model qwen3-omni-qlora-sft
+#   sbatch --array=0-4 scripts/eval.sh --experiment-name qwen3omni-5k-2stage --model qwen3-omni-qlora-sft
 # Zero-shot baseline for comparison (no training/merge needed):
 #   sbatch scripts/eval.sh --experiment-name qwen3-baseline --model qwen3-omni-hf
 # Recompute metrics from existing shard predictions (no model load):
-#   bash scripts/eval.sh --score-only --experiment-name row2-2stage-2026-07-19-v1 --model qwen3-omni-qlora-sft
+#   bash scripts/eval.sh --score-only --experiment-name qwen3omni-5k-2stage --model qwen3-omni-qlora-sft

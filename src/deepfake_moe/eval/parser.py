@@ -129,18 +129,23 @@ def _extract_json(text: str) -> dict | None:
 def _repair_truncated_json(text: str) -> dict | None:
     """Close a JSON object truncated mid-generation and parse the largest valid prefix.
 
-    Scans once to record, after every prefix length, whether we're inside a
-    string and the open ``{``/``[`` stack. Then tries the longest prefix first:
-    closes a dangling string, drops a trailing comma/colon, appends the missing
-    closers, and returns the first prefix that parses to a dict. Fields the
-    model never reached are simply absent (they default downstream); everything
-    it did emit before the cut is preserved.
+    Fields the model never reached are simply absent (they default
+    downstream); everything it did emit before the cut is preserved.
     """
     start = text.find("{")
     if start == -1:
         return None
     s = text[start:]
+    st_in, st_esc, st_stack = _scan_json_prefix_state(s)
+    return _largest_valid_json_prefix(s, st_in, st_esc, st_stack)
 
+
+def _scan_json_prefix_state(s: str) -> tuple[list[bool], list[bool], list[tuple[str, ...]]]:
+    """Scan ``s`` once and record its per-prefix-length parse state.
+
+    Recorded after every prefix length: whether we're inside a string (and
+    mid-escape), and the open ``{``/``[`` stack.
+    """
     in_str = False
     esc = False
     stack: list[str] = []
@@ -159,26 +164,30 @@ def _repair_truncated_json(text: str) -> dict | None:
             in_str = True
         elif ch in "{[":
             stack.append(ch)
-        elif ch in "}]":
-            if stack:
-                stack.pop()
+        elif ch in "}]" and stack:
+            stack.pop()
         st_in.append(in_str)
         st_esc.append(esc)
         st_stack.append(tuple(stack))
+    return st_in, st_esc, st_stack
 
+
+def _largest_valid_json_prefix(
+    s: str,
+    st_in: list[bool],
+    st_esc: list[bool],
+    st_stack: list[tuple[str, ...]],
+) -> dict | None:
+    """Return the first valid dict parsed from the longest closeable prefix.
+
+    Tries the longest prefix first: closes a dangling string, drops a
+    trailing comma/colon, and appends the missing closers before parsing.
+    """
     closers = {"{": "}", "[": "]"}
     for end in range(len(s), 0, -1):
-        core = s[:end]
-        if st_in[end]:
-            if st_esc[end]:
-                core = core[:-1]
-            core = core + '"'
-        else:
-            core = core.rstrip()
-            while core and core[-1] == ",":
-                core = core[:-1].rstrip()
-            if not core or core[-1] in ":,":
-                continue
+        core = _close_dangling_string(s[:end], in_str=st_in[end], esc=st_esc[end])
+        if core is None:
+            continue
         candidate = core + "".join(closers[b] for b in reversed(st_stack[end]))
         try:
             obj = json.loads(candidate)
@@ -187,6 +196,22 @@ def _repair_truncated_json(text: str) -> dict | None:
         if isinstance(obj, dict):
             return obj
     return None
+
+
+def _close_dangling_string(core: str, *, in_str: bool, esc: bool) -> str | None:
+    """Close an open string, or strip a trailing comma/colon.
+
+    Returns ``None`` when the prefix ends mid-token (e.g. right after a
+    comma or colon) and can't be closed into valid JSON.
+    """
+    if in_str:
+        return core[:-1] + '"' if esc else core + '"'
+    core = core.rstrip()
+    while core and core[-1] == ",":
+        core = core[:-1].rstrip()
+    if not core or core[-1] in ":,":
+        return None
+    return core
 
 
 def _parse_prob(value: object, *, fallback: bool) -> float:

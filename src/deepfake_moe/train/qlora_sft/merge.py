@@ -7,7 +7,7 @@ weights to fold the LoRA delta in), applies the artifact's LoRA adapter via
 
 ``configs/models.yaml`` already registers ``qwen3-omni-qlora-sft`` pointing at
 ``${QLORA_SFT_MERGED_DIR}`` — this writes there by default so that entry
-resolves without any YAML edit (§1.5).
+resolves without any YAML edit.
 """
 
 from __future__ import annotations

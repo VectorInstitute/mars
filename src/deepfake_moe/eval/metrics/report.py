@@ -70,7 +70,7 @@ def generate_report(
 
     # Pooled: all scored clips concatenated across datasets (larger datasets
     # dominate). Unweighted mean: each scored dataset's metric averaged with
-    # equal weight, regardless of dataset size (§1.6 — reported side by side).
+    # equal weight, regardless of dataset size — both reported side by side.
     summary: dict = {
         "n_total": len(records),
         "parse_rate": round(_parse_rate(records), 4),
