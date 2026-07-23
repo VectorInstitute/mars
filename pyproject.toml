@@ -74,20 +74,9 @@ docs = [
     "ipython>=8.31.0",
     "tornado>=6.5.6", # Pinning version to address vulnerability CVE-2026-49854
 ]
-# Opt-in only (not in default-groups): only resolvable via the Compute Canada /
-# DRAC wheelhouse below, which doesn't exist off-cluster (e.g. CI). Install with
-# `uv sync --group flash-attn` on a machine with CVMFS access before training.
-flash-attn = [
-    "flash-attn==2.8.3+torch211.computecanada",
-]
 # Default dependency groups to be installed
 [tool.uv]
 default-groups = ["dev", "docs"]
-# Local Compute Canada / DRAC wheelhouse — provides the prebuilt flash-attn
-# wheel for torch 2.11 that isn't available on PyPI.
-find-links = [
-    "/cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/",
-]
 [tool.mypy]
 follow_imports = "normal"
 ignore_missing_imports = false
@@ -181,15 +170,3 @@ thw = "thw"
     [tool.coverage.run]
     source=["src/deepfake_moe"]
     omit=["tests/*", "*__init__.py"]
-
-# Lets `uv lock`/`sync` resolve flash-attn's metadata without needing CUDA
-# present (e.g. from a login node), since it's a local, non-PyPI wheel.
-[[tool.uv.dependency-metadata]]
-name = "flash-attn"
-version = "2.8.3+torch211.computecanada"
-requires-dist = ["torch", "setuptools"]
-
-# Ensures torch/setuptools are visible during flash-attn's build step,
-# matching the pattern used by sonic-o1-mllm for the same wheelhouse.
-[tool.uv.extra-build-dependencies]
-flash-attn = ["torch", "setuptools"]
