@@ -77,6 +77,11 @@ docs = [
 # Default dependency groups to be installed
 [tool.uv]
 default-groups = ["dev", "docs"]
+# Force a minimum version on pillow (transitive, via torchvision/vllm/
+# qwen-omni-utils — not a direct dependency, so this is the only way to bump it).
+constraint-dependencies = [
+    "pillow>=12.3.0", # PYSEC-2026-2253 and others (decompression bombs, heap OOB)
+]
 [tool.mypy]
 follow_imports = "normal"
 ignore_missing_imports = false
