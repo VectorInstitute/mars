@@ -60,7 +60,7 @@ max_grad_norm: 1.0
 
 # ── Eval / checkpoint selection ────────────────────────────────────────────
 # Selection metric is validation loss (mean masked CE) — see SFTTrainer.evaluate
-# in train.py. No in-loop generation; macro-F1/AUC are scored separately by the
+# in trainer.py. No in-loop generation; macro-F1/AUC are scored separately by the
 # vLLM eval harness on saved checkpoints.
 eval_strategy: steps
 save_strategy: steps
@@ -82,7 +82,7 @@ merge_after_train: false              # merge explicitly via merge.py when final
 run_name: "qwen3omni-5k-thinker-lora"
 wandb_project: "deepfake-moe"
 wandb_group: "qwen3omni-5k-2stage"   # shared with Stage 2 to pair them in the W&B UI
-wandb_tags: ["row2", "stage1", "thinker_lora"]   # row2 = this study's MoE-attribution row
+wandb_tags: ["stage1", "thinker_lora"]
 
 # ── How to run (Slurm) ──────────────────────────────────────────────────────
 # Smoke test first (1 sample/step, tiny — validates the pipeline end-to-end):

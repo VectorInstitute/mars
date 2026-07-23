@@ -31,16 +31,16 @@ def _entry(clip_id: str, dataset: str = "tiny") -> dict:
 
 
 def _cfg(manifest_dir: Path, out_dir: Path, **overrides) -> EvalConfig:
-    base = dict(
-        manifest_dir=str(manifest_dir),
-        dataset_sources={"tiny": ["tiny_train.jsonl"]},
-        num_clips_per_dataset=2,
-        num_frames=4,
-        seed=0,
-        output_dir=str(out_dir),
-        temporal_datasets=[],
-        model="qwen3-omni",
-    )
+    base = {
+        "manifest_dir": str(manifest_dir),
+        "dataset_sources": {"tiny": ["tiny_train.jsonl"]},
+        "num_clips_per_dataset": 2,
+        "num_frames": 4,
+        "seed": 0,
+        "output_dir": str(out_dir),
+        "temporal_datasets": [],
+        "model": "qwen3-omni",
+    }
     base.update(overrides)
     return EvalConfig(**base)
 

@@ -62,7 +62,7 @@ max_grad_norm: 1.0
 
 # ── Eval / checkpoint selection ────────────────────────────────────────────
 # Selection metric is validation loss (mean masked CE) — see SFTTrainer.evaluate
-# in train.py. No in-loop generation; macro-F1/AUC are scored separately by the
+# in trainer.py. No in-loop generation; macro-F1/AUC are scored separately by the
 # vLLM eval harness on saved checkpoints.
 eval_strategy: steps
 save_strategy: steps
@@ -81,7 +81,7 @@ merge_after_train: false              # final stage — merge via merge.py, then
 run_name: "qwen3omni-5k-projectors"
 wandb_project: "deepfake-moe"
 wandb_group: "qwen3omni-5k-2stage"
-wandb_tags: ["row2", "stage2", "modality_projectors"]   # row2 = this study's MoE-attribution row
+wandb_tags: ["stage2", "modality_projectors"]
 
 # ── How to run (Slurm) ──────────────────────────────────────────────────────
 # PREREQUISITE: Stage 1 must be finished and init_checkpoint above must point at

@@ -86,6 +86,11 @@ def _assert_supported_vllm_stack() -> None:
         )
 
 
+def _logprob_value(value: Any) -> float:
+    """Coerce a vLLM ``Logprob`` (or a plain float, in older vLLM outputs) to float."""
+    return float(value.logprob) if hasattr(value, "logprob") else float(value)
+
+
 class QwenOmniVLLM:
     """Qwen3-Omni eval wrapper using vLLM tensor parallelism."""
 
@@ -192,10 +197,7 @@ class QwenOmniVLLM:
         token_ids = list(completion.token_ids)
         raw_step_logprobs = completion.logprobs or []
         step_logprobs = [
-            {
-                int(token_id): float(value.logprob if hasattr(value, "logprob") else value)
-                for token_id, value in position.items()
-            }
+            {int(token_id): _logprob_value(value) for token_id, value in position.items()}
             for position in raw_step_logprobs
         ]
         steps = field_value_step_indices(

@@ -15,8 +15,10 @@ from __future__ import annotations
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 import torch
+
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -24,7 +26,7 @@ from deepfake_moe.train.qlora_sft.config import QLoraSFTConfig  # noqa: E402
 from deepfake_moe.train.qlora_sft.model import build_stage1_model, build_stage2_model, find_named_modules  # noqa: E402
 
 
-def _report_lora_placement(model) -> None:
+def _report_lora_placement(model: Any) -> None:
     print("\n--- LoRA placement check ---")
     lora_param_names = [n for n, p in model.named_parameters() if p.requires_grad]
     n_decoder = sum(1 for n in lora_param_names if ".audio_tower." not in n and ".visual." not in n)
@@ -43,7 +45,7 @@ def _report_lora_placement(model) -> None:
         print("OK: LoRA is decoder-only.")
 
 
-def _report_dtypes(model, names: tuple[str, ...], label: str) -> None:
+def _report_dtypes(model: Any, names: tuple[str, ...], label: str) -> None:
     print(f"\n--- {label} dtype/trainable check ---")
     named = find_named_modules(model, names)
     for name in names:

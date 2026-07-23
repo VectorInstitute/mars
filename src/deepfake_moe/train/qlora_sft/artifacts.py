@@ -3,7 +3,7 @@
 PEFT's ``save_pretrained`` only serializes LoRA adapter weights — Stage 2's
 modality projector bridges are regular ``nn.Module`` parameters (not LoRA)
 and need explicit save/load logic, kept here rather than relying on PEFT
-defaults (REBUILD_PLAN.md §1.5).
+defaults.
 
 Artifact layout::
 

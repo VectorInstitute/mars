@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     branches:
-      - main
+      - '**'
     paths:
       - .pre-commit-config.yaml
       - .github/workflows/docs.yml

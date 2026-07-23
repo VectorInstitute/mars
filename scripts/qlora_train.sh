@@ -6,9 +6,9 @@
 #   sbatch scripts/qlora_train.sh --config configs/qlora_train.yaml
 #   sbatch scripts/qlora_train.sh --config configs/projector_train.yaml
 #
-# --smoke-test and --profile apply the canned recipes from REBUILD_PLAN.md
-# §1.5 (as --set overrides) and are stripped before forwarding the rest to
-# `python -m deepfake_moe.run_train`. Any --set key=value you
+# --smoke-test and --profile apply canned --set overrides (below) and are
+# stripped before forwarding the rest to `python -m deepfake_moe.run_train`.
+# Any --set key=value you
 # pass directly is forwarded as-is; run the smoke test before every real
 # launch, and the profiling run before committing to a Slurm --time.
 #
@@ -43,7 +43,7 @@ extra_set=()
 for arg in "$@"; do
   case "$arg" in
     --smoke-test)
-      # §1.5 smoke-test recipe: confirm the job completes end-to-end, checkpoint
+      # Smoke-test recipe: confirm the job completes end-to-end, checkpoint
       # has the right tensor count for the mode, best (lowest) val_loss logged,
       # W&B synced — run this before every real launch. Generation/parse-rate
       # is not checked here; verify it separately via the vLLM eval harness on
@@ -56,7 +56,7 @@ for arg in "$@"; do
       )
       ;;
     --profile)
-      # §1.5 profiling recipe: 10 steps, real num_frames, no eval/save/grad-accum —
+      # Profiling recipe: 10 steps, real num_frames, no eval/save/grad-accum —
       # use train_runtime / 10 to size the Slurm --time. Not representative of
       # the 4-frame smoke test (real run adds audio + full frame count).
       extra_set+=(

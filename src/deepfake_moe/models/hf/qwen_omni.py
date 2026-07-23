@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any, Literal, overload
 
 import torch
 from qwen_omni_utils import process_mm_info
@@ -69,8 +69,7 @@ class QwenOmni:
             videos=videos,
             system_prompt=SYSTEM_PROMPT,
         )
-        generated = self._generate_from_inputs(inputs, capture_logprobs=True)
-        raw, token_ids, step_logprobs = cast(tuple[str, list[int], list[dict[int, float]]], generated)
+        raw, token_ids, step_logprobs = self._generate_from_inputs(inputs, capture_logprobs=True)
         prediction = parse_response(raw, has_audio=clip.has_audio, clip_id=clip.clip_id)
         steps = field_value_step_indices(
             token_ids,
@@ -254,6 +253,14 @@ class QwenOmni:
             )
         return captured, handles
 
+    @overload
+    def _generate_from_inputs(
+        self, inputs: Any, *, max_new_tokens: int | None = None, capture_logprobs: Literal[False] = False
+    ) -> str: ...
+    @overload
+    def _generate_from_inputs(
+        self, inputs: Any, *, max_new_tokens: int | None = None, capture_logprobs: Literal[True]
+    ) -> tuple[str, list[int], list[dict[int, float]]]: ...
     def _generate_from_inputs(
         self,
         inputs: Any,

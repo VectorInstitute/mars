@@ -30,8 +30,6 @@ are skipped from quantization (stay BF16) but remain frozen in Stage 1.
 Stage 2 (``modality_projectors``): loads Stage 1's LoRA (frozen), then trains
 only the modality bridges — ``audio_tower.proj1/proj2``,
 ``visual.merger``/``merger_list`` — kept explicitly in BF16.
-
-See REBUILD_PLAN.md §1.5 for the locked mechanics this implements.
 """
 
 from __future__ import annotations
@@ -100,7 +98,7 @@ def load_processor(cfg: QLoraSFTConfig) -> Qwen3OmniMoeProcessor:
 
 
 def patch_thinker_text_no_split_modules() -> None:
-    """Work around a ``transformers`` bug that mis-splits a decoder layer across GPUs.
+    """Work around a ``transformers`` bug that can split a decoder layer across GPUs.
 
     ``Qwen3OmniMoeThinkerTextModel`` (the actual 30B-A3B MoE text decoder)
     inherits ``_no_split_modules`` from the generic ``Qwen3OmniMoePreTrainedModel``
@@ -201,8 +199,8 @@ def _cast_modules_to_bf16(model: Any, names: tuple[str, ...]) -> None:
 
     They're already real (non-quantized) parameters — ``_QUANT_SKIP_MODULES``
     keeps them out of NF4 — this just guards against a stray dtype mismatch
-    silently downcasting a trainable projector (§1.5: "4-bit base weights
-    cannot host trainable projectors ... don't rely on PEFT defaults").
+    silently downcasting a trainable projector: 4-bit base weights can't host
+    a trainable projector, so this can't rely on PEFT's defaults.
     """
     for module in find_named_modules(model, names).values():
         module.to(dtype=torch.bfloat16)

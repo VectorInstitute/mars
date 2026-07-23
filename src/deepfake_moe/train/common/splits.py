@@ -4,12 +4,11 @@ Train sampling is proportionally stratified by joint AV label (real /
 fake_video / fake_audio / fake_both): each stratum is sampled at
 (approximately) its share of the pool, so a fixed ``train_samples_per_dataset``
 draw can't accidentally miss an entire class due to random luck on a small
-sample fraction (REBUILD_PLAN.md §1.1). This preserves the pool's natural
-class balance rather than rebalancing it — it guarantees coverage, not equal
-representation.
+sample fraction. This preserves the pool's natural class balance rather than
+rebalancing it — it guarantees coverage, not equal representation.
 
 Validation sampling is plain uniform (matches ``eval.dataset``'s approach) —
-§1.1 calls out stratification for train sampling specifically.
+stratification is for train sampling specifically.
 """
 
 from __future__ import annotations
