@@ -15,9 +15,14 @@ from deepfake_moe.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
-_REQUIRED_FIELDS = frozenset(
-    {"video_fake", "audio_fake", "video_confidence", "audio_confidence", "fake_periods", "reason"}
-)
+# parse_ok gates whether a clip counts toward detection metrics. The locked
+# schema always includes fake_periods (as [] for a real clip, never omitted —
+# see train/common/targets.py's build_target), so its absence signals a
+# schema-deviating response (e.g. a legacy `segments` field) rather than a
+# real clip with no periods, and must fail the parse like the other required
+# fields. ``reason`` is still recovered-when-present (incl. via truncated-JSON
+# repair) and defaults to "" otherwise, since it doesn't gate correctness.
+_REQUIRED_FIELDS = frozenset({"video_fake", "audio_fake", "video_fake_prob", "audio_fake_prob", "fake_periods"})
 
 
 def parse_response(
@@ -49,9 +54,10 @@ def parse_response(
         return PredictionOutput(
             video_fake=False,
             audio_fake=False,
-            video_confidence=0,
-            audio_confidence=0,
+            video_fake_prob=0.0,
+            audio_fake_prob=0.0,
             fake_periods=[],
+            evidence=[],
             reason="parse_failed",
             raw_response=raw,
             parse_ok=False,
@@ -63,21 +69,23 @@ def parse_response(
 
     video_fake = bool(data.get("video_fake", False))
     audio_fake = bool(data.get("audio_fake", False))
-    vc = _clamp(data.get("video_confidence", 0))
-    ac = _clamp(data.get("audio_confidence", 0))
-    fake_periods = _parse_fake_periods(data.get("fake_periods", data.get("segments", [])))
+    v_prob = _parse_prob(data.get("video_fake_prob"), fallback=video_fake)
+    a_prob = _parse_prob(data.get("audio_fake_prob"), fallback=audio_fake)
+    fake_periods = _parse_fake_periods(data.get("fake_periods", []))
+    evidence = _parse_evidence(data.get("evidence", []))
     reason = str(data.get("reason", ""))
 
     if not has_audio:
         audio_fake = False
-        ac = 0
+        a_prob = 0.0
 
     return PredictionOutput(
         video_fake=video_fake,
         audio_fake=audio_fake,
-        video_confidence=vc,
-        audio_confidence=ac,
+        video_fake_prob=v_prob,
+        audio_fake_prob=a_prob,
         fake_periods=fake_periods,
+        evidence=evidence,
         reason=reason,
         raw_response=raw,
         parse_ok=not bool(missing),
@@ -111,16 +119,111 @@ def _extract_json(text: str) -> dict | None:
         except json.JSONDecodeError:
             pass
 
+    # Last resort: repair a generation truncated mid-object (token budget hit).
+    # Recovers every field emitted before the cut — crucially ``fake_periods``,
+    # which the schema emits before ``evidence``/``reason`` and so survives most
+    # truncations.
+    return _repair_truncated_json(text)
+
+
+def _repair_truncated_json(text: str) -> dict | None:
+    """Close a JSON object truncated mid-generation and parse the largest valid prefix.
+
+    Scans once to record, after every prefix length, whether we're inside a
+    string and the open ``{``/``[`` stack. Then tries the longest prefix first:
+    closes a dangling string, drops a trailing comma/colon, appends the missing
+    closers, and returns the first prefix that parses to a dict. Fields the
+    model never reached are simply absent (they default downstream); everything
+    it did emit before the cut is preserved.
+    """
+    start = text.find("{")
+    if start == -1:
+        return None
+    s = text[start:]
+
+    in_str = False
+    esc = False
+    stack: list[str] = []
+    st_in = [False]
+    st_esc = [False]
+    st_stack: list[tuple[str, ...]] = [()]
+    for ch in s:
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+        elif ch == '"':
+            in_str = True
+        elif ch in "{[":
+            stack.append(ch)
+        elif ch in "}]":
+            if stack:
+                stack.pop()
+        st_in.append(in_str)
+        st_esc.append(esc)
+        st_stack.append(tuple(stack))
+
+    closers = {"{": "}", "[": "]"}
+    for end in range(len(s), 0, -1):
+        core = s[:end]
+        if st_in[end]:
+            if st_esc[end]:
+                core = core[:-1]
+            core = core + '"'
+        else:
+            core = core.rstrip()
+            while core and core[-1] == ",":
+                core = core[:-1].rstrip()
+            if not core or core[-1] in ":,":
+                continue
+        candidate = core + "".join(closers[b] for b in reversed(st_stack[end]))
+        try:
+            obj = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict):
+            return obj
     return None
 
 
-def _clamp(value: object) -> int:
-    try:
-        if isinstance(value, (int, float, str)):
-            return max(0, min(10, int(value)))
-    except (TypeError, ValueError):
-        pass
-    return 0
+def _parse_prob(value: object, *, fallback: bool) -> float:
+    """Coerce a written probability into ``[0.0, 1.0]``."""
+    if isinstance(value, bool):
+        return 1.0 if value else 0.0
+    if isinstance(value, (int, float)):
+        return max(0.0, min(1.0, float(value)))
+    if isinstance(value, str):
+        try:
+            return max(0.0, min(1.0, float(value)))
+        except ValueError:
+            pass
+    return 1.0 if fallback else 0.0
+
+
+def _parse_evidence(raw: object) -> list[dict]:
+    """Keep well-formed evidence items without failing the whole parse."""
+    if not isinstance(raw, list):
+        return []
+    out: list[dict] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        clean: dict = {}
+        for key in ("modality", "type", "note"):
+            if key in item and item[key] is not None:
+                clean[key] = str(item[key])
+        period = item.get("period")
+        if isinstance(period, (list, tuple)) and len(period) == 2:
+            try:
+                t0, t1 = float(period[0]), float(period[1])
+                clean["period"] = [t0, t1]
+            except (TypeError, ValueError):
+                pass
+        out.append(clean)
+    return out
 
 
 def _parse_fake_periods(raw: object) -> list[list[float]]:

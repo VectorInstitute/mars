@@ -31,9 +31,9 @@ class ClipData:
     fake_periods : list[list[float]]
         Ground-truth fake intervals ``[[t0, t1], ...]``; empty if unavailable.
     video_path : str
-        Manifest ``src_path`` (used by vLLM eval; HF ``predict`` uses ``frames``).
+        Resolved on-disk video path (used by vLLM eval; HF ``predict`` uses ``frames``).
     audio_path : str | None
-        Manifest ``wav_path`` when audio is present.
+        Resolved on-disk audio path when audio is present.
     """
 
     clip_id: str
@@ -52,18 +52,25 @@ class ClipData:
 class PredictionOutput:
     """Structured output from any model implementing ``Predictor``.
 
+    Matches the locked schema (``skills/02-schema-and-scoring.md``): probabilities,
+    not integer confidence.
+
     Attributes
     ----------
     video_fake : bool
         Model video-stream prediction.
     audio_fake : bool
         Model audio-stream prediction.
-    video_confidence : int
-        Confidence in the video prediction, 0–10.
-    audio_confidence : int
-        Confidence in the audio prediction, 0–10.
+    video_fake_prob : float
+        Probability the video stream is manipulated, in ``[0.0, 1.0]``. AUC is
+        computed from the first-token generation logprob, not this written value
+        alone (see ``eval/logprob.py``); this field carries whichever is available.
+    audio_fake_prob : float
+        Probability the audio stream is manipulated, in ``[0.0, 1.0]``.
     fake_periods : list[list[float]]
         Predicted fake intervals ``[[t0, t1], ...]`` in seconds; empty if none.
+    evidence : list[dict]
+        Supporting cues; interpretability only, not scored.
     reason : str
         Short explanation from the model.
     raw_response : str
@@ -74,9 +81,10 @@ class PredictionOutput:
 
     video_fake: bool
     audio_fake: bool
-    video_confidence: int
-    audio_confidence: int
+    video_fake_prob: float
+    audio_fake_prob: float
     fake_periods: list[list[float]]
+    evidence: list[dict]
     reason: str
     raw_response: str = ""
     parse_ok: bool = True

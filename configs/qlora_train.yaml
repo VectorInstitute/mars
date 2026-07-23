@@ -1,0 +1,97 @@
+# ============================================================================
+# Stage 1 — Thinker QLoRA  (tuning_mode: thinker_lora)
+# Loaded by QLoraSFTConfig.from_yaml(). Machine-specific paths come from .env.
+# Stage 2 (configs/projector_train.yaml) consumes this stage's final_artifact/.
+# ============================================================================
+
+tuning_mode: thinker_lora
+init_checkpoint: null
+resume_from_checkpoint: null
+
+model_id: "Qwen/Qwen3-Omni-30B-A3B-Instruct"
+attn_implementation: flash_attention_2
+
+# ── Data (paths from .env) ─────────────────────────────────────────────────
+manifest_dir: "${MANIFEST_DIR}"
+data_root: "${DATA_ROOT}"
+dataset_video_roots:
+  av1m: "raw/AV-Deepfake1M-subset"
+  #arenav: "raw/ArEnAV_subset"
+  lavdf: "raw/LAV-DF/LAV-DF"
+  polyglot: "raw/PolyGlotFake"
+  fakeavceleb: "raw/FakeAVCeleb_v1.2"
+
+train_dataset_sources:
+  av1m: ["av1m_train.jsonl"]
+  #arenav: ["arenav_train.jsonl"]
+  lavdf: ["lavdf_train.jsonl"]
+  polyglot: ["polyglot_train.jsonl"]
+  fakeavceleb: ["fakeavceleb_train.jsonl"]
+
+val_dataset_sources:
+  av1m: ["av1m_val.jsonl"]
+  #arenav: ["arenav_val.jsonl"]
+  lavdf: ["lavdf_val.jsonl"]
+  polyglot: ["polyglot_val.jsonl"]
+  fakeavceleb: ["fakeavceleb_val.jsonl"]
+
+train_samples_per_dataset: 5000
+val_samples_per_dataset: 500
+audio_sample_rate: 16000
+num_frames: 64
+max_seq_len: 4096
+seed: 42
+
+# ── LoRA (text decoder only) ───────────────────────────────────────────────
+lora_target_modules: ["q_proj", "v_proj"]
+lora_rank: 8
+lora_alpha: 16
+lora_dropout: 0.05
+
+# ── Optimization ───────────────────────────────────────────────────────────
+learning_rate: 0.0002
+lr_scheduler_type: cosine
+warmup_ratio: 0.03
+micro_batch_size: 1
+gradient_accumulation_steps: 16       # effective batch 16 (model-parallel)
+max_steps: -1
+num_train_epochs: 1.0
+max_grad_norm: 1.0
+
+# ── Eval / checkpoint selection ────────────────────────────────────────────
+# Selection metric is validation loss (mean masked CE) — see SFTTrainer.evaluate
+# in train.py. No in-loop generation; macro-F1/AUC are scored separately by the
+# vLLM eval harness on saved checkpoints.
+eval_strategy: steps
+save_strategy: steps
+eval_steps: 200
+save_steps: 200
+logging_steps: 10
+save_total_limit: 3
+load_best_model_at_end: true
+
+# ── Output / naming ────────────────────────────────────────────────────────
+output_dir: "checkpoints"
+merge_after_train: false              # merge explicitly via merge.py when finalized
+
+# run_name is BOTH the checkpoint subdirectory (checkpoints/<run_name>/) and the
+# W&B run name, so it's named {model}-{dataset size}-{stage} — swap the model tag
+# when model_id changes. Other hyperparameters don't need to be repeated here:
+# wandb.init(config=...) already logs every QLoraSFTConfig field. If you
+# deliberately restart this exact run, --set run_name=... to avoid overwriting.
+run_name: "qwen3omni-5k-thinker-lora"
+wandb_project: "deepfake-moe"
+wandb_group: "qwen3omni-5k-2stage"   # shared with Stage 2 to pair them in the W&B UI
+wandb_tags: ["row2", "stage1", "thinker_lora"]   # row2 = this study's MoE-attribution row
+
+# ── How to run (Slurm) ──────────────────────────────────────────────────────
+# Smoke test first (1 sample/step, tiny — validates the pipeline end-to-end):
+#   sbatch scripts/qlora_train.sh --config configs/qlora_train.yaml --smoke-test
+# Profile to size the Slurm --time (10 steps, real num_frames):
+#   sbatch scripts/qlora_train.sh --config configs/qlora_train.yaml --profile
+# Real run:
+#   sbatch scripts/qlora_train.sh --config configs/qlora_train.yaml
+# Cheap prelim (override without editing this file):
+#   sbatch scripts/qlora_train.sh --config configs/qlora_train.yaml \
+#     --set train_samples_per_dataset=2000 --set val_samples_per_dataset=200 \
+#     --set run_name=qwen3omni-2k-thinker-lora-prelim

@@ -9,8 +9,8 @@ def _record(
     label_audio: int = 0,
     video_fake: bool = False,
     audio_fake: bool = False,
-    video_confidence: int = 5,
-    audio_confidence: int = 5,
+    video_fake_prob: float = 0.5,
+    audio_fake_prob: float = 0.5,
     has_audio: bool = True,
     parse_ok: bool = True,
 ) -> dict:
@@ -19,8 +19,8 @@ def _record(
         "label_audio": label_audio,
         "video_fake": video_fake,
         "audio_fake": audio_fake,
-        "video_confidence": video_confidence,
-        "audio_confidence": audio_confidence,
+        "video_fake_prob": video_fake_prob,
+        "audio_fake_prob": audio_fake_prob,
         "has_audio": has_audio,
         "parse_ok": parse_ok,
     }
@@ -28,13 +28,14 @@ def _record(
 
 def test_video_head_perfect_accuracy() -> None:
     records = [
-        _record(label_video=0, video_fake=False, video_confidence=9),
-        _record(label_video=1, video_fake=True, video_confidence=9),
+        _record(label_video=0, video_fake=False, video_fake_prob=0.1),
+        _record(label_video=1, video_fake=True, video_fake_prob=0.9),
     ]
     m = compute_detection_metrics(records, "video")
     assert m["n_evaluated"] == 2
     assert m["accuracy"] == 1.0
     assert m["f1"] == 1.0
+    assert m["auc"] == 1.0
 
 
 def test_audio_head_excludes_no_audio_clips() -> None:
@@ -69,3 +70,24 @@ def test_empty_valid_set_returns_note() -> None:
     m = compute_detection_metrics([_record(parse_ok=False)], "video")
     assert m["n_evaluated"] == 0
     assert "note" in m
+
+
+def test_auc_none_when_single_class_present() -> None:
+    records = [
+        _record(label_video=0, video_fake=False, video_fake_prob=0.2),
+        _record(label_video=0, video_fake=False, video_fake_prob=0.4),
+    ]
+    m = compute_detection_metrics(records, "video")
+    assert m["auc"] is None
+    assert "auc_note" in m
+
+
+def test_auc_uses_fake_prob_not_prediction() -> None:
+    # Predictions are wrong (both predicted real) but fake_prob still ranks correctly.
+    records = [
+        _record(label_video=0, video_fake=False, video_fake_prob=0.1),
+        _record(label_video=1, video_fake=False, video_fake_prob=0.8),
+    ]
+    m = compute_detection_metrics(records, "video")
+    assert m["accuracy"] == 0.5
+    assert m["auc"] == 1.0

@@ -49,4 +49,7 @@ def test_eval_config_from_yaml() -> None:
     assert cfg.model
     assert cfg.experiment_name
     assert cfg.manifest_dir
-    assert cfg.raw_data_dir
+    assert cfg.data_root
+    assert cfg.dataset_video_roots
+    assert "lavdf" in cfg.dataset_video_roots
+    assert cfg.resolved_audio_dir().endswith("processed/audio/normalized")
