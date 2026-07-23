@@ -724,7 +724,6 @@ dependencies = [
     { name = "accelerate" },
     { name = "av" },
     { name = "bitsandbytes" },
-    { name = "flash-attn" },
     { name = "librosa" },
     { name = "numpy" },
     { name = "nvidia-cudnn-cu12" },
@@ -769,13 +768,15 @@ docs = [
     { name = "pymdown-extensions" },
     { name = "tornado" },
 ]
+flash-attn = [
+    { name = "flash-attn" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "accelerate", specifier = ">=1.0.0" },
     { name = "av", specifier = ">=12.0" },
     { name = "bitsandbytes", specifier = ">=0.49.2" },
-    { name = "flash-attn", specifier = "==2.8.3+torch211.computecanada" },
     { name = "librosa", specifier = ">=0.10" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "nvidia-cudnn-cu12", specifier = ">=9.10.2.21" },
@@ -820,6 +821,7 @@ docs = [
     { name = "pymdown-extensions", specifier = ">=10.21.2" },
     { name = "tornado", specifier = ">=6.5.6" },
 ]
+flash-attn = [{ name = "flash-attn", specifier = "==2.8.3+torch211.computecanada" }]
 
 [[package]]
 name = "defusedxml"
