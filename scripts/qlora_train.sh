@@ -35,6 +35,12 @@ if [[ -n "${FFMPEG_SHARED:-}" && -d "${FFMPEG_SHARED}/lib" ]]; then
   export PATH="${FFMPEG_SHARED}/bin:${PATH}"
   export LD_LIBRARY_PATH="${FFMPEG_SHARED}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 fi
+# flash-attn is an opt-in uv dependency group (only resolvable via the
+# Compute Canada / DRAC wheelhouse, see pyproject.toml) — sync it here so
+# Stage 1's flash_attention_2 is available, when that wheelhouse exists.
+if [[ -d /cvmfs/soft.computecanada.ca ]]; then
+  uv sync --group flash-attn
+fi
 export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
 export PYTHONUNBUFFERED=1
 
