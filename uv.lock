@@ -6,13 +6,6 @@ resolution-markers = [
     "sys_platform != 'darwin'",
 ]
 
-[manifest]
-
-[[manifest.dependency-metadata]]
-name = "flash-attn"
-version = "2.8.3+torch211.computecanada"
-requires-dist = ["torch", "setuptools"]
-
 [[package]]
 name = "accelerate"
 version = "1.14.0"
@@ -768,9 +761,6 @@ docs = [
     { name = "pymdown-extensions" },
     { name = "tornado" },
 ]
-flash-attn = [
-    { name = "flash-attn" },
-]
 
 [package.metadata]
 requires-dist = [
@@ -821,7 +811,6 @@ docs = [
     { name = "pymdown-extensions", specifier = ">=10.21.2" },
     { name = "tornado", specifier = ">=6.5.6" },
 ]
-flash-attn = [{ name = "flash-attn", specifier = "==2.8.3+torch211.computecanada" }]
 
 [[package]]
 name = "defusedxml"
@@ -1053,18 +1042,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e6/dc/be6cbe99670cd6e4ad387123647cb08e0c32975e223f82551e914c5568a6/filelock-3.29.4.tar.gz", hash = "sha256:10cdb3656fc44541cdf30652a93fb10ec6b05325620eb316bd26893e4201538a", size = 63028, upload-time = "2026-06-13T16:12:00.744Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/13/37/a065dc3bd6e49423a6532c642ca7378d3f467b1ef44c2800c937af7f9739/filelock-3.29.4-py3-none-any.whl", hash = "sha256:dac1648087d5115554850d113e7dd8c83ab2d38e3435dde2d4f163847e57b767", size = 42757, upload-time = "2026-06-13T16:11:59.582Z" },
-]
-
-[[package]]
-name = "flash-attn"
-version = "2.8.3+torch211.computecanada"
-source = { registry = "/cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic" }
-dependencies = [
-    { name = "setuptools" },
-    { name = "torch" },
-]
-wheels = [
-    { path = "/cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic/flash_attn-2.8.3+torch211.computecanada-cp312-cp312-linux_x86_64.whl" },
 ]
 
 [[package]]
