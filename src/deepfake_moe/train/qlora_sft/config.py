@@ -34,6 +34,9 @@ class QLoraSFTConfig:
     # ── Base model ───────────────────────────────────────────────────────────
     model_id: str = "Qwen/Qwen3-Omni-30B-A3B-Instruct"
     attn_implementation: str = "sdpa"  # qlora_train.yaml overrides to flash_attention_2 for Stage 1
+    # Reserved fraction of each GPU, kept out of device_map="auto"'s weight
+    # budget for MoE grouped-matmul activations (see model.py's _max_memory_map).
+    gpu_memory_headroom_fraction: float = 0.15
 
     # ── Data (paths from .env) ──────────────────────────────────────────────
     manifest_dir: str = ""

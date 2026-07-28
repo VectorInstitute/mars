@@ -121,6 +121,47 @@ def patch_thinker_text_no_split_modules() -> None:
     Qwen3OmniMoeThinkerTextModel._no_split_modules = ["Qwen3OmniMoeThinkerTextDecoderLayer"]
 
 
+def patch_peft_weight_converter_kwargs() -> None:
+    """Work around a peft/transformers ``WeightConverter`` signature mismatch.
+
+    peft 0.19.1's MoE adapter-loading path (triggered by any architecture with
+    a registered checkpoint-conversion mapping, incl. our LoRA-only q_proj/
+    v_proj adapter on this MoE model) calls ``WeightConverter(...,
+    distributed_operation=..., quantization_operation=...)``, but installed
+    transformers only accepts those as post-init attributes, raising
+    ``TypeError``. Already fixed on peft's git main (construct, then assign);
+    not yet released. Remove once peft picks up the fix.
+    """
+    from transformers.core_model_loading import WeightConverter  # noqa: PLC0415
+
+    if getattr(WeightConverter.__init__, "_deepfake_moe_patched", False):
+        return
+    original_init = WeightConverter.__init__
+
+    def patched_init(self: Any, *args: Any, **kwargs: Any) -> None:
+        distributed_operation = kwargs.pop("distributed_operation", None)
+        quantization_operation = kwargs.pop("quantization_operation", None)
+        original_init(self, *args, **kwargs)
+        if distributed_operation is not None:
+            self.distributed_operation = distributed_operation
+        if quantization_operation is not None:
+            self.quantization_operation = quantization_operation
+
+    patched_init._deepfake_moe_patched = True  # type: ignore[attr-defined]
+    WeightConverter.__init__ = patched_init  # type: ignore[method-assign]
+
+
+def _max_memory_map(headroom_fraction: float) -> dict[int, int] | None:
+    """Cap each visible GPU's ``device_map="auto"`` weight budget, in bytes."""
+    if not torch.cuda.is_available():
+        return None
+    n_gpus = torch.cuda.device_count()
+    if n_gpus == 0:
+        return None
+    budget_fraction = 1.0 - headroom_fraction
+    return {i: int(torch.cuda.get_device_properties(i).total_memory * budget_fraction) for i in range(n_gpus)}
+
+
 def _load_quantized_base(cfg: QLoraSFTConfig) -> Any:
     """Load the Thinker directly: text decoder in NF4, towers BF16, sharded across GPUs.
 
@@ -143,6 +184,14 @@ def _load_quantized_base(cfg: QLoraSFTConfig) -> Any:
         "device_map": "auto",
         "dtype": torch.bfloat16,
     }
+    max_memory = _max_memory_map(cfg.gpu_memory_headroom_fraction)
+    if max_memory:
+        kwargs["max_memory"] = max_memory
+        logger.info(
+            "Per-GPU max_memory budget (bytes, %d%% headroom reserved): %s",
+            int(cfg.gpu_memory_headroom_fraction * 100),
+            max_memory,
+        )
     if cfg.attn_implementation:
         kwargs["attn_implementation"] = cfg.attn_implementation
     logger.info("Loading Thinker directly (NF4 decoder, BF16 towers), sharded across GPUs: %s", cfg.model_id)
@@ -244,8 +293,11 @@ def build_stage2_model(cfg: QLoraSFTConfig) -> Any:
     """
     if cfg.init_checkpoint is None:
         raise ValueError("Stage 2 requires cfg.init_checkpoint (see QLoraSFTConfig.__post_init__)")
+    from deepfake_moe.train.qlora_sft.artifacts import lora_dir  # noqa: PLC0415 (avoid module-level cycle)
+
+    patch_peft_weight_converter_kwargs()
     thinker = _load_quantized_base(cfg)
-    thinker = PeftModel.from_pretrained(thinker, cfg.init_checkpoint, is_trainable=False)
+    thinker = PeftModel.from_pretrained(thinker, str(lora_dir(cfg.init_checkpoint)), is_trainable=False)
 
     _freeze_all(thinker)
     n_trainable = _set_trainable_by_name(thinker, _PROJECTOR_MODULE_NAMES)
