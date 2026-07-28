@@ -68,8 +68,8 @@ def main() -> None:
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         adapter_dir = Path(tmp_dir) / "stage1_adapter"
-        model1.save_pretrained(str(adapter_dir))
-        print(f"\nSaved Stage 1 adapter to {adapter_dir} for Stage 2 load test.")
+        model1.save_pretrained(str(adapter_dir / "lora"))
+        print(f"\nSaved Stage 1 adapter to {adapter_dir} (lora/ subdir, mirrors save_artifact) for Stage 2 load test.")
         del model1
         torch.cuda.empty_cache()
 

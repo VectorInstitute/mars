@@ -15,13 +15,15 @@
 #SBATCH --job-name=deepfake_moe_qlora_train
 #SBATCH --gres=gpu:a100:4
 #SBATCH --mem=128G
-#SBATCH --time=1-00:00:00
+#SBATCH --time=7-00:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --output=logs/qlora_train_%j.out
 #SBATCH --error=logs/qlora_train_%j.err
 
 set -euo pipefail
-cd "${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+[[ -f "${repo_root}/pyproject.toml" ]] || repo_root="${SLURM_SUBMIT_DIR:?repo root not found next to this script and SLURM_SUBMIT_DIR is unset}"
+cd "$repo_root"
 mkdir -p logs
 
 # Machine config; on a cluster also load runtime modules + shared FFmpeg.
@@ -60,7 +62,7 @@ for arg in "$@"; do
       # use train_runtime / 10 to size the Slurm --time. Not representative of
       # the 4-frame smoke test (real run adds audio + full frame count).
       extra_set+=(
-        --set max_steps=10 --set num_frames=64
+        --set max_steps=10 --set num_frames=32
         --set eval_strategy=no --set save_strategy=no
         --set load_best_model_at_end=no --set gradient_accumulation_steps=1
       )

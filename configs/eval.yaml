@@ -18,14 +18,18 @@ dataset_sources:
   lavdf: ["lavdf_test.jsonl"]
   polyglot: ["polyglot_test.jsonl"]
   fakeavceleb: ["fakeavceleb_test.jsonl"]
+  celebdf: ["celebdf_heldout.jsonl"]
+  dfeval: ["dfeval_heldout.jsonl"]
 dataset_video_roots:
   av1m: "raw/AV-Deepfake1M-subset"
   #arenav: "raw/ArEnAV_subset"
   lavdf: "raw/LAV-DF/LAV-DF"
   polyglot: "raw/PolyGlotFake"
   fakeavceleb: "raw/FakeAVCeleb_v1.2"
+  celebdf: "raw/Celeb-DF"
+  dfeval: "raw/Deepfake-Eval-2024"
 
-num_clips_per_dataset: 1
+num_clips_per_dataset: 1000
 num_frames: 64
 seed: 42
 
@@ -35,7 +39,7 @@ temporal_datasets: ["av1m", "lavdf"]
 inference_only_datasets: ["dfeval"]
 
 output_dir: "results"
-experiment_name: "qwen3omni-5k-2stage"
+experiment_name: "qwen3omni-2k-projectors-prelim-4KTest"
 
 # Entry in configs/models.yaml. merge.py registers the merged model as
 # 'qwen3-omni-qlora-sft' (model_id: ${QLORA_SFT_MERGED_DIR}). Use 'qwen3-omni'
