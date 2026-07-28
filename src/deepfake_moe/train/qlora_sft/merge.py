@@ -23,7 +23,11 @@ from transformers import Qwen3OmniMoeForConditionalGeneration
 
 from deepfake_moe.train.qlora_sft.artifacts import load_meta, load_projector_weights, lora_dir
 from deepfake_moe.train.qlora_sft.config import QLoraSFTConfig
-from deepfake_moe.train.qlora_sft.model import load_processor, patch_thinker_text_no_split_modules
+from deepfake_moe.train.qlora_sft.model import (
+    load_processor,
+    patch_peft_weight_converter_kwargs,
+    patch_thinker_text_no_split_modules,
+)
 from deepfake_moe.utils.env import load_env
 from deepfake_moe.utils.logging_utils import get_logger
 
@@ -52,6 +56,7 @@ def merge_artifact(cfg: QLoraSFTConfig, artifact_dir: str | Path, output_dir: st
     # LoRA was trained against the FULL model (paths prefixed `thinker.` — see
     # model.py's module docstring), so the adapter must be loaded onto the
     # full model here too, not the extracted `.thinker` submodule.
+    patch_peft_weight_converter_kwargs()
     base = PeftModel.from_pretrained(base, str(lora_dir(artifact_dir)))
     base = base.merge_and_unload()
     logger.info("Merged LoRA into base weights.")
