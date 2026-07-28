@@ -29,7 +29,9 @@
 #SBATCH --array=0-0
 
 set -euo pipefail
-cd "${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+[[ -f "${repo_root}/pyproject.toml" ]] || repo_root="${SLURM_SUBMIT_DIR:?repo root not found next to this script and SLURM_SUBMIT_DIR is unset}"
+cd "$repo_root"
 mkdir -p logs
 
 # Machine config; on a cluster also load runtime modules + shared FFmpeg.

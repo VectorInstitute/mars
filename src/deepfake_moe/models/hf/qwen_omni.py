@@ -20,6 +20,25 @@ from deepfake_moe.utils.logging_utils import get_logger
 logger = get_logger(__name__)
 
 
+def _patch_no_split_modules() -> None:
+    """Fix ``Qwen3OmniMoeForConditionalGeneration._no_split_modules``.
+
+    Upstream lists a stale ``"Qwen3OmniMoeDecoderLayer"`` that no longer
+    exists (the class was split into thinker/talker variants without
+    updating this list), so ``device_map="auto"`` has no atomicity
+    guarantee for any decoder layer and can shard a single MoE layer's
+    experts across GPUs mid-layer, crashing on a residual/hidden_states
+    device mismatch. Correct the list before every load (idempotent).
+    """
+    Qwen3OmniMoeForConditionalGeneration._no_split_modules = [
+        "Qwen3OmniMoeThinkerTextDecoderLayer",
+        "Qwen3OmniMoeVisionBlock",
+        "Qwen3OmniMoeAudioEncoderLayer",
+        "Qwen3OmniMoeTalkerDecoderLayer",
+        "Qwen3OmniMoeTalkerCodePredictorDecoderLayer",
+    ]
+
+
 class QwenOmni:
     """Load Qwen3-Omni once; raw forward for inspection, chat for comparison.
 
@@ -40,6 +59,7 @@ class QwenOmni:
         if cfg.attn_implementation:
             kwargs["attn_implementation"] = cfg.attn_implementation
 
+        _patch_no_split_modules()
         logger.info("Loading Qwen3-Omni: %s", cfg.model_id)
         self.model = Qwen3OmniMoeForConditionalGeneration.from_pretrained(cfg.model_id, **kwargs)
         self.model.eval()
