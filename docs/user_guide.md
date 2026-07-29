@@ -159,9 +159,10 @@ the repository's actions [secret variables](https://docs.github.com/en/actions/s
 ## Cluster / Slurm
 
 Machine-specific values live in a gitignored `.env` (copy from `.env.example`).
-The launchers `scripts/eval.sh`, `scripts/forward.sh`, and `scripts/qlora_train.sh`
-are self-contained: the same file runs locally (`bash scripts/eval.sh`) or on
-Slurm (`sbatch scripts/eval.sh`). When submitted with `sbatch`, each script:
+The launchers `scripts/eval.sh`, `scripts/forward.sh`, `scripts/qlora_train.sh`,
+and `scripts/avr_ssl_train.sh` are self-contained: the same file runs locally
+(`bash scripts/eval.sh`) or on Slurm (`sbatch scripts/eval.sh`). When
+submitted with `sbatch`, each script:
 
 1. Loads `.env` into the environment
 2. Loads the cluster modules (`StdEnv/2023`, `gcc/12.3`, `cuda/12.2`) when a
@@ -179,4 +180,4 @@ FFMPEG_SHARED=/path/to/ffmpeg-shared-7
 
 Adjust `#SBATCH` resource directives (GPU type/count, time, `--mail-user`)
 directly at the top of `scripts/eval.sh` / `scripts/forward.sh` /
-`scripts/qlora_train.sh`.
+`scripts/qlora_train.sh` / `scripts/avr_ssl_train.sh`.

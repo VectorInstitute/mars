@@ -14,13 +14,18 @@ model registry and config-driven entry points.
   `vllm/` (tensor-parallel inference) are the two backends.
 - `deepfake_moe.eval` - dataset loading, the eval runner, locked-schema JSON
   parsing, and metrics (detection AUC/F1, temporal IoU).
-- `deepfake_moe.train` - shared SFT data/collator/targets (`common/`) and the
+- `deepfake_moe.train` - shared SFT data/collator/targets (`common/`), the
   two-stage QLoRA SFT pipeline (`qlora_sft/`: Stage 1 thinker LoRA, Stage 2
-  frozen-LoRA + modality-projector bridges).
+  frozen-LoRA + modality-projector bridges), and AVR Stage 1 self-supervised
+  pretraining (`avr_ssl/`).
+- `deepfake_moe.models.avr` - the AVR (Audio-Visual Reliability) module:
+  frozen encoder access, cross-modal imputation, expert routing, and
+  inverse-variance fusion into evidence tokens.
 - `deepfake_moe.utils` - env/`.env` loading, logging, and media helpers
   (video/audio segmentation, media I/O).
-- `deepfake_moe.run_forward` / `run_eval` / `run_train` - the three CLI entry
-  points; each wires config + data + model together and drives one run.
+- `deepfake_moe.run_forward` / `run_eval` / `run_train` / `run_train_avr_ssl`
+  - the CLI entry points; each wires config + data + model together and
+  drives one run.
 
 ## Run one raw forward pass
 

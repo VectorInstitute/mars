@@ -79,6 +79,32 @@ def uniform_sample(pool: list[dict], n: int, *, seed: int) -> list[dict]:
     return [pool[i] for i in sorted(indices)]
 
 
+def read_manifest_pool(manifest_dir: str, filenames: list[str]) -> list[dict]:
+    """Read and concatenate one dataset's labeled manifest rows.
+
+    Shared by :func:`load_split_entries` and ``train/avr_ssl/dataset.py``'s
+    real-only loader, which filters this pool before sampling rather than
+    after (see that module for why the order matters there).
+    """
+    manifest_root = Path(manifest_dir)
+    pool: list[dict] = []
+    for fname in filenames:
+        fpath = manifest_root / fname
+        if not fpath.exists():
+            logger.warning("manifest not found, skipping: %s", fpath)
+            continue
+        with open(fpath) as fh:
+            for line in fh:
+                text = line.strip()
+                if not text:
+                    continue
+                entry = json.loads(text)
+                if entry.get("label") is None:
+                    continue
+                pool.append(entry)
+    return pool
+
+
 def load_split_entries(
     manifest_dir: str,
     dataset_sources: dict[str, list[str]],
@@ -93,26 +119,10 @@ def load_split_entries(
     sharding/inference-only handling (not applicable to training), plus the
     stratification choice above.
     """
-    manifest_root = Path(manifest_dir)
     all_entries: list[dict] = []
 
     for dataset, filenames in dataset_sources.items():
-        pool: list[dict] = []
-        for fname in filenames:
-            fpath = manifest_root / fname
-            if not fpath.exists():
-                logger.warning("manifest not found, skipping: %s", fpath)
-                continue
-            with open(fpath) as fh:
-                for line in fh:
-                    text = line.strip()
-                    if not text:
-                        continue
-                    entry = json.loads(text)
-                    if entry.get("label") is None:
-                        continue
-                    pool.append(entry)
-
+        pool = read_manifest_pool(manifest_dir, filenames)
         if not pool:
             logger.warning("No usable entries for dataset=%s", dataset)
             continue
