@@ -19,6 +19,10 @@ localize fake intervals as JSON, then score against manifest ground truth
 (video/audio AUC & F1, temporal IoU).
 - **Training** — two-stage QLoRA SFT (Stage 1: thinker LoRA; Stage 2: frozen
 LoRA + modality-projector bridges), same launcher for both stages.
+- **AVR (Audio-Visual Reliability)** — a self-supervised module that learns
+calibrated, per-token cross-modal reliability from the frozen audio/visual
+encoders, trained standalone before it feeds evidence tokens into the
+Thinker.
 - **Configuration** — models live in a single registry and are selected at run
 time; results are grouped by experiment and model.
 
@@ -32,18 +36,21 @@ configs/
   eval.yaml              # eval settings; data paths come from .env as ${VAR}
   qlora_train.yaml       # Stage 1 QLoRA SFT training config
   projector_train.yaml   # Stage 2 modality-projector training config
+  avr_ssl.yaml            # AVR Stage 1 self-supervised training config
 scripts/
   eval.sh                # run eval — local (bash) or Slurm (sbatch; array = shards)
   forward.sh             # run one raw forward pass
-  qlora_train.sh         # run training — local (bash) or Slurm (sbatch); same for both stages
+  qlora_train.sh         # run QLoRA SFT training — local (bash) or Slurm (sbatch); same for both stages
+  avr_ssl_train.sh        # run AVR Stage 1 training — local (bash) or Slurm (sbatch)
   patch_vllm_qwen3.py    # optional vLLM fix for Qwen3-Omni
 src/deepfake_moe/
   run_eval.py            # eval entry point
   run_forward.py         # forward entry point
-  run_train.py           # training entry point
-  models/                # registry, factory, typed configs, hf + vllm backends
+  run_train.py           # QLoRA SFT training entry point
+  run_train_avr_ssl.py   # AVR Stage 1 training entry point
+  models/                # registry, factory, typed configs, hf + vllm backends; avr/ (AVR module)
   eval/                  # dataset, runner, metrics
-  train/                 # common data/collator/targets + two-stage QLoRA SFT (qlora_sft/)
+  train/                 # common data/collator/targets, two-stage QLoRA SFT (qlora_sft/), AVR Stage 1 (avr_ssl/)
   utils/                 # env/.env loading, logging, media / audio / video I/O
 .env.example             # copy to .env; machine paths + FFMPEG_SHARED
 ```
@@ -80,7 +87,7 @@ my-model:
 
 ## Run
 
-**Forward pass** (inspection — prints logits, hidden-state, and encoder shapes):
+**Forward pass** (inspection - prints logits, hidden-state, and encoder shapes):
 
 ```bash
 bash scripts/forward.sh --video clip.mp4 --audio clip.wav --generate
@@ -148,6 +155,26 @@ uv run deepfake-moe-qlora-merge \
     --config configs/qlora_train.yaml \
     --artifact-dir checkpoints/<run_name>/final_artifact
 ```
+
+**AVR Stage 1** — self-supervised pretraining of the AVR module's imputation,
+router, and expert weights (no labels, no Thinker). Standalone: it doesn't
+depend on QLoRA SFT and doesn't touch `train/qlora_sft/`. Run via
+`scripts/avr_ssl_train.sh`, local or Slurm:
+
+```bash
+sbatch scripts/avr_ssl_train.sh --config configs/avr_ssl.yaml
+```
+
+Same `--smoke-test` / `--profile` convention as QLoRA training:
+
+```bash
+bash scripts/avr_ssl_train.sh --config configs/avr_ssl.yaml --smoke-test
+bash scripts/avr_ssl_train.sh --config configs/avr_ssl.yaml --profile
+```
+
+Checkpoints (best + final) land at `checkpoints/<run_name>/{best,final}_artifact/`
+as a plain `avr_model.pt` state dict (imputation, router, and expert weights
+only) plus `meta.json`.
 
 
 
