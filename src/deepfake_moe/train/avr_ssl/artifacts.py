@@ -51,8 +51,13 @@ def save_artifact(
     >>> import tempfile
     >>> from deepfake_moe.models.avr.config import AVRConfig
     >>> from deepfake_moe.models.avr.model import AVRModel
-    >>> cfg = AVRConfig(hidden_dim=4, imputation_num_heads=2, expert_ffn_dim=8,
-    ...                  train_samples_per_dataset=1, val_samples_per_dataset=1)
+    >>> cfg = AVRConfig(
+    ...     hidden_dim=4,
+    ...     imputation_num_heads=2,
+    ...     expert_ffn_dim=8,
+    ...     train_samples_per_dataset=1,
+    ...     val_samples_per_dataset=1,
+    ... )
     >>> model = AVRModel(cfg)
     >>> with tempfile.TemporaryDirectory() as tmp:
     ...     save_artifact(model, cfg, tmp, reproducibility={"global_step": 1})
