@@ -14,8 +14,8 @@ class InverseVarianceFusion(nn.Module):
 
     ::
 
-        mu_star       = sum(mu_e / sigma_e^2) / sum(1 / sigma_e^2)
-        sigma_star_sq = 1 / sum(1 / sigma_e^2)
+        mu_star = sum(mu_e / sigma_e ^ 2) / sum(1 / sigma_e ^ 2)
+        sigma_star_sq = 1 / sum(1 / sigma_e ^ 2)
 
     Experts that report high variance are down-weighted automatically, so an
     expert admitting it doesn't know barely moves the final estimate.

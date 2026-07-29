@@ -246,7 +246,9 @@ class AVRSSLTrainer:
         if self._best_val_loss is not None and val_loss >= self._best_val_loss:
             return
         self._best_val_loss = val_loss
-        save_artifact(self.avr, self.cfg, self.best_dir, reproducibility={"global_step": step, "best_val_loss": val_loss})
+        save_artifact(
+            self.avr, self.cfg, self.best_dir, reproducibility={"global_step": step, "best_val_loss": val_loss}
+        )
         logger.info("new best val_reconstruction_loss=%.4f at step=%d -> %s", val_loss, step, self.best_dir)
 
     def train(self) -> None:
