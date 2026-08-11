@@ -17,6 +17,7 @@ except ModuleNotFoundError:
     LLM = None  # type: ignore[assignment, misc]
     SamplingParams = None  # type: ignore[assignment, misc]
 
+from deepfake_moe.eval.logprob import bool_token_ids, field_value_step_indices, stream_probs_from_step_logprobs
 from deepfake_moe.eval.parser import parse_response
 from deepfake_moe.eval.prompts import AV_USER_PROMPT, SYSTEM_PROMPT, VIDEO_ONLY_USER_PROMPT
 from deepfake_moe.models.base import ClipData, PredictionOutput
@@ -85,6 +86,11 @@ def _assert_supported_vllm_stack() -> None:
         )
 
 
+def _logprob_value(value: Any) -> float:
+    """Coerce a vLLM ``Logprob`` (or a plain float, in older vLLM outputs) to float."""
+    return float(value.logprob) if hasattr(value, "logprob") else float(value)
+
+
 class QwenOmniVLLM:
     """Qwen3-Omni eval wrapper using vLLM tensor parallelism."""
 
@@ -92,6 +98,8 @@ class QwenOmniVLLM:
         self.config = config
         self.llm: LLM | None = None
         self.processor: Any = None
+        self._true_token_ids: set[int] = set()
+        self._false_token_ids: set[int] = set()
 
     def load(self) -> QwenOmniVLLM:
         """Load vLLM engine and processor."""
@@ -105,17 +113,12 @@ class QwenOmniVLLM:
         os.environ["VLLM_USE_V1"] = "1"
         if cfg.max_model_len > 65536:
             os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1"
-        patched = _patch_qwen3_processor_for_vllm()
-        worker_method = cfg.worker_multiproc_method
-        if patched and worker_method == "spawn":
-            # With spawn, worker processes do not inherit in-memory monkey patches,
-            # causing missing _get_num_multimodal_tokens inside V1 worker init.
-            worker_method = "fork"
-            logger.warning(
-                "Switching VLLM_WORKER_MULTIPROC_METHOD spawn->fork to propagate "
-                "Qwen3 processor compatibility patch to vLLM workers."
-            )
-        os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = worker_method
+        # The Qwen3 processor compatibility patch is also registered as a
+        # "vllm.general_plugins" entry point, so vLLM re-applies it in every
+        # process (engine core + each worker) regardless of start method —
+        # no need to force fork to propagate this in-memory monkey patch.
+        _patch_qwen3_processor_for_vllm()
+        os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = cfg.worker_multiproc_method
 
         logger.info("Loading Qwen3-Omni (vLLM): %s  tensor_parallel=%d", cfg.model_id, tp)
         limit_mm = cfg.limit_mm_per_prompt or {"image": 1, "video": 1, "audio": 1}
@@ -135,6 +138,9 @@ class QwenOmniVLLM:
             disable_log_stats=True,
         )
         self.processor = Qwen3OmniMoeProcessor.from_pretrained(cfg.model_id)
+        self._true_token_ids, self._false_token_ids = bool_token_ids(self.processor.tokenizer)
+        if not self._true_token_ids or not self._false_token_ids:
+            logger.warning("Tokenizer has no single-token JSON true/false pair; logprob capture disabled.")
         return self
 
     def predict(self, clip: ClipData) -> PredictionOutput:
@@ -169,6 +175,7 @@ class QwenOmniVLLM:
         sampling = SamplingParams(
             temperature=0.0,
             max_tokens=self.config.max_new_tokens,
+            logprobs=20,
         )
         outputs = self.llm.generate(
             [  # type: ignore[arg-type]
@@ -183,5 +190,38 @@ class QwenOmniVLLM:
             ],
             sampling_params=sampling,
         )
-        raw = outputs[0].outputs[0].text
-        return parse_response(raw, has_audio=clip.has_audio, clip_id=clip.clip_id)
+        completion = outputs[0].outputs[0]
+        raw = completion.text
+        prediction = parse_response(raw, has_audio=clip.has_audio, clip_id=clip.clip_id)
+
+        token_ids = list(completion.token_ids)
+        raw_step_logprobs = completion.logprobs or []
+        step_logprobs = [
+            {int(token_id): _logprob_value(value) for token_id, value in position.items()}
+            for position in raw_step_logprobs
+        ]
+        steps = field_value_step_indices(
+            token_ids,
+            self.processor.tokenizer,
+            self._true_token_ids,
+            self._false_token_ids,
+        )
+        video_step = steps.get("video_fake")
+        if video_step is not None and video_step < len(step_logprobs):
+            video_prob = stream_probs_from_step_logprobs(
+                step_logprobs[video_step],
+                self._true_token_ids,
+                self._false_token_ids,
+            )
+            if video_prob is not None:
+                prediction.video_fake_prob = video_prob
+        audio_step = steps.get("audio_fake")
+        if clip.has_audio and audio_step is not None and audio_step < len(step_logprobs):
+            audio_prob = stream_probs_from_step_logprobs(
+                step_logprobs[audio_step],
+                self._true_token_ids,
+                self._false_token_ids,
+            )
+            if audio_prob is not None:
+                prediction.audio_fake_prob = audio_prob
+        return prediction

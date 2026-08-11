@@ -25,19 +25,41 @@ qwen3-omni:                                   # vLLM — Phase 1 eval default
     cache_gb: 0
   enable_prefix_caching: false
   seed: 1234
-  worker_multiproc_method: "fork"
+  worker_multiproc_method: "spawn"
   audio_sample_rate: 16000
   video_min_frames: 16
   video_max_frames: 64
   use_audio_in_video: false
   max_new_tokens: 512                         # room for JSON + fake_periods list
 
+qwen3-omni-qlora-sft:                         # merged QLoRA checkpoint for eval
+  backend: vllm
+  model_id: "${QLORA_SFT_MERGED_DIR}"
+  tensor_parallel_size: null
+  gpu_memory_utilization: 0.85
+  max_model_len: 65536
+  max_num_seqs: 1
+  limit_mm_per_prompt:
+    image: 1
+    video: 1
+    audio: 1
+  mm_processor_kwargs:
+    cache_gb: 0
+  enable_prefix_caching: false
+  seed: 1234
+  worker_multiproc_method: "spawn"
+  audio_sample_rate: 16000
+  video_min_frames: 16
+  video_max_frames: 64
+  use_audio_in_video: false
+  max_new_tokens: 512
+
 qwen3-omni-hf:                                # HF Transformers — raw forward / inspection
   backend: hf
   model_id: "Qwen/Qwen3-Omni-30B-A3B-Instruct"
   device_map: "auto"
   dtype: "auto"
-  attn_implementation: sdpa                   # e.g. "flash_attention_2"
+  attn_implementation: flash_attention_2                   # e.g. "flash_attention_2"
   audio_sample_rate: 16000
   video_fps: 1.0
   video_min_frames: 16

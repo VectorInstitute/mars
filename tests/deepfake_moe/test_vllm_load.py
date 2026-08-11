@@ -44,7 +44,7 @@ def test_vllm_load_uses_v0_and_safe_mm_defaults(monkeypatch: MonkeyPatch) -> Non
 
     assert loaded is model
     assert os.environ["VLLM_USE_V1"] == "1"
-    assert os.environ["VLLM_WORKER_MULTIPROC_METHOD"] == "fork"
+    assert os.environ["VLLM_WORKER_MULTIPROC_METHOD"] == cfg.worker_multiproc_method
     llm_ctor.assert_called_once()
     kwargs = llm_ctor.call_args.kwargs
     assert kwargs["tensor_parallel_size"] == 4

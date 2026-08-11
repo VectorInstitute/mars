@@ -12,21 +12,26 @@
 #   * Slurm array (sharded)   -> the first shard queues an afterok metrics job
 #
 # To (re)compute metrics from existing shard predictions yourself:
-#   bash scripts/eval.sh --metrics-only --experiment-name <name> --model <model>
+#   bash scripts/eval.sh --score-only --experiment-name <name> --model <model>
 #
-# Any extra flags are forwarded to run_eval (e.g. --retry-failed, --model, ...).
+# Predict/score are separate, resumable stages — any extra flags are forwarded
+# to run_eval: --predict-only (inference only, no report), --resume-predictions
+# (skip clips already in predictions.jsonl), --retry-failed (rerun only failed
+# clips), --score-only (metrics from existing predictions.jsonl, no model load).
 #
 #SBATCH --job-name=deepfake_moe_eval
 #SBATCH --gres=gpu:a40:4
 #SBATCH --mem=128G
-#SBATCH --time=2-00:00:00
+#SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --output=logs/eval_%A_%a.out
 #SBATCH --error=logs/eval_%A_%a.err
 #SBATCH --array=0-0
 
 set -euo pipefail
-cd "${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+[[ -f "${repo_root}/pyproject.toml" ]] || repo_root="${SLURM_SUBMIT_DIR:?repo root not found next to this script and SLURM_SUBMIT_DIR is unset}"
+cd "$repo_root"
 mkdir -p logs
 
 # Machine config; on a cluster also load runtime modules + shared FFmpeg.
@@ -63,5 +68,5 @@ if [[ "${SLURM_ARRAY_TASK_COUNT:-1}" -gt 1 && "${SLURM_ARRAY_TASK_ID:-0}" -eq 0 
   sbatch --dependency="afterok:${SLURM_ARRAY_JOB_ID}" \
     --job-name=deepfake_moe_metrics --cpus-per-task=4 --mem=16G --time=00:30:00 \
     --output=logs/metrics_%j.out \
-    --wrap="cd '${PWD}' && uv run python -m deepfake_moe.run_eval --metrics-only $*"
+    --wrap="cd '${PWD}' && uv run python -m deepfake_moe.run_eval --score-only $*"
 fi

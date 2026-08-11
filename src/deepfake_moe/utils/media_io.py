@@ -48,3 +48,22 @@ def load_video_frames(path: str, max_frames: int | None = None) -> np.ndarray:
         container.close()
 
     return np.stack(frames).astype(np.uint8) if frames else np.empty((0, 0, 0, 3), dtype=np.uint8)
+
+
+def video_native_fps(path: str) -> float:
+    """Return a video's native frame rate.
+
+    ``load_video_frames`` decodes consecutive frames with no fps
+    subsampling, so those frames are spaced at the video's native rate —
+    callers passing frames to the Qwen3-Omni processor need this rate for
+    correct token timestamps (``video_second_per_grid``); the processor
+    silently defaults to 1.0 otherwise.
+    """
+    container = av.open(path)
+    try:
+        rate = container.streams.video[0].average_rate
+        if rate is None:
+            raise ValueError(f"{path} has no detectable frame rate")
+        return float(rate)
+    finally:
+        container.close()
