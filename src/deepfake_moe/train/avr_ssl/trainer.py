@@ -7,10 +7,10 @@ from pathlib import Path
 from typing import Any
 
 import torch
+import wandb
 from torch.utils.data import DataLoader
 from transformers import Qwen3OmniMoeProcessor, Qwen3OmniMoeThinkerForConditionalGeneration, get_scheduler
 
-import wandb
 from deepfake_moe.models.avr.config import AVRConfig
 from deepfake_moe.models.avr.encoders import encode, load_frozen_encoders
 from deepfake_moe.models.avr.masking import (
