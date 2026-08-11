@@ -56,6 +56,9 @@ def run_eval(
                 entry,
                 num_frames=eval_cfg.num_frames,
                 sample_rate=model_cfg.audio_sample_rate,
+                data_root=eval_cfg.data_root,
+                audio_dir=eval_cfg.resolved_audio_dir(),
+                dataset_video_roots=eval_cfg.dataset_video_roots,
             )
             if clip is None:
                 record = _error_record(entry, reason="load_failed")
@@ -110,8 +113,9 @@ def _make_record(clip: ClipData, pred: PredictionOutput, elapsed: float) -> dict
         "pred_fake_periods": pred.fake_periods,
         "video_fake": pred.video_fake,
         "audio_fake": pred.audio_fake,
-        "video_confidence": pred.video_confidence,
-        "audio_confidence": pred.audio_confidence,
+        "video_fake_prob": pred.video_fake_prob,
+        "audio_fake_prob": pred.audio_fake_prob,
+        "evidence": pred.evidence,
         "reason": pred.reason,
         "parse_ok": pred.parse_ok,
         "elapsed_s": round(elapsed, 3),
@@ -129,8 +133,9 @@ def _error_record(entry: dict, reason: str) -> dict:
         "fake_periods": entry.get("fake_periods") or [],
         "video_fake": False,
         "audio_fake": False,
-        "video_confidence": 0,
-        "audio_confidence": 0,
+        "video_fake_prob": 0.0,
+        "audio_fake_prob": 0.0,
+        "evidence": [],
         "pred_fake_periods": [],
         "reason": reason,
         "parse_ok": False,

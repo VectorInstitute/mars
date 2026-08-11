@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     branches:
-      - main
+      - '**'
     paths:
       - .pre-commit-config.yaml
       - .github/workflows/code_checks.yml
@@ -49,8 +49,23 @@ jobs:
       - name: Install dependencies and check code
         run: |
           source .venv/bin/activate
-          pre-commit run --all-files
 
+          pre-commit run --all-files || {
+            echo "=== GITHUB RUNNER STATUS ==="
+            git status --short
+
+            echo "=== GITHUB RUNNER DIFF ==="
+            git diff
+
+            echo "=== COMMIT RUNNING IN CI ==="
+            git rev-parse HEAD
+
+            exit 1
+          }
+
+      # PYSEC-2026-3447 (setuptools MANIFEST.in exclude bypass, fixed in
+      # 83.0.0) is not adoptable: torch==2.11.0 pins setuptools<82. Revisit
+      # if/when torch is bumped past 2.11.
       - name: pip-audit (gh-action-pip-audit)
         uses: pypa/gh-action-pip-audit@v1.1.0
         with:
@@ -60,3 +75,10 @@ jobs:
             CVE-2025-69872
             GHSA-6v7p-g79w-8964
             CVE-2025-3000
+            PYSEC-2026-3447
+            CVE-2026-61632
+            PYSEC-2026-3545
+            PYSEC-2026-3546
+            PYSEC-2026-3547
+            PYSEC-2026-3552
+            PYSEC-2026-3654

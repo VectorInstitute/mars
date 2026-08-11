@@ -1,35 +1,67 @@
-# Phase 1 eval configuration (Qwen3-Omni). Loaded by EvalConfig.from_yaml().
-# Machine-specific paths come from .env (see .env.example) and are referenced
-# here as ${VAR}. Unknown keys raise ValueError.
-#
-# Split policy: this config uses the `test` split (pre/post-training baseline).
-# Held-out sets (celebdf, dfeval) and train-only sets are intentionally excluded.
+# ============================================================================
+# Evaluation config  (EvalConfig — deepfake_moe/eval/dataset.py)
+# Model-agnostic harness: `model` names an entry in configs/models.yaml.
+# Point it at the merged 2-stage model (produced by merge.py) to score the
+# trained system; swap `model` to the base entry for a zero-shot baseline.
+# Results land in <output_dir>/<experiment_name>/<model>/.
+# ============================================================================
 
-# ── Data (paths from .env) ───────────────────────────────────────────────────
 manifest_dir: "${MANIFEST_DIR}"
-raw_data_dir: "${RAW_DATA_DIR}"
+data_root: "${DATA_ROOT}"
 
-# by_dataset/*.jsonl files to combine per dataset.
+# NOTE: confirm these filenames match your actual TEST/heldout manifests.
+# Training used *_train.jsonl / *_val.jsonl; evaluation should use held-out
+# test splits. celebdf + dfeval live in the heldout set (Phase 0).
 dataset_sources:
-  lavdf:
-    - "lavdf_test.jsonl"
-  arenav:
-    - "arenav_test.jsonl"
+  av1m: ["av1m_test.jsonl"]
+  #arenav: ["arenav_test.jsonl"]
+  lavdf: ["lavdf_test.jsonl"]
+  polyglot: ["polyglot_test.jsonl"]
+  fakeavceleb: ["fakeavceleb_test.jsonl"]
+  celebdf: ["celebdf_heldout.jsonl"]
+  dfeval: ["dfeval_heldout.jsonl"]
+dataset_video_roots:
+  av1m: "raw/AV-Deepfake1M-subset"
+  #arenav: "raw/ArEnAV_subset"
+  lavdf: "raw/LAV-DF/LAV-DF"
+  polyglot: "raw/PolyGlotFake"
+  fakeavceleb: "raw/FakeAVCeleb_v1.2"
+  celebdf: "raw/Celeb-DF"
+  dfeval: "raw/Deepfake-Eval-2024"
 
-# ── Sampling ─────────────────────────────────────────────────────────────────
-num_clips_per_dataset: 2000
-num_frames: 64          # frames sampled uniformly per clip
+num_clips_per_dataset: 1000
+num_frames: 32
 seed: 42
 
-# ── Metrics ──────────────────────────────────────────────────────────────────
-# Datasets with fake_periods ground truth → temporal IoU computed.
-temporal_datasets:
-  - "lavdf"
+# av1m + lavdf carry fake_periods → temporal IoU / localization metrics run there.
+temporal_datasets: ["av1m", "lavdf"]
+# dfeval is blind (label=null): run for parse-rate/coverage, never scored.
+inference_only_datasets: ["dfeval"]
 
-# ── Model & output ───────────────────────────────────────────────────────────
-# `model` is a key in configs/models.yaml.       Override: --model NAME
-# Results are written to <output_dir>/<experiment_name>/<model>/.
-#                                                 Override: --experiment-name NAME
-model: "qwen3-omni"
-experiment_name: "default"
 output_dir: "results"
+experiment_name: "qwen3omni-8k-av1m"
+
+# Entry in configs/models.yaml. merge.py registers the merged model as
+# 'qwen3-omni-qlora-sft' (model_id: ${QLORA_SFT_MERGED_DIR}). Use 'qwen3-omni'
+# (or your base entry name) instead for the zero-shot baseline.
+model: "qwen3-omni-qlora-sft"
+
+# ── How to run (scripts/eval.sh) ────────────────────────────────────────────
+# run_eval defaults to --eval-config configs/eval.yaml, so eval.sh picks up this
+# file automatically. --experiment-name / --model flags override the values set
+# above; sharding comes from the Slurm --array size (results aggregate afterok).
+#
+# PREREQUISITE (to score the trained system): merge the finalized Stage 2
+# artifact first (see projector_train.yaml) and ensure $QLORA_SFT_MERGED_DIR in
+# .env matches the 'qwen3-omni-qlora-sft' entry in configs/models.yaml.
+#
+# Smoke the eval path (5 clips/dataset, local, still loads the model):
+#   bash scripts/eval.sh --dry-run
+# Single-job full eval of the merged 2-stage model:
+#   sbatch scripts/eval.sh --experiment-name qwen3omni-5k-2stage --model qwen3-omni-qlora-sft
+# Sharded across 5 array tasks (faster; first shard queues the metrics job):
+#   sbatch --array=0-4 scripts/eval.sh --experiment-name qwen3omni-5k-2stage --model qwen3-omni-qlora-sft
+# Zero-shot baseline for comparison (no training/merge needed):
+#   sbatch scripts/eval.sh --experiment-name qwen3-baseline --model qwen3-omni-hf
+# Recompute metrics from existing shard predictions (no model load):
+#   bash scripts/eval.sh --score-only --experiment-name qwen3omni-5k-2stage --model qwen3-omni-qlora-sft

@@ -44,9 +44,12 @@ def test_eval_config_from_yaml() -> None:
     root = Path(__file__).resolve().parents[2]
     path = root / "configs" / "eval.yaml"
     cfg = EvalConfig.from_yaml(path)
-    assert cfg.num_frames == 64
+    assert cfg.num_frames == 32
     assert "lavdf" in cfg.dataset_sources
     assert cfg.model
     assert cfg.experiment_name
     assert cfg.manifest_dir
-    assert cfg.raw_data_dir
+    assert cfg.data_root
+    assert cfg.dataset_video_roots
+    assert "lavdf" in cfg.dataset_video_roots
+    assert cfg.resolved_audio_dir().endswith("processed/audio/normalized")

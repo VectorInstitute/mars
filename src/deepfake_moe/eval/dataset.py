@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from dataclasses import fields as dc_fields
 from pathlib import Path
 
@@ -15,6 +15,7 @@ from deepfake_moe.models.base import ClipData
 from deepfake_moe.utils.env import expand_env
 from deepfake_moe.utils.logging_utils import get_logger
 from deepfake_moe.utils.media_io import load_audio, load_video_frames
+from deepfake_moe.utils.paths import default_audio_dir, resolve_audio_path, resolve_video_path
 from deepfake_moe.utils.video_segment import sample_frame_indices
 
 
@@ -39,7 +40,9 @@ class EvalConfig:
     temporal_datasets: list[str]
     model: str
     experiment_name: str = "default"
-    raw_data_dir: str = ""
+    data_root: str = ""
+    dataset_video_roots: dict[str, str] = field(default_factory=dict)
+    inference_only_datasets: list[str] = field(default_factory=list)
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "EvalConfig":
@@ -51,6 +54,10 @@ class EvalConfig:
             raise ValueError(f"Unknown EvalConfig keys: {sorted(unknown)}")
         return cls(**data)
 
+    def resolved_audio_dir(self) -> str:
+        """Return ``{data_root}/processed/audio/normalized``."""
+        return default_audio_dir(self.data_root)
+
 
 def load_manifest_entries(
     eval_cfg: EvalConfig,
@@ -60,8 +67,10 @@ def load_manifest_entries(
 ) -> list[dict]:
     """Load and sample manifest entries for every configured dataset.
 
-    Uses ``by_dataset/*.jsonl`` files rather than combined split files.
-    Rows with ``label=null`` (blind eval) are skipped.
+    Reads ``<manifest_dir>/<filename>`` directly for each configured source.
+    Rows with ``label=null`` are skipped unless their dataset is listed in
+    ``inference_only_datasets`` (e.g. ``dfeval``, a blind heldout set that is
+    run for coverage/parse-rate only, never scored).
 
     Returns
     -------
@@ -70,14 +79,15 @@ def load_manifest_entries(
     """
     _validate_shard_args(num_shards, shard_id)
     rng = np.random.default_rng(eval_cfg.seed)
-    by_dataset_dir = Path(eval_cfg.manifest_dir) / "by_dataset"
+    manifest_dir = Path(eval_cfg.manifest_dir)
     all_entries: list[dict] = []
 
     for dataset, filenames in eval_cfg.dataset_sources.items():
         pool: list[dict] = []
+        inference_only = dataset in eval_cfg.inference_only_datasets
 
         for fname in filenames:
-            fpath = by_dataset_dir / fname
+            fpath = manifest_dir / fname
             if not fpath.exists():
                 logger.warning("manifest not found, skipping: %s", fpath)
                 continue
@@ -87,7 +97,7 @@ def load_manifest_entries(
                     if not text:
                         continue
                     entry = json.loads(text)
-                    if entry.get("label") is None:
+                    if entry.get("label") is None and not inference_only:
                         continue
                     pool.append(entry)
 
@@ -138,6 +148,9 @@ def load_clip(
     *,
     num_frames: int,
     sample_rate: int,
+    data_root: str = "",
+    audio_dir: str = "",
+    dataset_video_roots: dict[str, str] | None = None,
 ) -> ClipData | None:
     """Load video frames and audio for one manifest entry.
 
@@ -151,17 +164,32 @@ def load_clip(
         Target number of frames after uniform subsampling.
     sample_rate :
         Audio sample rate for ``wav_path`` loading.
+    data_root :
+        Common parent of the raw dataset folders; combined with
+        ``dataset_video_roots[entry["dataset"]]`` to resolve ``src_path``.
+    audio_dir :
+        Root for normalized audio; combined with ``wav_path`` to resolve the
+        on-disk audio file.
+    dataset_video_roots :
+        Maps a manifest ``dataset`` name onto its raw-data subfolder (manifest
+        dataset names don't match the on-disk folder names, e.g.
+        ``lavdf`` -> ``raw/LAV-DF/LAV-DF``).
 
     Returns
     -------
     ClipData | None
         Decoded clip, or ``None`` on load failure.
     """
-    src_path: str = entry.get("src_path", "")
-    wav_path: str | None = entry.get("wav_path")
+    dataset = entry.get("dataset", "")
+    raw_src_path: str = entry.get("src_path", "")
+    raw_wav_path: str | None = entry.get("wav_path")
     has_audio: bool = bool(entry.get("has_audio", False))
     label: list[int] = entry.get("label") or [0, 0]
     fake_periods: list[list[float]] = entry.get("fake_periods") or []
+
+    video_root = (dataset_video_roots or {}).get(dataset, "")
+    src_path = resolve_video_path(raw_src_path, data_root=data_root, video_root=video_root)
+    wav_path = resolve_audio_path(raw_wav_path, audio_dir=audio_dir)
 
     try:
         all_frames = load_video_frames(src_path)
@@ -201,7 +229,7 @@ def load_clip(
 
     return ClipData(
         clip_id=entry.get("clip_id", ""),
-        dataset=entry.get("dataset", ""),
+        dataset=dataset,
         has_audio=has_audio,
         frames=frames,
         waveform=waveform,
