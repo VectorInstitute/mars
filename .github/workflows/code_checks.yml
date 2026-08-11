@@ -49,7 +49,19 @@ jobs:
       - name: Install dependencies and check code
         run: |
           source .venv/bin/activate
-          pre-commit run --all-files
+
+          pre-commit run --all-files || {
+            echo "=== GITHUB RUNNER STATUS ==="
+            git status --short
+
+            echo "=== GITHUB RUNNER DIFF ==="
+            git diff
+
+            echo "=== COMMIT RUNNING IN CI ==="
+            git rev-parse HEAD
+
+            exit 1
+          }
 
       # PYSEC-2026-3447 (setuptools MANIFEST.in exclude bypass, fixed in
       # 83.0.0) is not adoptable: torch==2.11.0 pins setuptools<82. Revisit
