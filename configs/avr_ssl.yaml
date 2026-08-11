@@ -25,21 +25,21 @@ manifest_dir: "${MANIFEST_DIR}"
 data_root: "${DATA_ROOT}"
 dataset_video_roots:
   av1m: "raw/AV-Deepfake1M-subset"
-  lavdf: "raw/LAV-DF/LAV-DF"
-  polyglot: "raw/PolyGlotFake"
-  fakeavceleb: "raw/FakeAVCeleb_v1.2"
+  #lavdf: "raw/LAV-DF/LAV-DF"
+  #polyglot: "raw/PolyGlotFake"
+  #fakeavceleb: "raw/FakeAVCeleb_v1.2"
 
 train_dataset_sources:
   av1m: ["av1m_train.jsonl"]
-  lavdf: ["lavdf_train.jsonl"]
-  polyglot: ["polyglot_train.jsonl"]
-  fakeavceleb: ["fakeavceleb_train.jsonl"]
+  #lavdf: ["lavdf_train.jsonl"]
+  #polyglot: ["polyglot_train.jsonl"]
+  #fakeavceleb: ["fakeavceleb_train.jsonl"]
 
 val_dataset_sources:
   av1m: ["av1m_val.jsonl"]
-  lavdf: ["lavdf_val.jsonl"]
-  polyglot: ["polyglot_val.jsonl"]
-  fakeavceleb: ["fakeavceleb_val.jsonl"]
+  #lavdf: ["lavdf_val.jsonl"]
+  #polyglot: ["polyglot_val.jsonl"]
+  #fakeavceleb: ["fakeavceleb_val.jsonl"]
 
 train_samples_per_dataset: 10000
 val_samples_per_dataset: 1000

@@ -6,7 +6,7 @@
 
 tuning_mode: modality_projectors
 # REQUIRED: point at Stage 1's final_artifact/ — must match qlora_train.yaml's run_name exactly.
-init_checkpoint: "checkpoints/qwen3omni-8k-thinker-lora/final_artifact"
+init_checkpoint: "checkpoints/qwen3omni-8k-av1m-thinker-lora/final_artifact"
 resume_from_checkpoint: null
 
 model_id: "Qwen/Qwen3-Omni-30B-A3B-Instruct"
@@ -18,26 +18,26 @@ data_root: "${DATA_ROOT}"
 dataset_video_roots:
   av1m: "raw/AV-Deepfake1M-subset"
   #arenav: "raw/ArEnAV_subset"
-  lavdf: "raw/LAV-DF/LAV-DF"
-  polyglot: "raw/PolyGlotFake"
-  fakeavceleb: "raw/FakeAVCeleb_v1.2"
+  #lavdf: "raw/LAV-DF/LAV-DF"
+  #polyglot: "raw/PolyGlotFake"
+  #fakeavceleb: "raw/FakeAVCeleb_v1.2"
 
 train_dataset_sources:
   av1m: ["av1m_train.jsonl"]
   #arenav: ["arenav_train.jsonl"]
-  lavdf: ["lavdf_train.jsonl"]
-  polyglot: ["polyglot_train.jsonl"]
-  fakeavceleb: ["fakeavceleb_train.jsonl"]
+  #lavdf: ["lavdf_train.jsonl"]
+  #polyglot: ["polyglot_train.jsonl"]
+  #fakeavceleb: ["fakeavceleb_train.jsonl"]
 
 val_dataset_sources:
   av1m: ["av1m_val.jsonl"]
   #arenav: ["arenav_val.jsonl"]
-  lavdf: ["lavdf_val.jsonl"]
-  polyglot: ["polyglot_val.jsonl"]
-  fakeavceleb: ["fakeavceleb_val.jsonl"]
+  #lavdf: ["lavdf_val.jsonl"]
+  #polyglot: ["polyglot_val.jsonl"]
+  #fakeavceleb: ["fakeavceleb_val.jsonl"]
 
 train_samples_per_dataset: 8000
-val_samples_per_dataset: 800
+val_samples_per_dataset: 1000
 audio_sample_rate: 16000
 num_frames: 32
 max_seq_len: 4096
@@ -78,9 +78,9 @@ load_best_model_at_end: true
 output_dir: "checkpoints"
 merge_after_train: false              # final stage — merge via merge.py, then eval
 
-run_name: "qwen3omni-8k-projectors"
+run_name: "qwen3omni-8k-av1m-projectors"
 wandb_project: "deepfake-moe"
-wandb_group: "qwen3omni-8k-2stage"
+wandb_group: "qwen3omni-8k-av1m-2stage"
 wandb_tags: ["stage2", "modality_projectors"]
 
 # ── How to run (Slurm) ──────────────────────────────────────────────────────
@@ -99,4 +99,4 @@ wandb_tags: ["stage2", "modality_projectors"]
 # After it finishes, merge to a standalone model for eval (needs QLORA_SFT_MERGED_DIR in .env):
 #   python -m deepfake_moe.train.qlora_sft.merge \
 #     --config configs/projector_train.yaml \
-#     --artifact-dir checkpoints/qwen3omni-8k-projectors/final_artifact
+#     --artifact-dir checkpoints/qwen3omni-8k-av1m-projectors/final_artifact

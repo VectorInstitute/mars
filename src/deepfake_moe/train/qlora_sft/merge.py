@@ -53,9 +53,9 @@ def merge_artifact(cfg: QLoraSFTConfig, artifact_dir: str | Path, output_dir: st
     logger.info("Merging artifact: tuning_mode=%s  model_id=%s", meta["tuning_mode"], meta["model_id"])
 
     base = load_bf16_base(meta["model_id"], cfg.attn_implementation)
-    # LoRA was trained against the FULL model (paths prefixed `thinker.` — see
-    # model.py's module docstring), so the adapter must be loaded onto the
-    # full model here too, not the extracted `.thinker` submodule.
+    # LoRA was trained against the FULL model (paths prefixed `thinker.`), so
+    # the adapter must be loaded onto the full model here too, not the
+    # extracted `.thinker` submodule.
     patch_peft_weight_converter_kwargs()
     base = PeftModel.from_pretrained(base, str(lora_dir(artifact_dir)))
     base = base.merge_and_unload()
