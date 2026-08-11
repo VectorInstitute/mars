@@ -39,8 +39,9 @@ class TopKRouter(nn.Module):
         """Return ``(topk_weight, topk_indices, aux_loss)``.
 
         ``topk_weight``/``topk_indices`` are ``(N, top_k)``. ``topk_weight``
-        is renormalized to sum to 1 across the selected experts, but isn't
-        consumed by fusion (see module docstring) — logging/inspection only.
+        is renormalized to sum to 1 across the selected experts, but fusion
+        combines experts by inverse-variance weighting instead, so this
+        value is for logging/inspection only.
         """
         logits = self.gate(tokens)
         probs = nn.functional.softmax(logits, dim=-1)

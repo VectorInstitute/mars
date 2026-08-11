@@ -30,7 +30,7 @@ dataset_video_roots:
   dfeval: "raw/Deepfake-Eval-2024"
 
 num_clips_per_dataset: 1000
-num_frames: 64
+num_frames: 32
 seed: 42
 
 # av1m + lavdf carry fake_periods → temporal IoU / localization metrics run there.
@@ -39,7 +39,7 @@ temporal_datasets: ["av1m", "lavdf"]
 inference_only_datasets: ["dfeval"]
 
 output_dir: "results"
-experiment_name: "qwen3omni-2k-projectors-prelim-4KTest"
+experiment_name: "qwen3omni-8k-av1m"
 
 # Entry in configs/models.yaml. merge.py registers the merged model as
 # 'qwen3-omni-qlora-sft' (model_id: ${QLORA_SFT_MERGED_DIR}). Use 'qwen3-omni'

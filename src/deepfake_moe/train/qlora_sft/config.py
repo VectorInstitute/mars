@@ -76,8 +76,9 @@ class QLoraSFTConfig:
     save_total_limit: int = 3
     dataloader_num_workers: int = 2
     # Checkpoint selection: best (lowest) validation CE, owned by
-    # SFTTrainer.evaluate — never Trainer's load_best_model_at_end reload
-    # (crashes on peft/transformers version skew, see train.py's docstring).
+    # SFTTrainer.evaluate — never Trainer's load_best_model_at_end reload,
+    # whose convert_peft_adapter_state_dict_for_transformers call crashes on
+    # peft/transformers version skew.
     load_best_model_at_end: bool = True
 
     # ── Output / merge ───────────────────────────────────────────────────────

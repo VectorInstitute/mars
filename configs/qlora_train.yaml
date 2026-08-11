@@ -17,26 +17,26 @@ data_root: "${DATA_ROOT}"
 dataset_video_roots:
   av1m: "raw/AV-Deepfake1M-subset"
   #arenav: "raw/ArEnAV_subset"
-  lavdf: "raw/LAV-DF/LAV-DF"
-  polyglot: "raw/PolyGlotFake"
-  fakeavceleb: "raw/FakeAVCeleb_v1.2"
+  #lavdf: "raw/LAV-DF/LAV-DF"
+  #polyglot: "raw/PolyGlotFake"
+  #fakeavceleb: "raw/FakeAVCeleb_v1.2"
 
 train_dataset_sources:
   av1m: ["av1m_train.jsonl"]
   #arenav: ["arenav_train.jsonl"]
-  lavdf: ["lavdf_train.jsonl"]
-  polyglot: ["polyglot_train.jsonl"]
-  fakeavceleb: ["fakeavceleb_train.jsonl"]
+  #lavdf: ["lavdf_train.jsonl"]
+  #polyglot: ["polyglot_train.jsonl"]
+  #fakeavceleb: ["fakeavceleb_train.jsonl"]
 
 val_dataset_sources:
   av1m: ["av1m_val.jsonl"]
   #arenav: ["arenav_val.jsonl"]
-  lavdf: ["lavdf_val.jsonl"]
-  polyglot: ["polyglot_val.jsonl"]
-  fakeavceleb: ["fakeavceleb_val.jsonl"]
+  #lavdf: ["lavdf_val.jsonl"]
+  #polyglot: ["polyglot_val.jsonl"]
+  #fakeavceleb: ["fakeavceleb_val.jsonl"]
 
 train_samples_per_dataset: 8000
-val_samples_per_dataset: 800
+val_samples_per_dataset: 1000
 audio_sample_rate: 16000
 num_frames: 32
 max_seq_len: 4096
@@ -79,9 +79,9 @@ merge_after_train: false              # merge explicitly via merge.py when final
 # when model_id changes. Other hyperparameters don't need to be repeated here:
 # wandb.init(config=...) already logs every QLoraSFTConfig field. If you
 # deliberately restart this exact run, --set run_name=... to avoid overwriting.
-run_name: "qwen3omni-8k-thinker-lora"
+run_name: "qwen3omni-8k-av1m-thinker-lora"
 wandb_project: "deepfake-moe"
-wandb_group: "qwen3omni-8k-2stage"   # shared with Stage 2 to pair them in the W&B UI
+wandb_group: "qwen3omni-8k-av1m-2stage"   # shared with Stage 2 to pair them in the W&B UI
 wandb_tags: ["stage1", "thinker_lora"]
 
 # ── How to run (Slurm) ──────────────────────────────────────────────────────

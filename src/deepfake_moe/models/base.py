@@ -52,8 +52,8 @@ class ClipData:
 class PredictionOutput:
     """Structured output from any model implementing ``Predictor``.
 
-    Matches the locked schema (``skills/02-schema-and-scoring.md``): probabilities,
-    not integer confidence.
+    Matches the locked schema: independent per-stream booleans and calibrated
+    probabilities, not integer confidence.
 
     Attributes
     ----------
@@ -64,7 +64,7 @@ class PredictionOutput:
     video_fake_prob : float
         Probability the video stream is manipulated, in ``[0.0, 1.0]``. AUC is
         computed from the first-token generation logprob, not this written value
-        alone (see ``eval/logprob.py``); this field carries whichever is available.
+        alone; this field carries whichever is available.
     audio_fake_prob : float
         Probability the audio stream is manipulated, in ``[0.0, 1.0]``.
     fake_periods : list[list[float]]
