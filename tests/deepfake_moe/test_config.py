@@ -44,7 +44,7 @@ def test_eval_config_from_yaml() -> None:
     root = Path(__file__).resolve().parents[2]
     path = root / "configs" / "eval.yaml"
     cfg = EvalConfig.from_yaml(path)
-    assert cfg.num_frames == 64
+    assert cfg.num_frames == 32
     assert "lavdf" in cfg.dataset_sources
     assert cfg.model
     assert cfg.experiment_name
