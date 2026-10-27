@@ -11,7 +11,7 @@ dependencies = [
     # --- models ---
     "torch==2.11.0",
     "torchvision==0.26.0",
-    "nvidia-cudnn-cu12>=9.10.2.21",
+    "nvidia-cudnn-cu12>=9.27.0.42",
     "nvidia-cusparselt-cu12>=0.7.1",
     "timm>=1.0.20",
     "transformers>=5.5.3",  # SigLIP and DINOv3 encoders; X-CLIP parity tests
