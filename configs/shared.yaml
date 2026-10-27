@@ -4,7 +4,7 @@
 # stay on the model YAML (a list on the model YAML would replace this test list).
 
 data:
-  test: [ffpp, celebdf, dftimit, avid, uadfv, genvideo, hififace_paired, hififace_onlyfake, gtav, df26, vifbench]
+  test: [ffpp, celebdf, dftimit, uadfv, genvideo, hififace_paired, gtav, df26]
   frame_stride: 2
   n_frames: 64
   clip_stride: null

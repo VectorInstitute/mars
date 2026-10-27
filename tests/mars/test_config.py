@@ -28,19 +28,7 @@ def test_yaml_base_merge_and_set() -> None:
     assert raw["model"]["spatial_pool"] == "attn"
     assert raw["data"]["n_frames"] == 64
     assert raw["data"]["train"] == ["ffpp", "gtav"]
-    expected_test = [
-        "ffpp",
-        "celebdf",
-        "dftimit",
-        "avid",
-        "uadfv",
-        "genvideo",
-        "hififace_paired",
-        "hififace_onlyfake",
-        "gtav",
-        "df26",
-        "vifbench",
-    ]
+    expected_test = ["ffpp", "celebdf", "dftimit", "uadfv", "genvideo", "hififace_paired", "gtav", "df26"]
     assert raw["data"]["test"] == expected_test
     assert "root" not in raw["data"]
     assert "compression" not in raw["data"]

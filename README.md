@@ -66,6 +66,31 @@ training. The paper reports per-dataset and per-generator results, seeds, traini
 clip length, ablations, robustness to common degradations, and the faithfulness of the
 evidence maps.
 
+## Quick start
+
+From a fresh clone to a trained and evaluated MARS:
+
+```bash
+# 0. Install
+git clone https://github.com/VectorInstitute/mars.git && cd mars && uv sync
+
+# 1. Place the corpora under data/ (or edit root: in configs/datasets/*.yaml),
+#    then build each manifest once
+uv run python -m mars.data.ffpp --config configs/datasets/ffpp.yaml
+uv run python -m mars.data.gtav --config configs/datasets/gtav.yaml
+#    ...and likewise celebdf, dftimit, uadfv, hififace (hififace_paired.yaml), genvideo, df26
+
+# 2. Train MARS; when training ends, every set in data.test is scored automatically
+sbatch scripts/train.sh --config configs/models/mars/config.yaml
+#    -> checkpoints/mars/mars_s0/best.pt and results/mars/mars_s0/<corpus>/
+
+# 3. (Optional) Evaluate the checkpoint again later, on every test set or on one
+sbatch scripts/eval.sh --config configs/models/mars/config.yaml \
+  --checkpoint checkpoints/mars/mars_s0/best.pt --dataset df26
+```
+
+Each step is detailed in the sections below. Without a Weights & Biases login, training logs to CSV only.
+
 ## Installation
 
 MARS uses [uv](https://docs.astral.sh/uv/) and Python 3.12.
