@@ -33,7 +33,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "codecov>=2.1.13",
-    "mypy>=1.19.1,<2",
+    "mypy>=2.4.0,<3",
     "nbqa>=1.9.1",
     "pip>=26.1", # Pinning version to address vulnerabilities CVE-2026-1703, CVE-2026-3219
     "pip-audit>=2.7.3",
