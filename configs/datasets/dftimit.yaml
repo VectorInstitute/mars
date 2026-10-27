@@ -1,0 +1,14 @@
+# DeepfakeTIMIT corpus. Test-only: all 960 videos (320 real JPEG sequences +
+# 320 higher_quality + 320 lower_quality AVI). VidTIMIT-Real-unused is ignored.
+# The shared data.test list selects it.
+
+dataset: dftimit
+roles: [test]
+root: data/DeepfakeTIMIT
+real_dir: VidTIMIT-Real
+fake_dir: DeepfakeTIMIT-Fake
+qualities:
+  - higher_quality
+  - lower_quality
+manifest: artifacts/dftimit/manifest_verified.csv
+max_videos_per_class: null

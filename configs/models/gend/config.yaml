@@ -1,0 +1,24 @@
+# GenD (Yermakov et al., WACV 2026) under the shared protocol; see src/mars/models/gend/README.md.
+_base_: ../../shared.yaml
+
+data:
+  train: [ffpp, gtav]
+  image_size: 336                          # PE-Core-L native input
+
+model:
+  name: gend
+  encoder_id: vit_pe_core_large_patch14_336.fb
+  encoder_path: null
+  d_feature: 1024
+  n_tokens: 576                            # 24 x 24 patches
+  n_classes: 2
+  encoder_chunk: 64
+
+loss:
+  ce: 1.0
+  uniformity: 0.5
+  alignment: 0.1
+
+log:
+  group: main_ffpp_gtav
+  run_name: gend_s0

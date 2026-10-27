@@ -1,0 +1,31 @@
+# ViF-Bench (Skyra, Li et al. 2025) source videos, used as test. Real/*.mp4 plus
+# Fake/<generator>/*.mp4; each fake is generated from the real video of the same name.
+# extra.method is real or the generator folder name. Non-mp4 files are ignored.
+
+dataset: vifbench
+roles: [test]
+root: data/Skyrea/source_videos
+real_dir: Real
+fake_dir: Fake
+generators:
+  - CogVideoX1.5-5B-T
+  - HunyuanVideo
+  - HunyuanVideo-I2V
+  - LTX-Video-13B-I
+  - LTX-Video-13B-T
+  - SkyReels-V2
+  - SkyReels-V2-I2V-14B-540P
+  - Wan2.1-T2V-1.3B
+  - Wan2.1-VACE-1.3B-T
+  - Wan2.2-I2V-14B
+  - Wan2.2-T2V-14B
+  - Wan2.2-TI2V-5B-I
+  - Wan2.2-TI2V-5B-T
+  - gen4-turbo
+  - hailuo
+  - kling-v1
+  - pika-v2
+  - pixverse-v4-5
+  - sora-2
+manifest: artifacts/vifbench/manifest.csv
+max_videos_per_generator: null

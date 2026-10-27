@@ -1,0 +1,20 @@
+# DF26, evaluation only (the licence forbids training on it).
+# Videos are listed from metadata/videos.csv. extra.method is real or the generator.
+# Each generator is scored against all reals, as in the official protocol.
+
+dataset: df26
+roles: [test]
+root: data/DF26
+metadata: metadata/videos.csv
+generators:
+  - Grok_Imagine
+  - HunyuanVideo_1.5_14b_i2v
+  - HunyuanVideo_1.5_14b_t2v
+  - Kling_3.0
+  - LTX_2.3_distilled_i2v
+  - LTX_2.3_distilled_t2v
+  - Veo_3.1
+  - Wan_2.2_14b_i2v
+  - Wan_2.2_14b_t2v
+  - Wan_2.6
+manifest: artifacts/df26/manifest.csv

@@ -1,0 +1,10 @@
+# UADFV corpus. Test-only: real/*.mp4 and fake/*.mp4 (49 each).
+# Ignore real/frames, real/landmarks, fake/frames, fake/landmarks.
+
+dataset: uadfv
+roles: [test]
+root: data/UADFV
+real_dir: real
+fake_dir: fake
+manifest: artifacts/uadfv/manifest_verified.csv
+max_videos_per_class: null

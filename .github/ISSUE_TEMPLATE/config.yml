@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 💬 Discussion
-    url: https://github.com/VectorInstitute/deepfake-moe/discussions
+    url: https://github.com/VectorInstitute/mars/discussions
     about: Ask questions or discuss ideas with the community
   - name: 📖 Documentation
-    url: https://github.com/VectorInstitute/deepfake-moe#readme
+    url: https://github.com/VectorInstitute/mars#readme
     about: Check the documentation for setup and usage guides

@@ -1,40 +1,24 @@
 #!/bin/bash
-# Phase 1 eval. The same file runs locally or on Slurm:
+# Evaluate a registered detector. Same file runs locally or on Slurm:
 #
-#   bash   scripts/eval.sh --dry-run
-#   sbatch scripts/eval.sh --experiment-name Qwen3-Baseline --model qwen3-omni
-#   sbatch --array=0-4 scripts/eval.sh --experiment-name Qwen3-Baseline --model qwen3-omni
+#   bash   scripts/eval.sh --config configs/models/unite/config.yaml \
+#            --checkpoint checkpoints/unite/ff_ce_ad/best.pt --split test
+#   sbatch scripts/eval.sh --config configs/models/unite/config.yaml \
+#            --checkpoint checkpoints/unite/ff_ce_ad/best.pt
 #
-# Sharding is taken from the Slurm array size; results go to
-# results/<experiment-name>/<model>/. Each shard writes its own
-# shard_XXX/predictions.jsonl, and the metrics are aggregated automatically:
-#   * single job              -> metrics written at the end of the run
-#   * Slurm array (sharded)   -> the first shard queues an afterok metrics job
-#
-# To (re)compute metrics from existing shard predictions yourself:
-#   bash scripts/eval.sh --score-only --experiment-name <name> --model <model>
-#
-# Predict/score are separate, resumable stages — any extra flags are forwarded
-# to run_eval: --predict-only (inference only, no report), --resume-predictions
-# (skip clips already in predictions.jsonl), --retry-failed (rerun only failed
-# clips), --score-only (metrics from existing predictions.jsonl, no model load).
-#
-#SBATCH --job-name=deepfake_moe_eval
+#SBATCH --job-name=mars_eval
 #SBATCH --gres=gpu:a40:4
-#SBATCH --mem=128G
-#SBATCH --time=01:00:00
-#SBATCH --cpus-per-task=16
-#SBATCH --output=logs/eval_%A_%a.out
-#SBATCH --error=logs/eval_%A_%a.err
-#SBATCH --array=0-0
-
+#SBATCH --mem=164G
+#SBATCH --time=2-00:00:00
+#SBATCH --cpus-per-task=32
+#SBATCH --output=logs/eval_%j.out
+#SBATCH --error=logs/eval_%j.err
 set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 [[ -f "${repo_root}/pyproject.toml" ]] || repo_root="${SLURM_SUBMIT_DIR:?repo root not found next to this script and SLURM_SUBMIT_DIR is unset}"
 cd "$repo_root"
-mkdir -p logs
+mkdir -p logs results
 
-# Machine config; on a cluster also load runtime modules + shared FFmpeg.
 # shellcheck disable=SC1091
 [[ -f .env ]] && { set -a; source .env; set +a; }
 if command -v module >/dev/null 2>&1; then
@@ -46,27 +30,33 @@ if [[ -n "${FFMPEG_SHARED:-}" && -d "${FFMPEG_SHARED}/lib" ]]; then
   export LD_LIBRARY_PATH="${FFMPEG_SHARED}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 fi
 export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
-export PYTHONUNBUFFERED=1  # stream logs to the .out file in real time (no block buffering)
+export PYTHONUNBUFFERED=1
+export TOKENIZERS_PARALLELISM=false
+export HF_HOME="${HF_HOME:-${repo_root}/.cache/huggingface}"
+# Footprint reports (ai-impact-accounting): grid region and its carbon intensity in
+# kgCO2/kWh. PUE and water use fall back to the package defaults unless DIA_PUE and
+# DIA_WUE are set.
+export DIA_REGION="${DIA_REGION:-ca-on}"
+export DIA_CI="${DIA_CI:-0.03}"
 
-# Optional: point the manifest src_path prefix at the on-disk raw data.
-if [[ -n "${MANIFEST_DATA_ROOT:-}" && -n "${RAW_DATA_DIR:-}" ]]; then
-  for name in ${DATASET_SYMLINKS:-}; do
-    if [[ -d "${RAW_DATA_DIR}/${name}" && ! -e "${MANIFEST_DATA_ROOT}/${name}" ]]; then
-      ln -s "${RAW_DATA_DIR}/${name}" "${MANIFEST_DATA_ROOT}/${name}"
-    fi
-  done
-fi
+gpus="$(nvidia-smi -L 2>/dev/null | wc -l || true)"
+[[ "${gpus:-0}" -ge 1 ]] || gpus=1
+read -r -a runner <<< "${UNITE_RUNNER-uv run}"
 
-uv run python -m deepfake_moe.run_eval \
-  --num-shards "${SLURM_ARRAY_TASK_COUNT:-1}" \
-  --shard-id "${SLURM_ARRAY_TASK_ID:-0}" \
-  "$@"
+# Per-GPU eval batch size (forward-only, so well above the training micro batch).
+# Passed first so any --set the caller adds still wins.
+eval_bs="${EVAL_BATCH_SIZE:-16}"
 
-# Sharded array: the first shard queues a CPU-only metrics job that waits for the
-# whole array (afterok), then aggregates all shards into one report.
-if [[ "${SLURM_ARRAY_TASK_COUNT:-1}" -gt 1 && "${SLURM_ARRAY_TASK_ID:-0}" -eq 0 ]]; then
-  sbatch --dependency="afterok:${SLURM_ARRAY_JOB_ID}" \
-    --job-name=deepfake_moe_metrics --cpus-per-task=4 --mem=16G --time=00:30:00 \
-    --output=logs/metrics_%j.out \
-    --wrap="cd '${PWD}' && uv run python -m deepfake_moe.run_eval --score-only $*"
-fi
+# run_split holds one DataLoader (num_workers each, persistent) per test corpus at
+# once, times the DDP ranks. On the RAM-poor a40 nodes that pool OOM-kills the
+# workers, so keep it small for eval regardless of the training setting.
+eval_workers="${EVAL_NUM_WORKERS:-2}"
+
+echo "repo_root=${repo_root}"
+# Loopback rendezvous instead of --standalone: on some nodes the hostname torchrun
+# looks up does not resolve. The port is per job so two jobs on one node do not clash.
+"${runner[@]}" torchrun \
+  --nnodes=1 --master_addr=127.0.0.1 --master_port="$((29500 + ${SLURM_JOB_ID:-0} % 1000))" \
+  --nproc_per_node="${gpus}" \
+  -m mars.run_eval \
+  --set "train.eval_batch_size=${eval_bs}" "data.num_workers=${eval_workers}" "$@"

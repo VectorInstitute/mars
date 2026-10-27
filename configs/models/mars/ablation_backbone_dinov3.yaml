@@ -1,0 +1,18 @@
+# MARS on DINOv3-L/16 at 384 instead of PE-Core-L: same two paths, split after block 12 of
+# 24. Residual path reads the 24 x 24 patch tokens (class and register tokens dropped);
+# semantic path ends in the class token after the final norm.
+_base_: config.yaml
+
+data:
+  image_size: 384
+
+model:
+  encoder_id: facebook/dinov3-vitl16-pretrain-lvd1689m
+  d_feature: 1024
+  n_tokens: 576
+  grid_side: 24
+  encoder_layer: 12
+
+log:
+  group: ablation_backbone
+  run_name: mars_dinov3_s0

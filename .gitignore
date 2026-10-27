@@ -9,6 +9,9 @@ wheels/
 # Virtual environments
 .venv
 
+archive/
+unite_replication/
+unite_replication_newFix/
 # Lint & Test
 .mypy_cache/
 .pytest_cache/
@@ -22,14 +25,12 @@ wheels/
 site/
 
 # SLURM job logs (may echo full paths from the run environment)
-logs/
 *.out
 slurm-*.out
 
 # Local machine / cluster values (paths, mail-user, data roots)
 .env
 **/skills/
-/checkpoints/**
 .cursor/**
 /wandb/
 
@@ -38,5 +39,20 @@ slurm-*.out
 /CLAUDE.local.md
 
 # Eval / inference outputs (large; may reference dataset paths)
-results/
 .nfs*
+
+# Local official FF++ split lists (not shipped)
+src/mars/data/ffpp/splits/*.json
+
+# Run-time folders: contents ignored, the folders themselves are kept.
+/data/*
+!/data/.gitkeep
+/artifacts/*
+!/artifacts/.gitkeep
+/checkpoints/*
+!/checkpoints/.gitkeep
+/results/*
+!/results/.gitkeep
+/logs/*
+!/logs/.gitkeep
+/.cache/

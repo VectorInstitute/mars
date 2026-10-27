@@ -1,0 +1,31 @@
+# ForAda (Cui et al., CVPR 2025) under the shared protocol; see src/mars/models/forada/README.md.
+_base_: ../../shared.yaml
+
+data:
+  train: [ffpp, gtav]
+  image_size: 256                          # adapter input; CLIP reads it resized to 224
+
+model:
+  name: forada
+  encoder_path: null                       # null downloads OpenAI ViT-L-14.pt to the torch hub cache
+  pretrained: true
+  clip_size: 224
+  clip_patch: 14
+  clip_width: 1024
+  clip_layers: 24
+  clip_heads: 16
+  clip_dim: 768
+  adapter_id: vit_tiny_patch16_224
+  adapter_patch: 16
+  adapter_blocks: 8
+  n_queries: 128
+  fusion_map: {1: 1, 2: 8, 3: 15}
+  intra_block: 7
+  mlp_dim: 256
+  mlp_out_dim: 128
+  n_classes: 2
+  encoder_chunk: 64
+
+log:
+  group: main_ffpp_gtav
+  run_name: forada_s0
