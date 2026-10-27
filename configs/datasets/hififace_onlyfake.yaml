@@ -1,0 +1,8 @@
+# HifiFace onlyfake. Test-only: all 1000 fake mp4s, no reals.
+
+dataset: hififace_onlyfake
+roles: [test]
+variant: onlyfake
+root: data/HifiFace
+manifest: artifacts/hififace_onlyfake/manifest_verified.csv
+max_videos_per_class: null

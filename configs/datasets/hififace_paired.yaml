@@ -1,0 +1,12 @@
+# HifiFace paired. Test-only: FF++ test.json ids, 140 real + 140 fake.
+
+dataset: hififace_paired
+roles: [test]
+variant: paired
+root: data/HifiFace
+ffpp_root: data/FF++/data
+compression: c23
+originals: [youtube]
+split_file: null
+manifest: artifacts/hififace_paired/manifest_verified.csv
+max_videos_per_class: null

@@ -1,0 +1,46 @@
+# Test fixture: single-path MARS (frozen SigLIP, final layer, residual path only); the
+# tests shrink it to tiny dimensions with --set style overrides.
+_base_: ../../../configs/shared.yaml
+
+data:
+  train: [ffpp, gtav]
+
+model:
+  name: mars
+  encoder_id: google/siglip-so400m-patch14-384
+  encoder_path: null
+  d_feature: 1152
+  n_tokens: 729
+  grid_side: 27
+  d_model: 1152
+  d_resid: 256
+  depth: 4
+  n_heads: 12
+  mlp_ratio: 4.0
+  dropout: 0.1
+  n_classes: 2
+  pool_hidden: 128
+  spatial_pool: attn
+  norm_style: post
+  encoder_chunk: 64
+  grad_checkpoint: true
+  block_norm: false
+  temporal_validity: true
+  # Each scale ladder yields one stream per consecutive pair, so four scales
+  # give three bands. Disable a family, or shorten its ladder, to ablate it.
+  streams:
+    appearance: true
+    spatial:
+      enabled: true
+      scales: [0.5, 1.0, 2.0, 4.0]
+    temporal:
+      enabled: true
+      scales: [0.5, 1.0, 2.0, 4.0]
+    first_difference: true
+    operator: dog
+
+log:
+  # Runs land in {checkpoints,results}/mars/{group}/{run_name}/. group is optional
+  # and also groups the runs in W&B, so one paper table is one group.
+  group: ""
+  run_name: mars_ffpp_gtav_ce_3ep_s0

@@ -1,0 +1,30 @@
+# DeMamba-XCLIP-FT (Chen et al., 2024) under the shared protocol; see src/mars/models/demamba/README.md.
+_base_: ../../shared.yaml
+
+data:
+  train: [ffpp, gtav]
+  image_size: 224                          # X-CLIP B/16 native input
+
+model:
+  name: demamba
+  encoder_id: microsoft/xclip-base-patch16
+  pretrained: true
+  patch_size: 16
+  width: 768
+  layers: 12
+  heads: 12
+  hidden: 3072
+  message_group: 8                         # consecutive frames exchanging messages, as pretrained
+  zone: 1
+  d_state: 16
+  expand: 2
+  d_conv: 4
+  drop_path: 0.1
+  n_classes: 2
+
+train:
+  micro_batch_size: 2                    # memory only: Mamba state per zone and step; accumulation keeps batch 32
+
+log:
+  group: main_ffpp_gtav
+  run_name: demamba_s0

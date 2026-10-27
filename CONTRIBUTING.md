@@ -1,6 +1,6 @@
-# Contributing to deepfake-moe
+# Contributing to mars
 
-Thanks for your interest in contributing to deepfake-moe!
+Thanks for your interest in contributing to mars!
 
 To submit PRs, please fill out the PR template along with the PR. If the PR
 fixes an issue, don't forget to link the PR to the issue!

@@ -66,6 +66,7 @@ jobs:
       # PYSEC-2026-3447 (setuptools MANIFEST.in exclude bypass, fixed in
       # 83.0.0) is not adoptable: torch==2.11.0 pins setuptools<82. Revisit
       # if/when torch is bumped past 2.11.
+      # accelerate PYSEC-2026-3804 has no fixed release yet.
       - name: pip-audit (gh-action-pip-audit)
         uses: pypa/gh-action-pip-audit@v1.1.0
         with:
@@ -82,3 +83,6 @@ jobs:
             PYSEC-2026-3547
             PYSEC-2026-3552
             PYSEC-2026-3654
+            PYSEC-2026-3721
+            PYSEC-2026-3704
+            PYSEC-2026-3804

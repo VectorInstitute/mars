@@ -1,0 +1,27 @@
+# Effort (Yan et al., ICML 2025) under the shared protocol; see src/mars/models/effort/README.md.
+_base_: ../../shared.yaml
+
+data:
+  train: [ffpp, gtav]
+  image_size: 224                          # CLIP ViT-L/14 native input
+
+model:
+  name: effort
+  encoder_path: null                       # null downloads OpenAI ViT-L-14.pt to the torch hub cache
+  pretrained: true
+  clip_size: 224
+  clip_patch: 14
+  clip_width: 1024
+  clip_layers: 24
+  clip_heads: 16
+  clip_dim: 768
+  residual_rank: 1
+  n_classes: 2
+  encoder_chunk: 64
+
+loss:
+  regularisation: 1.0                      # paper constraints; the released trainers use 0 (commented out)
+
+log:
+  group: main_ffpp_gtav
+  run_name: effort_s0
