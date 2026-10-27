@@ -1,0 +1,21 @@
+# MARS on SigLIP-so400m/14 at 384 instead of PE-Core-L: same two paths, split after block 13
+# of 27. Residual path reads the 27 x 27 patch tokens; semantic path ends in SigLIP's
+# attention-pooling head.
+_base_: config.yaml
+
+data:
+  image_size: 384
+
+model:
+  encoder_id: google/siglip-so400m-patch14-384
+  d_feature: 1152
+  n_tokens: 729
+  grid_side: 27
+  encoder_layer: 13
+
+train:
+  micro_batch_size: 4                    # memory only: 729 tokens per frame through 14 adapted blocks; accumulation keeps batch 32
+
+log:
+  group: ablation_backbone
+  run_name: mars_siglip_s0

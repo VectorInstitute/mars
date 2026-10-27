@@ -1,0 +1,12 @@
+# MARS with LoRA on every linear layer of the semantic blocks (13-24); the residual
+# path and blocks 1-12 are unchanged. Rank 16 on every linear layer, alpha and
+# initialisation as PEFT's defaults, as DFD-HR's PEFT comparison sets LoRA.
+_base_: config.yaml
+
+model:
+  semantic_lora_rank: 16
+  semantic_lora_alpha: 8.0
+
+log:
+  group: semantic_lora
+  run_name: mars_lora16_s0

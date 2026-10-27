@@ -1,0 +1,366 @@
+<!-- docs/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection</title>
+  <meta name="description" content="MARS is a full-frame video forgery detector for facial manipulation and fully generated video. It combines multiscale spatial and temporal feature differences with adapted appearance features from one frozen Perception Encoder, and exposes faithful patch and frame evidence." />
+  <link rel="canonical" href="https://vectorinstitute.github.io/mars/" />
+  <meta property="og:title" content="MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection" />
+  <meta property="og:description" content="A full-frame video forgery detector for facial manipulation and fully generated video, with faithful patch and frame evidence." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://vectorinstitute.github.io/mars/" />
+  <meta property="og:image" content="https://vectorinstitute.github.io/mars/assets/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="citation_title" content="MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection" />
+  <meta name="citation_author" content="Radwan, Ahmed Y." />
+  <meta name="citation_author" content="Raza, Shaina" />
+  <meta name="citation_publication_date" content="2026" />
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="main.js"></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection",
+    "keywords": ["deepfake detection", "video forgery detection", "generated video detection", "explainability", "Perception Encoder"],
+    "author": [
+      {"@type": "Person", "name": "Ahmed Y. Radwan", "affiliation": {"@type": "Organization", "name": "Vector Institute"}},
+      {"@type": "Person", "name": "Shaina Raza", "affiliation": {"@type": "Organization", "name": "Vector Institute"}}
+    ],
+    "datePublished": "2026",
+    "publisher": {"@type": "Organization", "name": "Vector Institute"},
+    "url": "https://vectorinstitute.github.io/mars"
+  }
+  </script>
+</head>
+<body>
+  <header class="topbar" id="top">
+    <div class="topbar-inner">
+      <div class="topbar-logos">
+        <img src="assets/logos/vector-black.webp" alt="Vector Institute" class="logo-img logo-vector" />
+        <img src="assets/logos/aixpert.webp" alt="AIXPERT" class="logo-img" />
+      </div>
+      <a class="brand" href="#top" aria-label="MARS home">
+        <span class="brand-name">MARS</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav" id="nav" aria-label="Site navigation">
+        <a href="#abstract">Abstract</a>
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#efficiency">Efficiency</a>
+        <a href="#robustness">Robustness</a>
+        <a href="#faithfulness">Faithfulness</a>
+        <a href="#quickstart">Quick Start</a>
+        <a href="#citation">BibTeX</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="title">MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection</h1>
+          <p class="authors">
+            <a href="https://scholar.google.com/citations?user=Fmhn-MQAAAAJ&hl=en" target="_blank" rel="noreferrer">Ahmed Y. Radwan</a><sup>1</sup>,
+            <a href="https://scholar.google.com/citations?user=chcz7RMAAAAJ&hl=en" target="_blank" rel="noreferrer">Shaina Raza</a><sup>1</sup>
+          </p>
+          <p class="affiliations"><sup>1</sup>Vector Institute, Canada</p>
+          <div class="button-row">
+            <a class="btn btn-primary" target="_blank" rel="noreferrer" href="https://arxiv.org/abs/XXXX.XXXXX">
+              arXiv
+            </a>
+            <a class="btn btn-primary" target="_blank" rel="noreferrer" href="https://github.com/VectorInstitute/mars">
+              Code
+            </a>
+            <a class="btn" href="#citation">BibTeX</a>
+          </div>
+          <p class="lead">
+            MARS detects both <strong>facial manipulation</strong> and <strong>fully generated video</strong> from full frames.
+            It reads one frozen encoder in two ways, compares features across <strong>space and time at several scales</strong>,
+            and shows which patches and frames drove each decision.
+          </p>
+        </div>
+        <div class="hero-figure">
+          <figure>
+            <img src="assets/figures/mars-overview.webp" alt="MARS architecture: a frozen PE-Core-L encoder, a semantic path with tuned LayerNorms on 16 sampled frames, a residual path with multiscale spatial and temporal difference streams and a temporal transformer on all 64 frames, and a gate that mixes the two paths" />
+            <figcaption>
+              <strong>Figure 1.</strong> MARS. (a) A frozen PE-Core-L encoder is split after block 12. (b) The semantic path runs
+              16 sampled frames through the whole encoder with its own tuned LayerNorm parameters. (c) The residual path turns the
+              block-12 features of all 64 frames into multiscale spatial and temporal residual streams and models them with a
+              temporal transformer. (d) A gate mixes the standardized scores of the two paths for each clip.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="container">
+    <section id="abstract" class="section">
+      <h2>Abstract</h2>
+      <div class="abstract-box">
+        <p>
+          Video forgery now spans localized facial manipulations, such as face swapping and reenactment, and fully generated
+          videos whose appearance and motion are synthesized throughout the frame. Detectors therefore have to recognize forgeries
+          beyond the manipulation types and visual content seen during training. Full-frame inputs can hide subtle traces inside
+          scene content, and differences in training data, preprocessing and training budgets make detectors hard to compare.
+        </p>
+        <p>
+          We introduce <strong>Multiscale Appearance-Residual Streams (MARS)</strong>, a full-frame detector with two complementary
+          paths over one frozen Perception Encoder. The <strong>residual path</strong> applies fixed spatial and temporal
+          difference-of-Gaussians operators to intermediate patch features, keeping the original features as appearance context,
+          and a temporal transformer models how these changes develop across the clip. The <strong>semantic path</strong> classifies
+          sampled frames with the complete encoder, tuning only normalization parameters and a classification head.
+        </p>
+        <p>
+          We retrain MARS and seven recent detectors under a shared full-frame protocol and evaluate them on seven datasets.
+          MARS improves average AUROC by <strong>1.40%</strong> over the strongest baseline, DFD-HR, while requiring about
+          <strong>5&times; less training compute</strong>. Trained on facial manipulations alone, it still reaches 93.99% AUROC on
+          GenVideo and 75.50% on DF26.
+        </p>
+        <p>
+          MARS also exposes signed patch and frame contributions for every prediction, without a separate explanation model.
+          Removing the highest-ranked patches or frames changes its predictions more than equal-budget random removal,
+          supporting the relevance of the displayed evidence to the decision.
+        </p>
+      </div>
+    </section>
+
+    <section id="method" class="section">
+      <h2>Method</h2>
+      <p class="section-intro">
+        Residual features emphasize local variation, but they also respond to natural texture and motion; appearance features
+        transfer across generators but can miss subtle traces. MARS reads one frozen PE-Core-L encoder both ways and lets a gate
+        decide, clip by clip, how much to trust each.
+      </p>
+      <div class="task-grid">
+        <div class="task-card">
+          <div class="task-header"><h3>Residual path <span class="panel-ref">Fig. 1(c)</span></h3></div>
+          <p class="task-description">
+            Block-12 patch features of all 64 frames are compared with Gaussian-smoothed copies of themselves in space and in time,
+            at three scales each, plus a frame difference. A masked temporal transformer and an attention pool over patches turn
+            these streams into one clip representation.
+          </p>
+        </div>
+        <div class="task-card">
+          <div class="task-header"><h3>Semantic path <span class="panel-ref">Fig. 1(b)</span></h3></div>
+          <p class="task-description">
+            Sixteen sampled frames pass through all 24 encoder blocks with the path's own copies of the LayerNorm parameters,
+            the only encoder weights that are trained. A linear head scores each frame, and the frame scores are averaged.
+          </p>
+        </div>
+        <div class="task-card">
+          <div class="task-header"><h3>Gate and losses <span class="panel-ref">Fig. 1(d)</span></h3></div>
+          <p class="task-description">
+            Each path's margin is standardized and a gate, fed with stop-gradient features, mixes them per clip. Every path is
+            trained with its own cross-entropy, and the fused cross-entropy trains only the gate.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="results" class="section">
+      <h2>Results</h2>
+      <p class="section-intro">
+        All eight detectors are retrained with the same data, clip sampling (64 frames, every second frame), optimizer,
+        three-epoch budget, seed and checkpoint selection on FF++ validation. The table reports video-level AUROC (%) on the
+        FF++ test split and six unseen datasets.
+      </p>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th class="center">FF++</th>
+              <th class="center">CelebDF</th>
+              <th class="center">DF-TIMIT</th>
+              <th class="center">UADFV</th>
+              <th class="center">HiFiFace</th>
+              <th class="center">GenVideo</th>
+              <th class="center">DF26</th>
+              <th class="center">Avg.</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr class="group"><td colspan="9">Trained on FF++ only</td></tr>
+          <tr class="subgroup"><td colspan="9">Frame-level</td></tr>
+          <tr><td>ForAda</td><td class="center">86.67</td><td class="center">86.66</td><td class="center">96.67</td><td class="center">95.29</td><td class="center">71.26</td><td class="center">54.54</td><td class="center">39.53</td><td class="center">75.80</td></tr>
+          <tr><td>Effort</td><td class="center">72.28</td><td class="center">59.50</td><td class="center">82.19</td><td class="center">94.00</td><td class="center">58.28</td><td class="center">51.10</td><td class="center">36.58</td><td class="center">64.85</td></tr>
+          <tr><td>GenD</td><td class="center">70.42</td><td class="center">66.13</td><td class="center">98.91</td><td class="center">51.10</td><td class="center">38.76</td><td class="center">64.32</td><td class="center">59.04</td><td class="center">64.10</td></tr>
+          <tr><td>DFD-HR</td><td class="center best">99.80</td><td class="center best">94.88</td><td class="center best">99.95</td><td class="center">97.21</td><td class="center best">86.75</td><td class="center">66.16</td><td class="center second">70.87</td><td class="center second">87.95</td></tr>
+          <tr class="subgroup"><td colspan="9">Clip-level</td></tr>
+          <tr><td>UNITE</td><td class="center">90.22</td><td class="center">81.15</td><td class="center">91.16</td><td class="center second">97.38</td><td class="center">72.07</td><td class="center second">66.36</td><td class="center">41.29</td><td class="center">77.09</td></tr>
+          <tr><td>DeMamba</td><td class="center">51.54</td><td class="center">47.74</td><td class="center">49.33</td><td class="center">49.25</td><td class="center">50.51</td><td class="center">51.29</td><td class="center">48.78</td><td class="center">49.78</td></tr>
+          <tr><td>ReStraV</td><td class="center">52.80</td><td class="center">49.00</td><td class="center">4.25</td><td class="center">52.04</td><td class="center">53.44</td><td class="center">6.92</td><td class="center">59.82</td><td class="center">39.75</td></tr>
+          <tr class="highlight"><td>MARS (ours)</td><td class="center second">99.23</td><td class="center second">91.25</td><td class="center second">99.85</td><td class="center best">97.92</td><td class="center second">84.92</td><td class="center best">93.99</td><td class="center best">75.50</td><td class="center best">91.81</td></tr>
+          <tr class="group"><td colspan="9">Trained on FF++ + GTA-V</td></tr>
+          <tr class="subgroup"><td colspan="9">Frame-level</td></tr>
+          <tr><td>ForAda</td><td class="center">86.55</td><td class="center">85.25</td><td class="center">96.57</td><td class="center">95.59</td><td class="center">73.45</td><td class="center">64.70</td><td class="center">40.04</td><td class="center">77.45</td></tr>
+          <tr><td>Effort</td><td class="center">71.77</td><td class="center">59.05</td><td class="center">82.33</td><td class="center">92.71</td><td class="center">57.93</td><td class="center">56.45</td><td class="center">37.98</td><td class="center">65.46</td></tr>
+          <tr><td>GenD</td><td class="center">70.47</td><td class="center">67.44</td><td class="center">98.69</td><td class="center">51.81</td><td class="center">47.47</td><td class="center">64.92</td><td class="center">59.63</td><td class="center">65.78</td></tr>
+          <tr><td>DFD-HR</td><td class="center best">99.80</td><td class="center best">93.89</td><td class="center second">99.59</td><td class="center">96.25</td><td class="center best">86.26</td><td class="center second">79.48</td><td class="center second">74.95</td><td class="center second">90.03</td></tr>
+          <tr class="subgroup"><td colspan="9">Clip-level</td></tr>
+          <tr><td>UNITE</td><td class="center">84.07</td><td class="center">73.48</td><td class="center">86.54</td><td class="center best">98.58</td><td class="center">66.74</td><td class="center">66.78</td><td class="center">42.64</td><td class="center">74.12</td></tr>
+          <tr><td>DeMamba</td><td class="center">51.40</td><td class="center">47.85</td><td class="center">49.30</td><td class="center">51.25</td><td class="center">50.42</td><td class="center">49.93</td><td class="center">52.67</td><td class="center">50.40</td></tr>
+          <tr><td>ReStraV</td><td class="center">52.79</td><td class="center">50.90</td><td class="center">4.16</td><td class="center">50.94</td><td class="center">53.11</td><td class="center">9.79</td><td class="center">59.93</td><td class="center">40.23</td></tr>
+          <tr class="highlight"><td>MARS (ours)</td><td class="center second">98.98</td><td class="center second">91.22</td><td class="center best">99.95</td><td class="center second">96.58</td><td class="center second">84.05</td><td class="center best">93.44</td><td class="center best">75.81</td><td class="center best">91.43</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">
+        <span class="best"></span> best and <span class="second-mark"></span> second best within each training setting.
+        Avg. is the equal mean over the seven datasets. GenVideo and DF26 contain fully generated videos only seen at test time.
+      </p>
+    </section>
+
+    <section id="efficiency" class="section">
+      <h2>Efficiency</h2>
+      <p class="section-intro">
+        MARS trains in 17.4 A40 GPU-hours and 5.46 kWh, against 86.1 GPU-hours and 24.80 kWh for DFD-HR, the strongest
+        baseline, with its encoder frozen apart from the semantic path's LayerNorm parameters. Energy and carbon were measured
+        for every run with the ai-impact-accounting package.
+      </p>
+      <figure class="figure figure-medium">
+        <img src="assets/figures/accuracy-vs-compute.webp" alt="Average AUROC against training GPU-hours for the eight detectors; MARS is top left" />
+        <figcaption><strong>Figure 2.</strong> Average AUROC over the seven test sets against the A40 GPU-hours needed to train each detector.</figcaption>
+      </figure>
+    </section>
+
+    <section id="robustness" class="section">
+      <h2>Robustness</h2>
+      <p class="section-intro">
+        The main checkpoints score degraded copies of every test video. Each panel shows average AUROC over the seven test sets
+        as one degradation gets stronger; the leftmost point is the clean test set. MARS achieves the highest average AUROC at
+        every tested JPEG quality, retaining 82.47% at quality 40 compared with 77.55% for DFD-HR. It also leads under
+        downscaling to 112 pixels and blur up to &sigma; = 1.5, although ForAda performs better under stronger blur and
+        downscaling. Gaussian noise exposes a clearer weakness: at &sigma; = 0.05, MARS drops to 70.80%, below DFD-HR's 74.73%.
+      </p>
+      <figure class="figure"><img src="assets/figures/legend-methods.webp" alt="Legend: MARS, DFD-HR, ForAda, UNITE, GenD, Effort, DeMamba, ReStraV" /></figure>
+      <div class="figure-grid-2">
+        <figure class="figure"><img src="assets/figures/robustness-jpeg.webp" alt="AUROC under JPEG compression" /><figcaption><strong>(a)</strong> JPEG compression, quality 80 to 10.</figcaption></figure>
+        <figure class="figure"><img src="assets/figures/robustness-blur.webp" alt="AUROC under Gaussian blur" /><figcaption><strong>(b)</strong> Gaussian blur, &sigma; from 0.5 to 3 pixels.</figcaption></figure>
+        <figure class="figure"><img src="assets/figures/robustness-resize.webp" alt="AUROC under downscaling" /><figcaption><strong>(c)</strong> Downscaling of the short side to 224, 112 and 64 pixels.</figcaption></figure>
+        <figure class="figure"><img src="assets/figures/robustness-noise.webp" alt="AUROC under Gaussian noise" /><figcaption><strong>(d)</strong> Gaussian noise, &sigma; from 0.01 to 0.2.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="faithfulness" class="section">
+      <h2>Faithfulness of the evidence</h2>
+      <p class="section-intro">
+        Because the fused score is a sum of patch and frame terms, MARS returns signed patch maps and frame scores for every
+        prediction. We test whether this evidence is what the detector uses by removing it.
+      </p>
+      <div class="figure-grid-2">
+        <figure class="figure">
+          <img src="assets/figures/faithfulness-patches.webp" alt="AUROC after blanking the highest-attribution patches versus random patches" />
+          <figcaption><strong>(a)</strong> Blanking the 64 highest-attribution patches per frame reduces average AUROC from 99.32% to 73.05%, whereas blanking the same number of random patches leaves it at 98.96%.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/figures/faithfulness-frames.webp" alt="Probability of manipulation after removing the highest-scoring, random or manipulated frames" />
+          <figcaption><strong>(b)</strong> On clips with a 32-frame manipulated segment within authentic footage, removing the 32 highest-scoring frames reduces the mean fake probability from 34.21% to 21.75%, while random removal leaves it at 35.10%; removing the known manipulated frames lowers it further to 14.80%.</figcaption>
+        </figure>
+      </div>
+      <p class="muted">
+        On spliced FF++ clips, the highest-scoring frame falls inside the manipulated segment in 93.30% of clips, against 37.50% by chance.
+      </p>
+    </section>
+
+    <section id="quickstart" class="section">
+      <h2>Quick Start</h2>
+      <p class="section-intro">
+        The repository contains MARS, the seven re-implemented baselines and every script behind the paper's tables and figures.
+        See the <a href="https://github.com/VectorInstitute/mars" target="_blank" rel="noreferrer">README</a> for data preparation and the full list of experiments.
+      </p>
+      <div class="code-section">
+        <h3 class="h3">Installation</h3>
+        <div class="code-card">
+          <button class="code-copy" data-target="code-install" aria-label="Copy installation commands">Copy</button>
+          <pre id="code-install"><code>git clone https://github.com/VectorInstitute/mars.git
+cd mars
+uv sync</code></pre>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="h3">Build a manifest, train and evaluate</h3>
+        <div class="code-card">
+          <button class="code-copy" data-target="code-run" aria-label="Copy training and evaluation commands">Copy</button>
+          <pre id="code-run"><code># Index a corpus placed under data/ (once per corpus)
+uv run python -m mars.data.ffpp --config configs/datasets/ffpp.yaml
+
+# Train MARS on FF++ + GTA-V; the test battery runs after training
+sbatch scripts/train.sh --config configs/models/mars/config.yaml
+
+# Evaluate a checkpoint on one test set
+sbatch scripts/eval.sh --config configs/models/mars/config.yaml \
+  --checkpoint checkpoints/mars/mars_s0/best.pt --dataset df26</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="citation" class="section">
+      <h2>BibTeX</h2>
+      <p class="muted">If you use MARS in your research, please cite our paper:</p>
+      <div class="bibtex-section">
+        <button class="btn btn-small btn-copy" id="copyBibtex" type="button" aria-label="Copy BibTeX citation">Copy BibTeX</button>
+        <pre class="bibtex" id="bibtexBlock"><code>@article{radwan2026mars,
+  title   = {MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection},
+  author  = {Radwan, Ahmed Y. and Raza, Shaina},
+  journal = {arXiv preprint arXiv:XXXX.XXXXX},
+  year    = {2026}
+}</code></pre>
+        <p class="copy-status" id="copyStatus" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section id="acknowledgements" class="section">
+      <h2>Acknowledgements</h2>
+      <div class="ack-content">
+        <p>
+          Resources used in preparing this research were provided, in part, by the Province of Ontario,
+          the Government of Canada through CIFAR, and companies sponsoring the Vector Institute
+          (<a href="http://www.vectorinstitute.ai/#partners" target="_blank" rel="noreferrer">http://www.vectorinstitute.ai/#partners</a>).
+        </p>
+        <p>
+          This research was funded by the European Union's Horizon Europe research and innovation programme
+          under the AIXPERT project (Grant Agreement No. 101214389), which aims to develop an agentic,
+          multi-layered, GenAI-powered framework for creating explainable, accountable, and transparent AI systems.
+        </p>
+        <div class="ack-logos">
+          <img src="assets/logos/vector-black.webp" alt="Vector Institute" />
+          <img src="assets/logos/aixpert.webp" alt="AIXPERT" />
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3 class="h3">Contact</h3>
+          <p>
+            For questions or collaborations, please contact:<br/>
+            <a href="mailto:shaina.raza@vectorinstitute.ai">shaina.raza@vectorinstitute.ai</a>
+          </p>
+          <p>Report issues: <a href="https://github.com/VectorInstitute/mars/issues" target="_blank" rel="noreferrer">GitHub Issues</a></p>
+        </div>
+        <div class="footer-section">
+          <h3 class="h3">Links</h3>
+          <ul class="footer-links">
+            <li><a href="https://github.com/VectorInstitute/mars" target="_blank" rel="noreferrer">GitHub Repository</a></li>
+            <li><a href="https://arxiv.org/abs/XXXX.XXXXX" target="_blank" rel="noreferrer">arXiv Paper</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Vector Institute — MARS</p>
+        <p><a href="#top">Back to top ↑</a></p>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
