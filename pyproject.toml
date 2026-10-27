@@ -63,10 +63,13 @@ default-groups = ["dev"]
 # Force a minimum version on pillow (transitive, via torchvision/
 # qwen-omni-utils — not a direct dependency, so this is the only way to bump it).
 constraint-dependencies = [
-    "pillow>=12.3.0", # PYSEC-2026-2253 and others (decompression bombs, heap OOB)
+    "pillow>=13.0.0", # PYSEC-2026-4326 to -4328, CVE-2026-112895, CVE-2026-112897 and others
     "anyio>=4.14.2", # CVE-2026-63374, CVE-2026-64847, CVE-2026-63349
     "urllib3>=2.8.0", # CVE-2026-97688, CVE-2026-97689
-    "virtualenv>=21.7.13", # PYSEC-2026-4011 to PYSEC-2026-4014
+    "virtualenv>=21.14.9", # CVE-2026-113714 to CVE-2026-113776
+    "filelock>=4.2.1", # CVE-2026-112940, CVE-2026-112913, CVE-2026-112907
+    "certifi>=2026.10.19", # PYSEC-2026-4320 (revoked emSign intermediates)
+    "authlib>=1.9.0", # CVE-2026-96760
 ]
 # ai-impact-accounting 0.1.0 declares its demo and dashboard stack (torch>=2.12.1,
 # gradio, datasets, ...) as base requirements. Importing track needs only these, so
