@@ -1,0 +1,22 @@
+# GenVideo Val split, used as test. Real/*.mp4 plus Fake/<generator>/*.mp4.
+# extra.method is real or the generator folder name. Non-mp4 files are ignored.
+# max_videos_per_generator caps each fake generator, then keeps that many reals.
+
+dataset: genvideo
+roles: [test]
+root: data/GenVideo-Val
+real_dir: Real
+fake_dir: Fake
+generators:
+  - Crafter
+  - Gen2
+  - HotShot
+  - Lavie
+  - ModelScope
+  - MoonValley
+  - MorphStudio
+  - Show_1
+  - Sora
+  - WildScrape
+manifest: artifacts/genvideo/manifest_verified.csv
+max_videos_per_generator: null

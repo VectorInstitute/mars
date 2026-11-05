@@ -1,0 +1,13 @@
+# GTA-V (SAIL-VOS-3D). Train: split_train.txt. Test: split_val.txt (no val).
+# Each clip is {seq}/images/*.bmp. All synthetic (fake). Listed clips whose
+# images folder is missing are skipped.
+
+dataset: gtav
+roles: [train, test]
+root: data/sailvos3d
+images_dir: images
+split_dir: split
+train_file: split_train.txt
+test_file: split_val.txt
+manifest: artifacts/gtav/manifest_verified.csv
+max_videos_per_class: null

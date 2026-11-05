@@ -1,0 +1,43 @@
+_base_: ../../shared.yaml
+
+data:
+  train: [ffpp, gtav]
+
+model:
+  name: unite
+  encoder_id: google/siglip-so400m-patch14-384
+  encoder_path: null
+  token_layout: per_token_temporal
+  spatial_pool: attn
+  pool_hidden: 128
+  d_feature: 1152
+  n_tokens: 729
+  d_model: 1152
+  depth: 4
+  n_heads: 12
+  mlp_ratio: 4.0
+  dropout: 0.1
+  n_classes: 2
+  encoder_chunk: 64
+  norm_style: post
+  grad_checkpoint: true
+  input_norm: false
+
+loss:
+  lambda_ce: 0.5
+  lambda_ad: 0.5
+  ce_enabled: true
+  ad:
+    enabled: true
+    center_lr: 0.05
+    delta_within: [0.01, -2.0]
+    delta_between: 0.5
+    between_reduction: mean
+    feature_norm: l2
+
+# model, train data name, loss, attention spatial type, epochs
+log:
+  # Runs land in {checkpoints,results}/unite/{group}/{run_name}/. group is optional
+  # and also groups the runs in W&B, so one paper table is one group.
+  group: ""
+  run_name: unite_ff_gta_ce_ad_0.5_spatial_attn_3ep_s0
