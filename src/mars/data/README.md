@@ -29,3 +29,10 @@ Each corpus package has `config.py` (fields from `configs/datasets/<slug>.yaml`)
 `manifest.py` (scan the folder and write `artifacts/<slug>/manifest*.csv`), `dataset.py`
 and `__main__.py` (build the manifest from the command line). A new corpus is one such
 package plus its branch in `factory.py`.
+
+## Files you add yourself
+
+- **FF++ split lists** (optional, required for HifiFace paired): `train.json`, `val.json`,
+  `test.json` in `src/mars/data/ffpp/splits/`; see the README in that folder.
+- **GTA-V splits:** `split_train.txt` and `split_val.txt` come with SAIL-VOS-3D, under `split/`
+  in the dataset root.

@@ -1,7 +1,7 @@
 """FaceForensics++ manifest with identity-safe splits.
 
 Default: official FaceForensics++ ``train.json`` / ``val.json`` / ``test.json``
-under ``data/ffpp/splits`` (720 / 140 / 140 original IDs). Manipulated videos
+under ``src/mars/data/ffpp/splits`` (720 / 140 / 140 original IDs). Manipulated videos
 are named ``<target>_<source>.mp4``; both IDs must land in the same split.
 
 If those files are absent, connected components of shared source IDs are

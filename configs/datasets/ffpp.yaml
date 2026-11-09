@@ -12,6 +12,6 @@ manipulations:
   - Face2Face
   - FaceSwap
   - NeuralTextures
-# Optional local dir of train/val/test.json (data/ffpp/splits if present).
+# Optional dir of train/val/test.json (default: src/mars/data/ffpp/splits if present).
 split_file: null
 max_videos_per_class: null
