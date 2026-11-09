@@ -14,7 +14,7 @@ class FfppConfig:
     """On-disk layout, roles, and identity-safe split settings for FF++.
 
     ``split_file`` is a directory of official ``train.json`` / ``val.json`` /
-    ``test.json``. ``None`` uses bundled ``data/ffpp/splits`` when present,
+    ``test.json``. ``None`` uses ``src/mars/data/ffpp/splits`` when it holds train.json,
     otherwise ``split_fractions`` / ``split_seed``.
     """
 
