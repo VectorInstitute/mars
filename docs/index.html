@@ -130,6 +130,12 @@
           supporting the relevance of the displayed evidence to the decision.
         </p>
       </div>
+      <figure class="figure figure-medium">
+        <img src="assets/figures/mars-teaser.webp" alt="MARS on a real DF26 video, a Celeb-DF facial manipulation and a GenVideo clip: P(fake) 0.06, 0.64 and 0.64, with patch evidence on the manipulated face and on the generated scene, and evidence over time" loading="lazy" />
+        <figcaption><strong>Figure 2.</strong> One detector for facial manipulation and generated video. Badges: video-level
+          P(fake); overlays: patch contributions to the decision; bottom: contribution over time (red: toward fake, blue: toward
+          real).</figcaption>
+      </figure>
     </section>
 
     <section id="method" class="section">
@@ -217,6 +223,10 @@
         <span class="best"></span> best and <span class="second-mark"></span> second best within each training setting.
         Avg. is the equal mean over the seven datasets. GenVideo and DF26 contain fully generated videos only seen at test time.
       </p>
+      <p class="section-intro">
+        Over five training seeds MARS averages 90.69 &plusmn; 1.02 AUROC, the highest of the eight detectors. Trained on FF++
+        alone, without any generated video, it reaches 93.99% AUROC on GenVideo and 75.50% on DF26.
+      </p>
     </section>
 
     <section id="efficiency" class="section">
@@ -228,7 +238,7 @@
       </p>
       <figure class="figure figure-medium">
         <img src="assets/figures/accuracy-vs-compute.webp" alt="Average AUROC against training GPU-hours for the eight detectors; MARS is top left" />
-        <figcaption><strong>Figure 2.</strong> Average AUROC over the seven test sets against the A40 GPU-hours needed to train each detector.</figcaption>
+        <figcaption><strong>Figure 3.</strong> Average AUROC over the seven test sets against the A40 GPU-hours needed to train each detector.</figcaption>
       </figure>
     </section>
 

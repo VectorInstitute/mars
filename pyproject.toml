@@ -58,6 +58,7 @@ constraint-dependencies = [
     "certifi>=2026.10.19", # PYSEC-2026-4320 (revoked emSign intermediates)
     "authlib>=1.9.0", # CVE-2026-96760
     "msgpack>=1.2.3", # CVE-2026-114613
+    "joserfc>=1.7.6", # CVE-2026-119284
 ]
 # ai-impact-accounting 0.1.0 declares its demo and dashboard stack (torch>=2.12.1,
 # gradio, datasets, ...) as base requirements. Importing track needs only these, so

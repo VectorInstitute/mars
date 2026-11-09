@@ -8,10 +8,15 @@
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE.md)
 [![Contact](https://img.shields.io/badge/Contact-shaina.raza%40vectorinstitute.ai-green)](mailto:shaina.raza@vectorinstitute.ai)
 
 Project page: <https://vectorinstitute.github.io/mars>
+
+![MARS on a real video, a facial manipulation and a fully generated video](assets/mars_teaser.jpg)
+
+*One detector for facial manipulation and generated video. MARS reads each clip with a residual path
+(local changes across space and time) and a semantic path (global content of each frame), mixed by a
+gate, and returns P(fake) with the patches and frames that drove it.*
 
 ## What this is
 
@@ -65,6 +70,11 @@ against 90.03% for the strongest baseline (DFD-HR), with 17.4 instead of 86.1 A4
 training. The paper reports per-dataset and per-generator results, seeds, training length,
 clip length, ablations, robustness to common degradations, and the faithfulness of the
 evidence maps.
+
+- **Across seeds:** 90.69 +- 1.02 average AUROC over five training seeds, the highest of the eight
+  detectors.
+- **Transfer without generated training data:** trained on FF++ alone, MARS reaches 93.99% AUROC on
+  GenVideo and 75.50% on DF26.
 
 ## Quick start
 
@@ -131,7 +141,7 @@ uv run python -m mars.data.df26     --config configs/datasets/df26.yaml
 | UADFV | test | `data/UADFV` | 49 authentic, 49 manipulated |
 | HiFiFace (paired) | test | `data/HifiFace` | swaps whose target is in the FF++ test split, paired with that target |
 | GenVideo | test | `data/GenVideo-Val` | validation split, 10 generators |
-| DF26 | test | `data/DF26` | evaluation only under its licence, 10 generators |
+| DF26 | test | `data/DF26` | 10 generators |
 
 
 ## Training and evaluation
@@ -220,6 +230,23 @@ uv run ruff check . && uv run ruff format --check .
 uv run mypy --config-file pyproject.toml src
 ```
 
+## Troubleshooting
+
+- **Videos fail to decode or decode slowly.** Frames are read with PyAV (`data.decode_backend: pyav`);
+  install FFmpeg on the system if PyAV cannot open a codec, and check one file with `ffprobe`.
+- **CUDA out of memory.** Lower `train.micro_batch_size` (gradient accumulation keeps the effective
+  batch of 32), for example `--set train.micro_batch_size=4`.
+- **A dataset is skipped or has no videos.** Check `root:` in `configs/datasets/<corpus>.yaml` and
+  rebuild that corpus's manifest after moving the data.
+- **`best.pt exists; pass --experiment <new-name>`.** Runs never overwrite each other; give the run a
+  new name with `--experiment`.
+
+## Support
+
+Open a [GitHub issue](https://github.com/VectorInstitute/mars/issues) for bugs and questions. For
+collaboration, contact [shaina.raza@vectorinstitute.ai](mailto:shaina.raza@vectorinstitute.ai).
+Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Citation
 
 ```bibtex
@@ -231,7 +258,10 @@ uv run mypy --config-file pyproject.toml src
 }
 ```
 
-## License
+## Acknowledgments
 
-Apache 2.0; see [LICENSE.md](LICENSE.md). Each dataset keeps its own licence; DF26 may be used
-for evaluation only.
+Resources used in preparing this research were provided, in part, by the Province of Ontario, the
+Government of Canada through CIFAR, and companies sponsoring the Vector Institute.
+
+This research was funded by the European Union's Horizon Europe research and innovation programme
+under the AIXPERT project (Grant Agreement No. 101214389).
