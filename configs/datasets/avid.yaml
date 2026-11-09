@@ -1,0 +1,9 @@
+# AVID corpus. Test-only: real/*.mp4 and fake/*.mp4 (24 each).
+
+dataset: avid
+roles: [test]
+root: data/AVID
+real_dir: real
+fake_dir: fake
+manifest: artifacts/avid/manifest_verified.csv
+max_videos_per_class: null

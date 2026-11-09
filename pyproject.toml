@@ -1,0 +1,189 @@
+[project]
+name = "mars"
+version = "0.1.0"
+description = "MARS: Multiscale Appearance-Residual Streams for video forgery detection."
+readme = "README.md"
+authors = [ {name = "Vector AI Engineering", email = "ai_engineering@vectorinstitute.ai"}]
+license = "Apache-2.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy>=1.26",
+    # --- models ---
+    "torch==2.11.0",
+    "torchvision==0.26.0",
+    "nvidia-cudnn-cu12>=9.10.2.21",
+    "nvidia-cusparselt-cu12>=0.7.1",
+    "timm>=1.0.20",
+    "transformers>=5.5.3",  # SigLIP and DINOv3 encoders; X-CLIP parity tests
+    # --- video decoding and data ---
+    "av>=12.0",
+    "pyyaml>=6.0",
+    "scikit-learn>=1.4",
+    "wandb>=0.28.1",
+    "ai-impact-accounting[measure]>=0.1.0",
+]
+[project.urls]
+repository = "https://github.com/VectorInstitute/mars"
+[project.scripts]
+mars-train = "mars.run_train:main"
+mars-eval = "mars.run_eval:main"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[dependency-groups]
+dev = [
+    "codecov>=2.1.13",
+    "mypy>=1.19.1,<2",
+    "nbqa>=1.9.1",
+    "pip>=26.1", # Pinning version to address vulnerabilities CVE-2026-1703, CVE-2026-3219
+    "pip-audit>=2.7.3",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.2",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
+    "ruff>=0.13.3",
+    "types-PyYAML>=6.0",
+]
+# Default dependency groups to be installed
+[tool.uv]
+default-groups = ["dev"]
+# Minimum versions of transitive dependencies with known vulnerabilities.
+constraint-dependencies = [
+    "pillow>=13.0.0", # PYSEC-2026-4326 to -4328, CVE-2026-112895, CVE-2026-112897 and others
+    "anyio>=4.14.2", # CVE-2026-63374, CVE-2026-64847, CVE-2026-63349
+    "urllib3>=2.8.0", # CVE-2026-97688, CVE-2026-97689
+    "virtualenv>=21.14.9", # CVE-2026-113714 to CVE-2026-113776
+    "filelock>=4.2.1", # CVE-2026-112940, CVE-2026-112913, CVE-2026-112907
+    "certifi>=2026.10.19", # PYSEC-2026-4320 (revoked emSign intermediates)
+    "authlib>=1.9.0", # CVE-2026-96760
+    "msgpack>=1.2.3", # CVE-2026-114613
+    "joserfc>=1.7.6", # CVE-2026-119284
+]
+# ai-impact-accounting 0.1.0 declares its demo and dashboard stack (torch>=2.12.1,
+# gradio, datasets, ...) as base requirements. Importing track needs only these, so
+# the experiments keep their pinned torch stack.
+[[tool.uv.dependency-metadata]]
+name = "ai-impact-accounting"
+version = "0.1.0"
+provides-extras = ["measure"]
+requires-dist = [
+    "huggingface-hub>=1.2.0,<2.0",
+    "networkx>=3.0",
+    "pyyaml>=6.0",
+    "jsonschema>=4.0",
+    "codecarbon>=2.3; extra == 'measure'",
+    "nvidia-ml-py>=13.610.43; extra == 'measure'",
+]
+[tool.mypy]
+follow_imports = "normal"
+ignore_missing_imports = false
+install_types = false
+pretty = true
+allow_untyped_defs = false
+no_implicit_optional = true
+check_untyped_defs = true
+namespace_packages = true
+explicit_package_bases = true
+warn_unused_configs = true
+allow_subclassing_any = false
+allow_untyped_calls = false
+allow_incomplete_defs = false
+allow_untyped_decorators = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+implicit_reexport = false
+strict_equality = true
+extra_checks = true
+mypy_path = "src"
+exclude = [
+    "unite_replication",
+    "unite_replication_newFix",
+    "archive",
+]
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "timm.*", "transformers.*", "yaml"]
+ignore_missing_imports = true
+follow_imports = "skip"
+[tool.ruff]
+include = ["*.py", "pyproject.toml", "*.ipynb"]
+exclude = [
+    "unite_replication",
+    "unite_replication_newFix",
+    "archive",
+]
+line-length = 120
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+[tool.ruff.lint]
+select = [
+    "A", # flake8-builtins
+    "B", # flake8-bugbear
+    "COM", # flake8-commas
+    "C4", # flake8-comprehensions
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "ICN", # flake8-import-conventions
+    "Q", # flake8-quotes
+    "RSE", # flake8-raise
+    "D", # pydocstyle
+    "E", # pycodestyle
+    "F", # pyflakes
+    "I", # isort
+    "W", # pycodestyle
+    "N", # pep8-naming
+    "ERA", # eradicate
+    "PL", # pylint
+]
+fixable = ["A", "B", "COM", "C4", "RET", "SIM", "ICN", "Q", "RSE", "D", "E", "F", "I", "W", "N", "ERA", "PL"]
+ignore = [
+    "B905", # `zip()` without an explicit `strict=` parameter
+    "E501", # line too long
+    "D203", # 1 blank line required before class docstring
+    "D213", # Multi-line docstring summary should start at the second line
+    "PLR2004", # Replace magic number with named constant
+    "PLR0913", # Too many arguments
+    "PLC0415", # Lazy imports in factories (load a model/dataset only when selected)
+    "COM812", # Missing trailing comma
+    "ERA001", # Found commented-out code (too many false positives with math comments)
+    "A001", # Ignore variable `input` is shadowing a Python builtin (common for torch)
+    "A002", # Ignore variable `input` is shadowing a Python builtin in function (common for torch)
+    "D301", # r-strings for docstrings with backslashes
+]
+# Ignore import violations in all `__init__.py` files.
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401", "F403", "F811"]
+# Ignoring undocumented public functions, public init, magic method, and magic numbers in tests folder
+"tests/*" = ["D103", "D105", "D107"]
+[tool.ruff.lint.pep8-naming]
+ignore-names = ["X*", "setUp", "F"]
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 88
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [
+    "unite_replication",
+    "unite_replication_newFix",
+    "archive",
+    ".git",
+    ".venv",
+    "dist",
+    "build",
+]
+markers = [
+    "integration_test: marks tests as integration tests",
+]
+[tool.typos.default.extend-words]
+fpr = "fpr"  # false-positive rate
+nd = "nd"  # einsum index (tokens, dims)
+PN = "PN"  # plural of PNG ("PNGs")
+[tool.coverage]
+    [tool.coverage.run]
+    source=["src/mars"]
+    omit=["tests/*", "*__init__.py"]

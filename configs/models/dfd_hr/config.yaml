@@ -1,0 +1,36 @@
+# DFD-HR (Sun et al., CVPR 2026) under the shared protocol; see src/mars/models/dfd_hr/README.md.
+_base_: ../../shared.yaml
+
+data:
+  train: [ffpp, gtav]
+  image_size: 448                          # one 224 global view and 2 x 2 tiles of 224
+
+model:
+  name: dfd_hr
+  encoder_path: null                       # null downloads OpenAI ViT-L-14.pt to the torch hub cache
+  pretrained: true
+  clip_size: 224
+  clip_patch: 14
+  clip_width: 1024
+  clip_layers: 24
+  clip_heads: 16
+  clip_dim: 768
+  n_experts: 4
+  top_k: 4
+  expert_ratio: 0.25
+  routed_blocks: [21, 22, 23]
+  capacity: 0.75
+  router_hidden: 64
+  query_heads: 4
+  n_classes: 2
+  encoder_chunk: 32
+
+loss:
+  ranking: 0.1
+
+train:
+  micro_batch_size: 2                    # memory only: 5 CLIP-L passes per frame; accumulation keeps batch 32
+
+log:
+  group: main_ffpp_gtav
+  run_name: dfd_hr_s0

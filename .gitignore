@@ -1,0 +1,58 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+archive/
+unite_replication/
+unite_replication_newFix/
+# Lint & Test
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Vscode
+.vscode
+
+# macos
+*.DS_Store
+site/
+
+# SLURM job logs (may echo full paths from the run environment)
+*.out
+slurm-*.out
+
+# Local machine / cluster values (paths, mail-user, data roots)
+.env
+**/skills/
+.cursor/**
+/wandb/
+
+# Local agent context (personal, not shared with the team)
+/CLAUDE.md
+/CLAUDE.local.md
+
+# Eval / inference outputs (large; may reference dataset paths)
+.nfs*
+
+# Local official FF++ split lists (not shipped)
+src/mars/data/ffpp/splits/*.json
+
+# Run-time folders: contents ignored, the folders themselves are kept.
+/data/*
+!/data/.gitkeep
+/artifacts/*
+!/artifacts/.gitkeep
+/checkpoints/*
+!/checkpoints/.gitkeep
+/results/*
+!/results/.gitkeep
+/logs/*
+!/logs/.gitkeep
+/.cache/

@@ -1,0 +1,9 @@
+# Celeb-DF v2 corpus. Test-only: official List_of_testing_videos.txt, not the
+# full tree. The model YAML selects it via data.test.
+
+dataset: celebdf
+roles: [test]
+root: data/Celeb-DF-V2
+list_file: List_of_testing_videos.txt
+manifest: artifacts/celebdf/manifest_verified.csv
+max_videos_per_class: null

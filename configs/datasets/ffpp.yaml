@@ -1,0 +1,17 @@
+# FaceForensics++ corpus. Not merged into data:; the model YAML
+# selects it via data.train / data.val / data.test.
+
+dataset: ffpp
+roles: [train, val, test]
+root: data/FF++/data
+manifest: artifacts/ffpp/manifest.csv
+compression: c23
+originals: [youtube]
+manipulations:
+  - Deepfakes
+  - Face2Face
+  - FaceSwap
+  - NeuralTextures
+# Optional dir of train/val/test.json (default: src/mars/data/ffpp/splits if present).
+split_file: null
+max_videos_per_class: null

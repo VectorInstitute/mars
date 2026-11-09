@@ -1,0 +1,59 @@
+# MARS: one frozen PE-Core-L read two ways (residual and semantic paths), gated.
+_base_: ../../shared.yaml
+
+data:
+  train: [ffpp, gtav]
+  image_size: 336                          # PE-Core-L native input
+
+model:
+  name: mars
+  # Frozen PE-Core-L. The residual path reads its block-12 tokens; the semantic path runs
+  # all 24 blocks with its own trainable LayerNorms (semantic_early_norms).
+  encoder_id: vit_pe_core_large_patch14_336.fb
+  encoder_path: null
+  encoder_layer: 12
+  d_feature: 1024
+  n_tokens: 576                            # 24 x 24 patches
+  grid_side: 24
+  d_model: 1152
+  d_resid: 256
+  depth: 4
+  n_heads: 12
+  mlp_ratio: 4.0
+  dropout: 0.1
+  n_classes: 2
+  pool_hidden: 128
+  spatial_pool: attn
+  norm_style: post
+  encoder_chunk: 64
+  grad_checkpoint: true
+  block_norm: false
+  temporal_validity: true
+  # Each scale ladder yields one stream per consecutive pair, so four scales
+  # give three bands. Disable a family, or shorten its ladder, to ablate it.
+  streams:
+    appearance: true
+    spatial:
+      enabled: true
+      scales: [0.5, 1.0, 2.0, 4.0]
+    temporal:
+      enabled: true
+      scales: [0.5, 1.0, 2.0, 4.0]
+    first_difference: true
+    operator: dog
+  # Residual path = the streams above on block-12 tokens. Semantic path = blocks 13-24
+  # (LayerNorms trainable), PE's attention pool, L2-normalised per-frame head on 16 frames.
+  paths: [residual, semantic]
+  semantic_frames: 16
+  # The semantic path re-encodes its frames with trainable copies of the LayerNorms of
+  # blocks 1-12; the residual path keeps the frozen originals. false gives the earlier
+  # MARS, whose semantic path reads the shared block-12 tokens.
+  semantic_early_norms: true
+  # Each path learns from its own loss; the fused loss trains only the gate, which mixes
+  # the two margins after standardising them with running statistics (fixed in model.py).
+
+log:
+  # Runs land in {checkpoints,results}/mars/{group}/{run_name}/. group is optional
+  # and also groups the runs in W&B, so one paper table is one group.
+  group: ""
+  run_name: mars_s0
