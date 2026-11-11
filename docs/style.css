@@ -84,12 +84,6 @@ a:hover {
   line-height: 1;
 }
 
-.brand-name {
-  font-weight: 800;
-  letter-spacing: 0.2px;
-  color: var(--text);
-  font-size: 1.1rem;
-}
 /* Topbar logos */
 .topbar-logos {
   display: flex;
@@ -198,6 +192,31 @@ a:hover {
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.15;
+}
+
+/* Logo centered above the title */
+.title-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.title-logo {
+  height: clamp(64px, 9vw, 110px);
+  width: auto;
+}
+
+.title-wordmark {
+  height: clamp(52px, 7vw, 88px);
+  width: auto;
 }
 
 /* Authors - styled with links */
