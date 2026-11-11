@@ -24,6 +24,7 @@ dependencies = [
 ]
 [project.urls]
 repository = "https://github.com/VectorInstitute/mars"
+paper = "https://arxiv.org/abs/2611.12508"
 [project.scripts]
 mars-train = "mars.run_train:main"
 mars-eval = "mars.run_eval:main"
