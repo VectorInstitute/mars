@@ -1,4 +1,14 @@
-# MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection
+<p align="center">
+  <img src="assets/mars_logo.png" height="110" alt="MARS logo">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/mars_wordmark_light.png">
+    <img src="assets/mars_wordmark.png" height="88" alt="MARS: Video Deepfake Detection">
+  </picture>
+</p>
+
+<h1 align="center">MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection</h1>
+
+<div align="center">
 
 [![code checks](https://github.com/VectorInstitute/mars/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/mars/actions/workflows/code_checks.yml)
 [![unit tests](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml)
@@ -10,13 +20,17 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Contact](https://img.shields.io/badge/Contact-shaina.raza%40vectorinstitute.ai-green)](mailto:shaina.raza@vectorinstitute.ai)
 
-Project page: <https://vectorinstitute.github.io/mars>
+</div>
 
-![MARS on a real video, a facial manipulation and a fully generated video](assets/mars_teaser.jpg)
+---
+
+<p align="center"><img src="assets/mars_teaser.jpg" width="55%" alt="MARS on a real video, a facial manipulation and a fully generated video"></p>
 
 *One detector for facial manipulation and generated video. MARS reads each clip with a residual path
 (local changes across space and time) and a semantic path (global content of each frame), mixed by a
 gate, and returns P(fake) with the patches and frames that drove it.*
+
+---
 
 ## What this is
 
@@ -45,7 +59,7 @@ differ from those reported by the original authors.
 
 ## Architecture
 
-![MARS overview](assets/mars_overview.png)
+<p align="center"><img src="assets/mars_overview.png" width="95%" alt="MARS overview"></p>
 
 *(a) A frozen PE-Core-L encoder is split after block 12. (b) The semantic path runs 16 sampled
 frames through all 24 blocks with its own trainable LayerNorm parameters. (c) The residual path
@@ -63,11 +77,8 @@ paths.*
 
 ## Results
 
-![Accuracy against training compute](assets/accuracy_vs_compute.png)
-
 Trained on FF++ and GTA-V and averaged over seven test sets, MARS reaches 91.43% video AUROC,
-against 90.03% for the strongest baseline (DFD-HR), with 17.4 instead of 86.1 A40 GPU-hours of
-training. The paper reports per-dataset and per-generator results, seeds, training length,
+against 90.03% for the strongest baseline (DFD-HR). The paper reports per-dataset and per-generator results, seeds, training length,
 clip length, ablations, robustness to common degradations, and the faithfulness of the
 evidence maps.
 
