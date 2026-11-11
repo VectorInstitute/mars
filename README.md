@@ -3,7 +3,7 @@
 [![code checks](https://github.com/VectorInstitute/mars/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/mars/actions/workflows/code_checks.yml)
 [![unit tests](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml)
 [![integration tests](https://github.com/VectorInstitute/mars/actions/workflows/integration_tests.yml/badge.svg)](https://github.com/VectorInstitute/mars/actions/workflows/integration_tests.yml)
-[![arXiv](https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b.svg)](https://arxiv.org/abs/XXXX.XXXXX)
+[![arXiv](https://img.shields.io/badge/arXiv-2611.12508-b31b1b.svg)](https://arxiv.org/abs/2611.12508)
 [![Project page](https://img.shields.io/badge/Project-page-0b2e6f.svg)](https://vectorinstitute.github.io/mars)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
@@ -250,11 +250,14 @@ Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Citation
 
 ```bibtex
-@article{radwan2026mars,
-  title   = {MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection},
-  author  = {Radwan, Ahmed Y. and Raza, Shaina},
-  journal = {arXiv preprint arXiv:XXXX.XXXXX},
-  year    = {2026}
+@misc{radwan2026marsmultiscaleappearanceresidualstreams,
+      title={MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection},
+      author={Ahmed Y. Radwan and Shaina Raza},
+      year={2026},
+      eprint={2611.12508},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2611.12508},
 }
 ```
 
