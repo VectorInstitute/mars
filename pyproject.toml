@@ -18,7 +18,7 @@ dependencies = [
     # --- video decoding and data ---
     "av>=12.0",
     "pyyaml>=6.0",
-    "scikit-learn>=1.4",
+    "scikit-learn>=1.9.1",
     "wandb>=0.28.1",
     "ai-impact-accounting[measure]>=0.1.0",
 ]
