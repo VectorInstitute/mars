@@ -272,6 +272,12 @@ a:hover {
   justify-content: center;
 }
 
+.btn-icon {
+  height: 1.25em;
+  width: auto;
+  flex: none;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

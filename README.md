@@ -14,6 +14,7 @@
 [![unit tests](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml)
 [![integration tests](https://github.com/VectorInstitute/mars/actions/workflows/integration_tests.yml/badge.svg)](https://github.com/VectorInstitute/mars/actions/workflows/integration_tests.yml)
 [![arXiv](https://img.shields.io/badge/arXiv-2611.12508-b31b1b.svg)](https://arxiv.org/abs/2611.12508)
+[![Checkpoint](https://img.shields.io/badge/%F0%9F%A4%97%20Checkpoint-MARS-ffd21e.svg)](https://huggingface.co/vector-institute/mars)
 [![Project page](https://img.shields.io/badge/Project-page-0b2e6f.svg)](https://vectorinstitute.github.io/mars)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
