@@ -1,6 +1,15 @@
-# MARScope
+<p align="center">
+  <img src="assets/mars_logo.png" height="110" alt="MARS logo">
+</p>
 
-----------------------------------------------------------------------------------------
+<h1 align="center">MARScope</h1>
+
+> **This is the `marscope` branch of the [MARS repository](https://github.com/VectorInstitute/mars).** It holds
+> MARScope, the toolkit for trying MARS on your own videos. The MARS detector, training code and paper results
+> are on [`main`](https://github.com/VectorInstitute/mars).
+> [Paper](https://arxiv.org/abs/2611.12508) ·
+> [Project page and demo video](https://vectorinstitute.github.io/mars) ·
+> [Checkpoints](https://huggingface.co/vector-institute/mars)
 
 [![code checks](https://github.com/VectorInstitute/mars/actions/workflows/code_checks.yml/badge.svg?branch=marscope)](https://github.com/VectorInstitute/mars/actions/workflows/code_checks.yml?query=branch%3Amarscope)
 [![unit tests](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml/badge.svg?branch=marscope)](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml?query=branch%3Amarscope)
@@ -12,6 +21,11 @@ MARScope runs up to three trained video deepfake detectors ([MARS](https://githu
 your own machine. It shows the evidence behind each score, lets you test what each model relies on,
 and explains the result with fixed, cited notes. It is a study tool: it never says a video is real
 or fake.
+
+<p align="center"><img src="assets/mars_teaser.jpg" width="55%" alt="MARS on a real video, a facial manipulation and a fully generated video, with the patches and frames behind each score"></p>
+
+*The kind of evidence MARScope shows: MARS on a real video, a facial manipulation and a fully generated
+video, with P(fake), the patches that drove it, and its contribution over time (red: toward fake, blue: toward real).*
 
 
 ## Overview
