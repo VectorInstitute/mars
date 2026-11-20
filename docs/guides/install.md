@@ -1,9 +1,9 @@
 # Installation
 
-MARScope is not on PyPI yet. Install it from the repository with [uv](https://docs.astral.sh/uv/):
+MARScope is not on PyPI. Install it from the `marscope` branch of the MARS repository with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-git clone https://github.com/VectorInstitute/marscope.git
+git clone -b marscope https://github.com/VectorInstitute/mars.git marscope
 cd marscope
 uv sync --extra cuda       # NVIDIA GPU on Linux or Windows
 uv sync                    # Apple silicon Mac, or a machine without an NVIDIA GPU

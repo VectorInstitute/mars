@@ -4,7 +4,7 @@ extra:
   generator: false
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/VectorInstitute/marscope
+      link: https://github.com/VectorInstitute/mars/tree/marscope
 markdown_extensions:
   - attr_list
   - admonition
@@ -62,11 +62,10 @@ plugins:
             show_root_toc_entry: false
             show_symbol_type_heading: true
             show_symbol_type_toc: true
-repo_url: https://github.com/VectorInstitute/marscope
-edit_uri: edit/main/docs/
-repo_name: VectorInstitute/marscope
+repo_url: https://github.com/VectorInstitute/mars
+edit_uri: edit/marscope/docs/
+repo_name: VectorInstitute/mars
 site_name: MARScope
-site_url: https://vectorinstitute.github.io/marscope/
 theme:
   custom_dir: docs/overrides
   favicon: assets/favicon-48x48.svg

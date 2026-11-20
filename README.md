@@ -2,11 +2,9 @@
 
 ----------------------------------------------------------------------------------------
 
-[![code checks](https://github.com/VectorInstitute/marscope/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/marscope/actions/workflows/code_checks.yml)
-[![unit tests](https://github.com/VectorInstitute/marscope/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/VectorInstitute/marscope/actions/workflows/unit_tests.yml)
-[![docs](https://github.com/VectorInstitute/marscope/actions/workflows/docs.yml/badge.svg)](https://github.com/VectorInstitute/marscope/actions/workflows/docs.yml)
-[![codecov](https://codecov.io/github/VectorInstitute/marscope/graph/badge.svg?token=83MYFZ3UPA)](https://codecov.io/github/VectorInstitute/marscope)
-![GitHub License](https://img.shields.io/github/license/VectorInstitute/marscope)
+[![code checks](https://github.com/VectorInstitute/mars/actions/workflows/code_checks.yml/badge.svg?branch=marscope)](https://github.com/VectorInstitute/mars/actions/workflows/code_checks.yml?query=branch%3Amarscope)
+[![unit tests](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml/badge.svg?branch=marscope)](https://github.com/VectorInstitute/mars/actions/workflows/unit_tests.yml?query=branch%3Amarscope)
+![GitHub License](https://img.shields.io/github/license/VectorInstitute/mars)
 
 **See what a video deepfake detector sees, and how far to trust it.**
 
@@ -261,5 +259,5 @@ the AIXPERT project (Grant Agreement No. 101214389).
 
 ## Support
 
-- Open an issue on GitHub: [https://github.com/VectorInstitute/marscope/issues](https://github.com/VectorInstitute/marscope/issues)
+- Open an issue on GitHub: [https://github.com/VectorInstitute/mars/issues](https://github.com/VectorInstitute/mars/issues)
 - For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md)

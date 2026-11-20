@@ -18,11 +18,11 @@ hide:
 
 <div class="ms-hero__cta" markdown>
 [Quickstart :material-arrow-right:](quickstart.md){ .md-button .md-button--primary }
-[GitHub](https://github.com/VectorInstitute/marscope){ .md-button }
+[GitHub](https://github.com/VectorInstitute/mars/tree/marscope){ .md-button }
 </div>
 
 <div class="ms-hero__badges" markdown>
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-003049.svg)](https://github.com/VectorInstitute/marscope/blob/main/LICENSE.md) [![Models](https://img.shields.io/badge/🤗%20Models-MARS%20·%20GenD%20·%20DFD--HR-orange)](https://huggingface.co/vector-institute/mars)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-003049.svg)](https://github.com/VectorInstitute/mars/blob/marscope/LICENSE.md) [![Models](https://img.shields.io/badge/🤗%20Models-MARS%20·%20GenD%20·%20DFD--HR-orange)](https://huggingface.co/vector-institute/mars)
 </div>
 
 </div>
@@ -66,9 +66,9 @@ hide:
 
 ## About
 
-Built by the AI Engineering team at the [Vector Institute](https://vectorinstitute.ai), led by [Shaina Raza, PhD](mailto:shaina.raza@vectorinstitute.ai). Released under the [Apache License 2.0](https://github.com/VectorInstitute/marscope/blob/main/LICENSE.md).
+Built by the AI Engineering team at the [Vector Institute](https://vectorinstitute.ai), led by [Shaina Raza, PhD](mailto:shaina.raza@vectorinstitute.ai). Released under the [Apache License 2.0](https://github.com/VectorInstitute/mars/blob/marscope/LICENSE.md).
 
-For collaboration or licensing inquiries, email Shaina. For bugs and feature requests, use [GitHub Issues](https://github.com/VectorInstitute/marscope/issues).
+For collaboration or licensing inquiries, email Shaina. For bugs and feature requests, use [GitHub Issues](https://github.com/VectorInstitute/mars/issues).
 
 ??? note "Acknowledgements"
     Resources used in preparing this research are provided, in part, by the Province of Ontario, the Government of Canada through CIFAR, and companies sponsoring the Vector Institute. This research is also supported by the European Union's Horizon Europe research and innovation programme under the **AIXPERT** project (Grant Agreement No. 101214389).

@@ -8,7 +8,7 @@ source .venv/bin/activate
 pre-commit install
 ```
 
-Checks run before every PR (see [CONTRIBUTING.md](https://github.com/VectorInstitute/marscope/blob/main/CONTRIBUTING.md)):
+Checks run before every PR (see [CONTRIBUTING.md](https://github.com/VectorInstitute/mars/blob/marscope/CONTRIBUTING.md)):
 
 ```bash
 uv run pre-commit run --all-files               # ruff, ruff-format, mypy, typos, doctest, unit tests
@@ -29,7 +29,7 @@ srun --partition=<gpu-partition> --gres=gpu:1 --cpus-per-task=8 --mem=32G --time
 ```
 
 What reviewers check, and what blocks a merge, is in
-[REVIEW.md](https://github.com/VectorInstitute/marscope/blob/main/REVIEW.md).
+[REVIEW.md](https://github.com/VectorInstitute/mars/blob/marscope/REVIEW.md).
 
 ## Build the docs locally
 

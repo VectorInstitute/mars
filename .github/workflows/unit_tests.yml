@@ -56,12 +56,3 @@ jobs:
       - name: Install dependencies and check code
         run: |
           uv run pytest -m "not integration_test" --cov src/marscope --cov-report=xml tests
-
-      # Uncomment this once this repo is configured on Codecov
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: VectorInstitute/marscope
-          fail_ci_if_error: false
-          verbose: true
