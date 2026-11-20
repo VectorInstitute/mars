@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     branches:
-      - main
+      - marscope
     paths:
       - .pre-commit-config.yaml
       - .github/workflows/code_checks.yml
@@ -16,7 +16,7 @@ on:
       - '**.ipynb'
   pull_request:
     branches:
-      - main
+      - marscope
     paths:
       - .pre-commit-config.yaml
       - .github/workflows/code_checks.yml

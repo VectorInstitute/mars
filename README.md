@@ -52,7 +52,7 @@ on → notes (trust, provenance, laws that may apply) → optional report.
 ## Install
 
 ```bash
-git clone https://github.com/VectorInstitute/marscope.git
+git clone -b marscope https://github.com/VectorInstitute/mars.git marscope
 cd marscope
 uv sync --extra cuda       # NVIDIA GPU on Linux or Windows (then: uv run --extra cuda marscope ...)
 uv sync                    # Apple silicon Mac, a machine without an NVIDIA GPU, or with CUDA 12 installed
@@ -68,7 +68,7 @@ and the result says so (`device` in the JSON, a note on the start screen and on 
 | Apple silicon Mac, ARM Linux, Windows on ARM, any machine without an NVIDIA GPU | CPU, fp32 (slow) |
 
 Python 3.12 to 3.14. Intel Macs are not supported (ONNX Runtime no longer publishes wheels for them).
-With pip instead of uv: `pip install marscope[cuda]` (GPU) or `pip install marscope`.
+With pip instead of uv: `pip install "marscope[cuda] @ git+https://github.com/VectorInstitute/mars@marscope"` (GPU) or `pip install "git+https://github.com/VectorInstitute/mars@marscope"`.
 
 ## Quick start
 

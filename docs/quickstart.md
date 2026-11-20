@@ -6,7 +6,7 @@ download from Hugging Face the first time they are used.
 === "Web UI (GPU)"
 
     ```bash
-    git clone https://github.com/VectorInstitute/marscope.git
+    git clone -b marscope https://github.com/VectorInstitute/mars.git marscope
     cd marscope
     uv sync --extra cuda
     uv run --extra cuda marscope --serve
@@ -16,7 +16,7 @@ download from Hugging Face the first time they are used.
 === "Web UI (Mac or CPU)"
 
     ```bash
-    git clone https://github.com/VectorInstitute/marscope.git
+    git clone -b marscope https://github.com/VectorInstitute/mars.git marscope
     cd marscope
     uv sync
     uv run marscope --serve
