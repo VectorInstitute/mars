@@ -34,7 +34,8 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --dev
+        # No --all-extras: the cuda extra (CUDA 12 wheels, ~1-2 GB) is not needed on CPU runners.
+        run: uv sync --dev
 
       - name: Build package
         run: uv build

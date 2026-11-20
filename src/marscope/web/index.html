@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MARScope · Vector Institute</title>
+<meta name="description" content="See what a video deepfake detector sees. A study tool from the Vector Institute.">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/shell.css">
+<script src="js/shell.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-left">
+    <a class="logo" href="index.html" aria-label="MARScope home"><span class="logo-mar">MAR</span><span class="logo-scope">Scope</span></a>
+    <span class="logo-tagline" data-i18n="tagline">Video deepfake detectors, explained</span>
+  </div>
+  <div class="header-right">
+    <div class="switcher" data-switch="lang"><button type="button" class="switch-trigger" aria-expanded="false">EN</button><div class="switch-menu" role="listbox" hidden></div></div>
+    <span class="sep nav-sep" aria-hidden="true">/</span>
+    <div class="switcher" data-switch="theme"><button type="button" class="switch-trigger" aria-expanded="false">Light</button><div class="switch-menu" role="listbox" hidden></div></div>
+    <span class="sep nav-sep" aria-hidden="true">/</span>
+    <nav class="topnav" aria-label="Site links">
+      <a href="https://vectorinstitute.github.io/marscope/" target="_blank" rel="noopener noreferrer" data-i18n="docs">Docs</a>
+      <span class="sep" aria-hidden="true">/</span>
+      <a href="#faq" data-i18n="faq">FAQ</a>
+    </nav>
+    <a class="vector-link" href="https://vectorinstitute.ai/" target="_blank" rel="noopener noreferrer" aria-label="Vector Institute">
+      <img class="vector-logo on-light" src="img/vector-logo.png" alt="Vector Institute">
+      <img class="vector-logo on-dark" src="img/vector-logo-white.svg" alt="Vector Institute">
+    </a>
+    <a class="signin" href="app.html" data-i18n="openApp">Open the app</a>
+  </div>
+</header>
+
+<main id="main" class="landing-main">
+  <div class="hero">
+    <div class="hero-headline-card">
+      <div class="hero-headline-inner">
+        <span class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="eyebrowA">Open source</span><span class="eyebrow-sep">·</span>Vector Institute</span>
+        <h1 class="headline">
+          <span class="headline-line" data-i18n="h1">See what a</span>
+          <span class="headline-line headline-mark" data-i18n="h2">detector</span>
+          <span class="headline-line" data-i18n="h3">sees.</span>
+        </h1>
+      </div>
+    </div>
+
+    <div class="hero-body-card">
+      <p class="subline" data-i18n="subline">MARScope runs trained deepfake detectors on your video, shows what each one relies on, and explains how far to trust each score.</p>
+      <div class="actions">
+        <a class="cta-primary" href="app.html"><span data-i18n="openApp">Open the app</span> <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="cta-text" href="https://vectorinstitute.github.io/marscope/" target="_blank" rel="noopener noreferrer" data-i18n="readDocs">Read the docs</a>
+      </div>
+      <p class="disclaimer"><span data-i18n="trust">Runs on your machine. The video never leaves it.</span> · <a href="https://github.com/VectorInstitute/marscope/blob/main/LICENSE.md" target="_blank" rel="noopener noreferrer" data-i18n="licence">Licence</a></p>
+
+      <div class="proof" role="img" aria-labelledby="proof-text">
+        <div class="proof-cell proof-before">
+          <div class="proof-tag"><span class="dot"></span><span data-i18n="proofA">A frame</span></div>
+          <img src="img/example-input.jpg" width="960" height="600" alt="" loading="lazy">
+        </div>
+        <div class="proof-arrow" aria-hidden="true">→</div>
+        <div class="proof-cell proof-after">
+          <div class="proof-tag"><span class="dot"></span><span data-i18n="proofB">What MARS relies on</span></div>
+          <img src="img/example-output.jpg" width="960" height="600" alt="" loading="lazy">
+        </div>
+      </div>
+      <p class="proof-text" id="proof-text" data-i18n-html="proofText"></p>
+
+      <ul class="capabilities">
+        <li><span class="cap-num">01</span><span class="cap-dot"></span><span class="cap-verb" data-i18n="cap1">Score</span></li>
+        <li><span class="cap-num">02</span><span class="cap-dot"></span><span class="cap-verb" data-i18n="cap2">Evidence</span></li>
+        <li><span class="cap-num">03</span><span class="cap-dot"></span><span class="cap-verb" data-i18n="cap3">Explain</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <section class="faq" id="faq" aria-labelledby="faq-h">
+    <h2 id="faq-h" data-i18n="faqTitle">Questions</h2>
+    <div id="faq-list"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p class="footer-definition" data-i18n-html="definition"></p>
+  <p class="footer-legal" data-i18n="legal"></p>
+  <p class="footer-copyright"><span data-i18n="copyright"></span> · <a href="https://github.com/VectorInstitute/marscope" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+</footer>
+
+
+<script>
+(function () {
+  "use strict";
+  window.MS.addStrings({
+    en: {
+      eyebrowA: "Open source", h1: "See what a", h2: "detector", h3: "sees.",
+      subline: "MARScope runs trained deepfake detectors on your video, shows what each one relies on, and explains how far to trust each score.",
+      readDocs: "Read the docs", trust: "Runs on your machine. The video never leaves it.", licence: "Licence",
+      proofA: "A frame", proofB: "What MARS relies on",
+      proofText: "A generated video from GenVideo (Crafter). MARS gives it a <b>64%</b> probability of fake: very unusual for a real video, since fewer than 1 in 100 real videos score this high. The highlighted areas are what raised its score: a good place to look closer.",
+      cap1: "Score", cap2: "Evidence", cap3: "Explain", faqTitle: "Questions",
+    },
+    fr: {
+      eyebrowA: "Code source ouvert", h1: "Voir ce que voit", h2: "un détecteur.", h3: "",
+      subline: "MARScope applique des détecteurs d’hypertrucages entraînés à votre vidéo, montre sur quoi chacun s’appuie et explique jusqu’où se fier à chaque score.",
+      readDocs: "Lire la documentation", trust: "Tourne sur votre machine. La vidéo n’en sort jamais.", licence: "Licence",
+      proofA: "Une image", proofB: "Ce sur quoi MARS s’appuie",
+      proofText: "Une vidéo générée de GenVideo (Crafter). MARS lui donne une probabilité de faux de <b>64 %</b> : très inhabituel pour une vraie vidéo, car moins de 1 vraie vidéo sur 100 obtient un score aussi haut. Les zones surlignées sont ce qui a fait monter son score : un bon endroit où regarder de plus près.",
+      cap1: "Score", cap2: "Indices", cap3: "Explication", faqTitle: "Questions",
+    },
+  });
+  const FAQ = [
+    [{ en: "Is this a deepfake checker?", fr: "Est-ce un vérificateur d’hypertrucages?" }, { en: "It is a study tool. It shows how three trained detectors score a video, what each one relies on, and how far to trust their scores.", fr: "Non. C’est un outil d’étude. Il montre comment trois détecteurs entraînés notent une vidéo, sur quoi chacun s’appuie et pourquoi leurs scores ne sont pas une preuve." }],
+    [{ en: "Why is there no “real” or “fake” verdict?", fr: "Pourquoi pas de verdict « vrai » ou « faux »?" }, { en: "Scores are not calibrated, detectors disagree, and everyday videos differ from the test videos the models were checked on. So MARScope shows the evidence and leaves the decision to people.", fr: "Les scores ne sont pas calibrés, les détecteurs divergent, et les vidéos du quotidien diffèrent des vidéos de test sur lesquelles les modèles ont été testés. Un verdict inviterait à s’en servir comme preuve." }],
+    [{ en: "Does the highlighted area show where the fake is?", fr: "La zone surlignée montre-t-elle où est le faux?" }, { en: "No. It shows what a model relied on, which may not be the edited region. You can test it: hide those areas and compare with hiding random ones.", fr: "Non. Elle montre ce sur quoi un modèle s’est appuyé, qui n’est pas forcément la zone modifiée. Vous pouvez le vérifier : cachez ces zones et comparez avec des zones au hasard." }],
+    [{ en: "Is my video uploaded anywhere?", fr: "Ma vidéo est-elle envoyée quelque part?" }, { en: "No. MARScope runs on your machine and deletes the video when you close the result. Only a text summary goes to a language model, and only if you set one up.", fr: "Non. MARScope tourne sur votre machine et supprime la vidéo quand vous fermez le résultat. Seul un résumé textuel part vers un modèle de langage, et seulement si vous en configurez un." }],
+    [{ en: "Which videos does it work on?", fr: "Sur quelles vidéos fonctionne-t-il?" }, { en: "Up to 2 minutes and 1080p. The models were trained mostly on face videos, so the notes tell you when a video is unlike their training data.", fr: "Jusqu’à 2 minutes et 1080p. Les modèles ont surtout été entraînés sur des vidéos de visages; les notes signalent quand une vidéo en diffère." }],
+    [{ en: "What do I need to run it?", fr: "De quoi ai-je besoin?" }, { en: "Python and, ideally, a GPU: about 3 GB of GPU memory per model, so all three fit on an 8 GB card. It also runs on the CPU, slowly.", fr: "Python et, idéalement, un GPU : environ 3 Go de mémoire GPU par modèle, donc les trois tiennent sur une carte de 8 Go. Il tourne aussi sur le processeur, lentement." }],
+    [{ en: "Can I use it for legal or forensic work?", fr: "Puis-je l’utiliser pour un travail juridique ou judiciaire?" }, { en: "No. It is not built or tested for assessing evidence (EU AI Act, Annex III 6(c)).", fr: "Non. Il n’est ni conçu ni testé pour évaluer des preuves (AI Act de l’UE, annexe III 6(c))." }],
+  ];
+  function renderFaq() {
+    const L = (o) => o[window.MS.lang()] || o.en;
+    const list = document.getElementById("faq-list");
+    list.replaceChildren(...FAQ.map(([q, a]) => {
+      const d = document.createElement("details"), s = document.createElement("summary"), p = document.createElement("p");
+      s.textContent = L(q); p.textContent = L(a); d.append(s, p); return d;
+    }));
+  }
+  window.MS.onChange((what) => { if (what === "lang") renderFaq(); });
+  document.addEventListener("DOMContentLoaded", renderFaq);
+})();
+</script>
+</body>
+</html>

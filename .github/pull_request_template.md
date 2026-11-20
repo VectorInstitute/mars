@@ -1,53 +1,36 @@
 ## Summary
 
-<!-- Provide a brief description of what this PR does -->
+<!-- What this PR does and why, in two or three sentences. Link the issue: "Closes #123". -->
 
-Clickup Ticket(s): Link(s) if applicable.
+## Type of change
 
-## Type of Change
-
-- [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
-- [ ] ✨ New feature (non-breaking change that adds functionality)
-- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] 📝 Documentation update
-- [ ] 🔧 Refactoring (no functional changes)
-- [ ] ⚡ Performance improvement
-- [ ] 🧪 Test improvements
-- [ ] 🔒 Security fix
-
-## Changes Made
-
-<!-- List the main changes made in this PR -->
--
--
--
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation
+- [ ] Refactoring (no behaviour change)
+- [ ] Tests or CI
 
 ## Testing
 
-<!-- Describe how you tested these changes -->
-- [ ] Tests pass locally (`uv run pytest tests/`)
-- [ ] Type checking passes (`uv run mypy <src_dir>`)
-- [ ] Linting passes (`uv run ruff check src_dir/`)
-- [ ] Manual testing performed (describe below)
+<!-- What you ran and what it printed (paste the output or a summary). Not just "tests pass". -->
 
-**Manual testing details:**
-<!-- Describe any manual testing performed -->
+- [ ] `uv run pre-commit run --all-files`
+- [ ] `uv run pytest -m "not integration_test" tests`
+- [ ] Integration tests on a GPU (required for preprocessing, runners, aggregation or ranges)
+- [ ] Manual check (describe below; screenshots for UI changes)
 
-## Screenshots/Recordings
+## Risk
 
-<!-- If applicable, add screenshots or recordings to demonstrate the changes -->
+<!-- What could go wrong, and what the checks above would not catch. Low / medium / high. -->
 
-## Related Issues
+## How to revert
 
-<!-- Link any related issues using "Closes #123" or "Relates to #123" -->
-
-## Deployment Notes
-
-<!-- Any special deployment considerations or migration steps -->
+<!-- "Revert this PR" is fine if true. Note anything a revert does not undo (released packages, caches). -->
 
 ## Checklist
 
-- [ ] Code follows the project's style guidelines
-- [ ] Self-review of code completed
-- [ ] Documentation updated (if applicable)
-- [ ] No sensitive information (API keys, credentials) exposed
+- [ ] Small and focused on one concern
+- [ ] No verdict wording; evidence is "what the model relies on" (see REVIEW.md)
+- [ ] No model files, videos, dataset clips or secrets added
+- [ ] Docs updated if behaviour changed

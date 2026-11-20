@@ -12,7 +12,6 @@ on:
       - .github/workflows/code_checks.yml
       - .github/workflows/docs.yml
       - .github/workflows/unit_tests.yml
-      - .github/workflows/integration_tests.yml
       - '**.py'
       - '**.ipynb'
       - uv.lock
@@ -27,7 +26,6 @@ on:
       - .github/workflows/code_checks.yml
       - .github/workflows/docs.yml
       - .github/workflows/unit_tests.yml
-      - .github/workflows/integration_tests.yml
       - '**.py'
       - '**.ipynb'
       - uv.lock
@@ -54,17 +52,18 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --dev
+        # No --all-extras: the cuda extra (CUDA 12 wheels, ~1-2 GB) is not needed on CPU runners.
+        run: uv sync --dev
 
       - name: Install dependencies and check code
         run: |
-          uv run pytest -m "not integration_test" --cov src/aieng_template_uv --cov-report=xml tests
+          uv run pytest -m "not integration_test" --cov src/marscope --cov-report=xml tests
 
       # Uncomment this once this repo is configured on Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: VectorInstitute/aieng-template-uv
+          slug: VectorInstitute/marscope
           fail_ci_if_error: false
           verbose: true

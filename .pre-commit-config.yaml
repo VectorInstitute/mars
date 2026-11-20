@@ -19,10 +19,13 @@ repos:
       args: [--unsafe]
     - id: check-toml
 
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.13.8
+  - repo: local
     hooks:
-      - id: uv-lock
+    - id: uv-lock
+      name: uv-lock
+      entry: uv lock --check
+      language: system
+      pass_filenames: false
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: 'v0.17.5'
@@ -59,7 +62,7 @@ repos:
     - id: doctest
       name: doctest
       entry: python3 -m doctest -o NORMALIZE_WHITESPACE
-      files: "^src/aieng_template_uv/"
+      files: '^src/marscope/.*\.py$'
       language: system
 
   - repo: local

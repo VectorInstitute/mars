@@ -1,54 +1,74 @@
-# Vector AI Engineering template (uv edition) repository
+---
+hide:
+  - navigation
+  - toc
+---
 
-This template repository can be used to bootstrap AI Engineering project repositories
-on Github! The template is meant for python codebases since Python is the most commonly
-used language by our team.
+<div class="ms-hero" markdown>
 
-The template includes:
+<div class="ms-hero__banner" markdown>
 
-- [pyproject.toml](https://pip.pypa.io/en/stable/reference/build-system/pyproject-toml/)
-file to specify repository information and manage dependencies using
-[uv](https://docs.astral.sh/uv/).
+# See what a deepfake detector sees.<br><span class="ms-hero__accent">And how far to trust it.</span>
 
-- [README.md](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes) which should have basic information on why the project is
-useful, installation instructions and other information on how users can get started.
+<p class="ms-hero__lede">
+<strong>MARScope</strong> (<code>marscope</code>) runs up to three trained video deepfake detectors on your own machine, shows the evidence behind each score, lets you test what each model relies on, and explains the result with fixed, cited notes. It never says a video is real or fake.
+</p>
 
-- [.pre-commit-config.yaml](https://pre-commit.com/) for running pre-commit hooks that
-check for code-style, apply formatting, check for type hints and run tests.
+</div>
 
-- [.github/pull_request_template.md](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository) for PRs.
+<div class="ms-hero__cta" markdown>
+[Quickstart :material-arrow-right:](quickstart.md){ .md-button .md-button--primary }
+[GitHub](https://github.com/VectorInstitute/marscope){ .md-button }
+</div>
 
-- [.github/ISSUE_TEMPLATE](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository) for bug reports and issues that can be raised on the repository.
+<div class="ms-hero__badges" markdown>
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-003049.svg)](https://github.com/VectorInstitute/marscope/blob/main/LICENSE.md) [![Models](https://img.shields.io/badge/🤗%20Models-MARS%20·%20GenD%20·%20DFD--HR-orange)](https://huggingface.co/vector-institute/mars)
+</div>
 
-- [.github/workflows](https://docs.github.com/en/actions/using-workflows) for running CI
-workflows using Github actions. The template includes CI workflows for code checks,
-documentation building and releasing python packages to PyPI.
+</div>
 
-- [LICENSE.md](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository) for adding a license to the project repository.
-By default, this is the [Apache-2.0 license](http://www.apache.org/licenses/). Please
-change according to your project!
+!!! warning "Early development"
+    MARScope is not released yet. Run it from the repository (see [Installation](guides/install.md)).
 
-- [docs](https://squidfunk.github.io/mkdocs-material/) for adding project documentation. Typically
-projects should have API reference documentation, user guides and tutorials.
+---
 
-- [CONTRIBUTING.md](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/setting-guidelines-for-repository-contributors) with basic guidelines on how others can
-contribute to the repository.
+## Continue exploring
 
-- [CODE_OF_CONDUCT.md](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/adding-a-code-of-conduct-to-your-project) with standards on how the community engages in
-a healthy and constructive manner.
+<div class="grid cards" markdown>
 
-- [.gitignore](https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files)
-with some standard file extensions to be ignored by git. Please add/modify as necessary.
+-   [__What it does :material-arrow-right:__](overview.md)
 
-- [codecov.yml](https://docs.codecov.com/docs/codecov-yaml) for using codecov.io to
-generate code coverage information for your repository. You would need to add codecov.io
-app as an [integration to your repository](https://docs.codecov.com/docs/how-to-create-a-github-app-for-codecov-enterprise).
+    A worked example, what you can do with a result, and what MARScope does not do.
 
+-   [__Quickstart :material-arrow-right:__](quickstart.md)
 
-If you are starting a new project, you can navigate to the [Use this template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) button
-on the top right corner of the [template repository home page](https://github.com/VectorInstitute/aieng-template)
-which will allow you to bootstrap your project repo using this template.
+    Install, open the app, and analyze your first video.
 
-Please check out the user guide page for more detailed information on using the
-template features. For existing projects, the [user guide](user_guide.md)
-can be followed to migrate to following the template more closely.
+-   [__How it works :material-arrow-right:__](how_it_works.md)
+
+    Frames and clips, scores in context, the A1–A5 tests, the notes and the report.
+
+-   [__Web UI and serving :material-arrow-right:__](guides/serve.md)
+
+    Run the app on your laptop or on a remote GPU machine.
+
+-   [__API Reference :material-arrow-right:__](api.md)
+
+    Reference for every public class and function in `marscope`.
+
+-   [__FAQ :material-arrow-right:__](faq.md)
+
+    Privacy, how to read a score, which videos work, and limits.
+
+</div>
+
+---
+
+## About
+
+Built by the AI Engineering team at the [Vector Institute](https://vectorinstitute.ai), led by [Shaina Raza, PhD](mailto:shaina.raza@vectorinstitute.ai). Released under the [Apache License 2.0](https://github.com/VectorInstitute/marscope/blob/main/LICENSE.md).
+
+For collaboration or licensing inquiries, email Shaina. For bugs and feature requests, use [GitHub Issues](https://github.com/VectorInstitute/marscope/issues).
+
+??? note "Acknowledgements"
+    Resources used in preparing this research are provided, in part, by the Province of Ontario, the Government of Canada through CIFAR, and companies sponsoring the Vector Institute. This research is also supported by the European Union's Horizon Europe research and innovation programme under the **AIXPERT** project (Grant Agreement No. 101214389).

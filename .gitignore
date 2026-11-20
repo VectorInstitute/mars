@@ -8,6 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+.env
 
 # Lint & Test
 .mypy_cache/
@@ -20,3 +21,40 @@ wheels/
 # macos
 *.DS_Store
 site/
+.env.*
+!.env.example
+
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Caches (models, Hugging Face, the toolkit's own cache if pointed inside the repo)
+.cache/
+hf/
+.huggingface/
+*.onnx
+*.onnx.data
+
+# Videos, reports and session exports from local runs (never committed: REVIEW.md)
+*.mp4
+*.mov
+*.webm
+*.avi
+*.mkv
+*-report.md
+*-report.html
+*-report.pdf
+*-session.json
+*-evidence-card.png
+
+# Logs (including Slurm job output)
+*.log
+slurm-*.out
+nohup.out
+
+# Editors and notebooks
+.idea/
+*.swp
+.ipynb_checkpoints/

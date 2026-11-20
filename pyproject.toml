@@ -1,18 +1,60 @@
 [project]
-name = "aieng-template-uv"
+name = "marscope"
 version = "0.1.1"
-description = "Add your description here"
+description = "See what a video deepfake detector sees: scores, evidence and explanations, never a verdict"
 readme = "README.md"
 authors = [ {name = "Vector AI Engineering", email = "ai_engineering@vectorinstitute.ai"}]
 license = "Apache-2.0"
-repository = "https://github.com/VectorInstitute/aieng-template-uv"
-requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Environment :: GPU :: NVIDIA CUDA :: 12",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+]
+repository = "https://github.com/VectorInstitute/marscope"
+requires-python = ">=3.12,<3.15"  # ONNX Runtime has wheels for 3.12 to 3.14
 dependencies = [
+    # inference. ONNX Runtime GPU builds exist for Linux x86_64 and Windows x64; 1.26 is the last one
+    # built for CUDA 12, which runs on any driver from CUDA 12 on (Colab, most clusters), while 1.28+
+    # needs CUDA 13 (driver 580+). Elsewhere (Apple silicon, ARM Linux, Windows on ARM) the CPU build.
+    "numpy>=2.0",
+    "onnxruntime-gpu>=1.24,<1.27; (sys_platform == 'linux' and platform_machine == 'x86_64') or (sys_platform == 'win32' and platform_machine == 'AMD64')",
+    "onnxruntime>=1.24; sys_platform == 'darwin' or (sys_platform == 'linux' and platform_machine != 'x86_64') or (sys_platform == 'win32' and platform_machine != 'AMD64')",
+    # video
+    "av>=14.0",
+    "pillow>=11.0",
+    "mediapipe>=0.10.20",
+    "c2pa-python>=0.39.0",
+    # models and policy
+    "huggingface-hub>=0.30",
+    "pydantic>=2.10",
+    "pyyaml>=6.0",
+    # server
+    "fastapi>=0.115",
+    "uvicorn>=0.34",
+    "python-multipart>=0.0.20",
+    # report
+    "openai>=1.60",
+    "python-dotenv>=1.0",
+    "reportlab>=4.0",
+    # security pins kept from the template (transitive dependencies)
     "filelock==4.2.10",
     "requests>=2.33.0", # Pinning version to address vulnerability CVE-2026-25645
     "urllib3==2.8.0",
     "pygments>=2.20.0", # Pinning version to address vulnerability CVE-2026-4539
 ]
+
+[project.optional-dependencies]
+# CUDA 12 and cuDNN 9 libraries as wheels, for GPU machines without a system CUDA install.
+cuda = ["onnxruntime-gpu[cuda,cudnn]>=1.24,<1.27; (sys_platform == 'linux' and platform_machine == 'x86_64') or (sys_platform == 'win32' and platform_machine == 'AMD64')"]
+
+[project.scripts]
+marscope = "marscope.cli:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -32,6 +74,8 @@ dev = [
     "pytest-mock>=3.14.0",
     "msgpack>=1.2.1", # Pinning version to address vulnerability GHSA-6v7p-g79w-8964
     "ruff>=0.13.3",
+    "types-pyyaml>=6.0",
+    "httpx>=0.28", # FastAPI TestClient
 ]
 docs = [
     "jinja2>=3.1.6", # Pinning version to address vulnerability GHSA-cpwx-vrp4-4pq7
@@ -72,6 +116,74 @@ implicit_reexport = false
 strict_equality = true
 extra_checks = true
 mypy_path = "src"
+
+[[tool.mypy.overrides]]
+# Libraries without type information.
+module = ["mediapipe.*", "c2pa.*", "reportlab.*", "onnxruntime.*"]
+ignore_missing_imports = true
+
+[tool.typos.default.extend-words]
+# French UI, note and card text (the checker only knows English), plus a few identifiers.
+abord = "abord"
+algorithmes = "algorithmes"
+apparence = "apparence"
+artificiel = "artificiel"
+befores = "befores"
+bord = "bord"
+Celle = "Celle"
+celles = "celles"
+Certains = "Certains"
+certains = "certains"
+choses = "choses"
+classe = "classe"
+Classe = "Classe"
+Comparaison = "Comparaison"
+comparaison = "comparaison"
+confirme = "confirme"
+constats = "constats"
+contient = "contient"
+copie = "copie"
+cours = "cours"
+discret = "discret"
+effet = "effet"
+entreprise = "entreprise"
+Espace = "Espace"
+Exemple = "Exemple"
+exemple = "exemple"
+fixe = "fixe"
+garantie = "garantie"
+groupes = "groupes"
+indicat = "indicat"
+indicateurs = "indicateurs"
+juge = "juge"
+langage = "langage"
+Limite = "Limite"
+listent = "listent"
+mesure = "mesure"
+mis = "mis"
+mouvement = "mouvement"
+mouvements = "mouvements"
+naturels = "naturels"
+nd = "nd"
+objet = "objet"
+principales = "principales"
+probabilite = "probabilite"
+projet = "projet"
+quarante = "quarante"
+raison = "raison"
+registre = "registre"
+reproductible = "reproductible"
+ressemble = "ressemble"
+reste = "reste"
+servent = "servent"
+signes = "signes"
+Sur = "Sur"
+sur = "sur"
+transforme = "transforme"
+ue = "ue"
+UE = "UE"
+valide = "valide"
+visibles = "visibles"
 
 [tool.ruff]
 include = ["*.py", "pyproject.toml", "*.ipynb"]
@@ -144,5 +256,5 @@ markers = [
 
 [tool.coverage]
     [tool.coverage.run]
-    source=["src/aieng_template_uv"]
+    source=["src/marscope"]
     omit=["tests/*", "*__init__.py"]

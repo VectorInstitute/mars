@@ -1,0 +1,425 @@
+# MARScope policy: note texts, references, MIT AI Risk tags and cut-offs.
+# Rule conditions live in policy.py; this file holds data only. Both are versioned together.
+
+version: "0.1.0"
+# Cut-offs below are provisional until they are set once on the 7 test sets (see the design notes).
+provisional: true
+
+cutoffs:
+  face_confidence: 0.5
+  low_bits_per_pixel: 0.04
+  face_found_share: 0.5        # below this share of frames, "a face was found in only part of the video"
+  several_faces_share: 0.5     # several faces in at least this share of frames with a face
+  context_min_models: 2        # high fake scores needed for context notes when 2+ models ran
+  # A1 and A5 answer "does this model break when ...": breaks = the score falls from above the model's
+  # usual range for real videos into it; partly = it drops by at least this much but stays above; else holds.
+  partly_drop: 0.10
+
+reasons:
+  short:
+    en: "the video is shorter than one 64-frame clip, so the clip is padded"
+    fr: "la vidéo est plus courte qu'un extrait de 64 images, qui est donc complété"
+  low_resolution:
+    en: "the frames are smaller than the model input and are upscaled"
+    fr: "les images sont plus petites que l'entrée du modèle et sont agrandies"
+  wide:
+    en: "the frame is more than twice as wide as it is tall, so the square resize distorts it"
+    fr: "l'image est plus de deux fois plus large que haute, et le redimensionnement carré la déforme"
+  no_face:
+    en: "no face was found"
+    fr: "aucun visage n'a été trouvé"
+  face_partly:
+    en: "a face was found in only {face_percent}% of the frames"
+    fr: "un visage n'a été trouvé que dans {face_percent} % des images"
+  several_faces:
+    en: "several faces appear in most frames"
+    fr: "plusieurs visages apparaissent dans la plupart des images"
+  small_face:
+    en: "the face is small in the frame"
+    fr: "le visage est petit dans l'image"
+  disagree:
+    en: "the models disagree: {high} gave a high fake score, {other} did not"
+    fr: "les modèles divergent : {high} donne un score de fausseté élevé, {other} non"
+  low_bitrate:
+    en: "the file is heavily compressed ({bpp} bits per pixel), which can erase fine traces"
+    fr: "le fichier est fortement compressé ({bpp} bits par pixel), ce qui peut effacer les traces fines"
+
+notes:
+  # Each note: a plain headline (text, at most 12 words: the finding) and a detail (the measured
+  # numbers and how the test was done), shown on request. Written for a reader with no background.
+  a1_holds:
+    kind: trust
+    tag: A1
+    state: holds
+    title: {en: "A1 Face outline: does the score hold without it?", fr: "A1 Contour du visage : le score tient-il sans lui?"}
+    text:
+      en: "{model}'s score holds when the face outline is hidden."
+      fr: "Le score de {model} tient quand on cache le contour du visage."
+    detail:
+      en: "Hiding the face outline moves its score from {before}% to {after}%. Hiding as much of the inside of the face gives {inside}%."
+      fr: "Cacher le contour du visage fait passer son score de {before} % à {after} %. Cacher une surface égale à l’intérieur du visage donne {inside} %."
+    references: [mars, survey]
+  a1_partly:
+    kind: trust
+    tag: A1
+    state: partly
+    title: {en: "A1 Face outline: does the score hold without it?", fr: "A1 Contour du visage : le score tient-il sans lui?"}
+    text:
+      en: "{model}'s score drops but stays high without the face outline."
+      fr: "Le score de {model} baisse mais reste haut sans le contour du visage."
+    detail:
+      en: "Hiding the face outline lowers its score from {before}% to {after}%, still higher than it usually gives real videos. Hiding as much of the inside of the face gives {inside}%."
+      fr: "Cacher le contour du visage baisse son score de {before} % à {after} %, toujours plus haut que ce qu’il donne d’habitude aux vraies vidéos. Cacher une surface égale à l’intérieur du visage donne {inside} %."
+    references: [mars, survey]
+  a1_breaks:
+    kind: trust
+    tag: A1
+    state: breaks
+    title: {en: "A1 Face outline: does the score hold without it?", fr: "A1 Contour du visage : le score tient-il sans lui?"}
+    text:
+      en: "{model}'s score falls to a real-video level without the face outline."
+      fr: "Sans le contour du visage, le score de {model} tombe au niveau des vraies vidéos."
+    detail:
+      en: "Hiding the face outline drops its score from {before}% to {after}%, into the range it usually gives real videos. Hiding as much of the inside of the face gives {inside}%."
+      fr: "Cacher le contour du visage fait tomber son score de {before} % à {after} %, dans la plage qu’il donne d’habitude aux vraies vidéos. Cacher une surface égale à l’intérieur du visage donne {inside} %."
+    references: [mars, survey]
+  a1_na:
+    kind: trust
+    tag: A1
+    state: info
+    title: {en: "A1 Face outline: does the score hold without it?", fr: "A1 Contour du visage : le score tient-il sans lui?"}
+    text:
+      en: "{model}'s score is already normal for a real video: nothing to test."
+      fr: "Le score de {model} est déjà normal pour une vraie vidéo : rien à tester."
+    detail:
+      en: "{model} gives this video {before}%. Hiding the face outline gives {after}%."
+      fr: "{model} donne {before} % à cette vidéo. Cacher le contour du visage donne {after} %."
+    references: [mars, survey]
+  a2_info:
+    kind: trust
+    tag: A2
+    state: info
+    title: {en: "A2 New generators: how well does it spot their fakes?", fr: "A2 Nouveaux générateurs : repère-t-il leurs faux?"}
+    text:
+      en: "On unseen generators, {model} rates {genvideo} and {df26} out of 100."
+      fr: "Sur des générateurs jamais vus, {model} obtient {genvideo} et {df26} sur 100."
+    detail:
+      en: "How well it tells real from fake on GenVideo and on DF26 (2026 generators): 100 means always right, 50 is a coin toss. See Model cards for each generator."
+      fr: "À quel point il distingue le vrai du faux sur GenVideo et sur DF26 (générateurs de 2026) : 100, toujours juste; 50, pile ou face. Voir les fiches des modèles pour chaque générateur."
+    references: [mars, survey]
+  a4_holds:
+    kind: trust
+    tag: A4
+    state: holds
+    title: {en: "A4 Sharing: does the score hold after many shares?", fr: "A4 Partage : le score tient-il après de nombreux partages?"}
+    text:
+      en: "{model}'s score holds when the video is shared many times."
+      fr: "Le score de {model} tient quand la vidéo est partagée de nombreuses fois."
+    detail:
+      en: "A simulated copy shared many times (40% resolution, light blur and noise, JPEG quality 35) moves its score from {before}% to {after}%."
+      fr: "Une copie simulée partagée de nombreuses fois (résolution 40 %, léger flou et bruit, qualité JPEG 35) fait passer son score de {before} % à {after} %."
+    references: [survey]
+  a4_partly:
+    kind: trust
+    tag: A4
+    state: partly
+    title: {en: "A4 Sharing: does the score hold after many shares?", fr: "A4 Partage : le score tient-il après de nombreux partages?"}
+    text:
+      en: "{model}'s score drops but stays high after many shares."
+      fr: "Le score de {model} baisse mais reste haut après de nombreux partages."
+    detail:
+      en: "A simulated copy shared many times (40% resolution, light blur and noise, JPEG quality 35) lowers its score from {before}% to {after}%, still higher than it usually gives real videos. Try other settings in What if."
+      fr: "Une copie simulée partagée de nombreuses fois (résolution 40 %, léger flou et bruit, qualité JPEG 35) baisse son score de {before} % à {after} %, toujours plus haut que ce qu’il donne d’habitude aux vraies vidéos. Essayez d’autres réglages dans Et si."
+    references: [survey]
+  a4_breaks:
+    kind: trust
+    tag: A4
+    state: breaks
+    title: {en: "A4 Sharing: does the score hold after many shares?", fr: "A4 Partage : le score tient-il après de nombreux partages?"}
+    text:
+      en: "{model}'s score falls to a real-video level after many shares."
+      fr: "Après de nombreux partages, le score de {model} tombe au niveau des vraies vidéos."
+    detail:
+      en: "A simulated copy shared many times (40% resolution, light blur and noise, JPEG quality 35) drops its score from {before}% to {after}%, into the range it usually gives real videos: a widely shared copy of a fake could pass this model. Try other settings in What if."
+      fr: "Une copie simulée partagée de nombreuses fois (résolution 40 %, léger flou et bruit, qualité JPEG 35) fait tomber son score de {before} % à {after} %, dans la plage qu’il donne d’habitude aux vraies vidéos : une copie très partagée d’un faux pourrait passer inaperçue. Essayez d’autres réglages dans Et si."
+    references: [survey]
+  a4_na:
+    kind: trust
+    tag: A4
+    state: info
+    title: {en: "A4 Sharing: does the score hold after many shares?", fr: "A4 Partage : le score tient-il après de nombreux partages?"}
+    text:
+      en: "{model}'s score is already normal for a real video: nothing to test."
+      fr: "Le score de {model} est déjà normal pour une vraie vidéo : rien à tester."
+    detail:
+      en: "{model} gives this video {before}%. A copy shared many times (40% resolution, light blur and noise, JPEG quality 35) gives {after}%."
+      fr: "{model} donne {before} % à cette vidéo. Une copie partagée de nombreuses fois (résolution 40 %, léger flou et bruit, qualité JPEG 35) donne {after} %."
+    references: [survey]
+  a5_holds:
+    kind: trust
+    tag: A5
+    state: holds
+    title: {en: "A5 Fine detail: does the score hold without it?", fr: "A5 Détails fins : le score tient-il sans eux?"}
+    text:
+      en: "{model}'s score holds when fine pixel detail is removed."
+      fr: "Le score de {model} tient quand on retire les détails fins."
+    detail:
+      en: "Removing the fine detail of each frame moves its score from {before}% to {after}%: what it uses is not only in the finest pixels."
+      fr: "Retirer les détails fins de chaque image fait passer son score de {before} % à {after} % : ce qu’il utilise n’est pas seulement dans les pixels les plus fins."
+    references: [mars, survey]
+  a5_partly:
+    kind: trust
+    tag: A5
+    state: partly
+    title: {en: "A5 Fine detail: does the score hold without it?", fr: "A5 Détails fins : le score tient-il sans eux?"}
+    text:
+      en: "{model}'s score drops but stays high without fine pixel detail."
+      fr: "Le score de {model} baisse mais reste haut sans les détails fins."
+    detail:
+      en: "Removing the fine detail of each frame lowers its score from {before}% to {after}%, still higher than it usually gives real videos. Part of what it uses is fine detail, which compression and re-uploads can also erase."
+      fr: "Retirer les détails fins de chaque image baisse son score de {before} % à {after} %, toujours plus haut que ce qu’il donne d’habitude aux vraies vidéos. Une partie de ce qu’il utilise tient aux détails fins, que la compression et les republications peuvent aussi effacer."
+    references: [mars, survey]
+  a5_breaks:
+    kind: trust
+    tag: A5
+    state: breaks
+    title: {en: "A5 Fine detail: does the score hold without it?", fr: "A5 Détails fins : le score tient-il sans eux?"}
+    text:
+      en: "{model}'s score falls to a real-video level without fine pixel detail."
+      fr: "Sans les détails fins, le score de {model} tombe au niveau des vraies vidéos."
+    detail:
+      en: "Removing the fine detail of each frame drops its score from {before}% to {after}%, into the range it usually gives real videos: what it uses here is mostly fine detail, which compression and re-uploads can also erase."
+      fr: "Retirer les détails fins de chaque image fait tomber son score de {before} % à {after} %, dans la plage qu’il donne d’habitude aux vraies vidéos : ce qu’il utilise ici tient surtout aux détails fins, que la compression et les republications peuvent aussi effacer."
+    references: [mars, survey]
+  a5_na:
+    kind: trust
+    tag: A5
+    state: info
+    title: {en: "A5 Fine detail: does the score hold without it?", fr: "A5 Détails fins : le score tient-il sans eux?"}
+    text:
+      en: "{model}'s score is already normal for a real video: nothing to test."
+      fr: "Le score de {model} est déjà normal pour une vraie vidéo : rien à tester."
+    detail:
+      en: "{model} gives this video {before}%. Removing the fine detail gives {after}%."
+      fr: "{model} donne {before} % à cette vidéo. Retirer les détails fins donne {after} %."
+    references: [mars, survey]
+  a3_at_risk:
+    kind: trust
+    tag: A3
+    state: at_risk
+    title: {en: "A3 Training videos: is this video like them?", fr: "A3 Vidéos d’entraînement : cette vidéo leur ressemble-t-elle?"}
+    text:
+      en: "This video is unlike the videos the models learned from."
+      fr: "Cette vidéo ne ressemble pas aux vidéos sur lesquelles les modèles ont appris."
+    detail:
+      en: "The models learned from face videos (FF++) and rendered game footage (GTA-V). This video differs: {reasons}. Scores on such videos are less reliable."
+      fr: "Les modèles ont appris sur des vidéos de visages (FF++) et des images de jeu rendues (GTA-V). Cette vidéo diffère : {reasons}. Les scores sur de telles vidéos sont moins fiables."
+    references: [survey, nist-ai-100-4, mit-ai-risk]
+    mit: ["7.3"]
+  a4_at_risk:
+    kind: trust
+    tag: A4
+    state: at_risk
+    title: {en: "A4 Sharing: has this file been heavily compressed?", fr: "A4 Partage : ce fichier est-il fortement compressé?"}
+    text:
+      en: "This file is heavily compressed, which can hide what detectors use."
+      fr: "Ce fichier est fortement compressé, ce qui peut cacher ce qu’utilisent les détecteurs."
+    detail:
+      en: "A hint from the file itself: {reasons}."
+      fr: "Un indice tiré du fichier lui-même : {reasons}."
+    references: [survey, nist-ai-100-4, mit-ai-risk]
+    mit: ["7.3"]
+  credentials_found:
+    kind: provenance
+    tag: Provenance
+    state: info
+    title: {en: "Content Credentials found", fr: "Content Credentials trouvés"}
+    text:
+      en: "The file records who made or edited it (Content Credentials)."
+      fr: "Le fichier indique qui l’a créé ou modifié (Content Credentials)."
+    detail:
+      en: "{summary}. Credentials say who made or edited a file; they do not prove what it shows."
+      fr: "{summary}. Ils indiquent qui a créé ou modifié un fichier; ils ne prouvent pas ce qu’il montre."
+    references: [c2pa, jpeg-trust]
+  credentials_absent:
+    kind: provenance
+    tag: Provenance
+    state: info
+    title: {en: "No Content Credentials", fr: "Aucun Content Credential"}
+    text:
+      en: "No record of who made the file; most videos have none."
+      fr: "Aucune trace de qui a créé le fichier; la plupart des vidéos n’en ont pas."
+    detail:
+      en: "Content Credentials record who made or edited a file. Missing credentials do not mean the video is fake."
+      fr: "Les Content Credentials indiquent qui a créé ou modifié un fichier. Leur absence ne signifie pas que la vidéo est fausse."
+    references: [c2pa]
+  credentials_unsupported:
+    kind: provenance
+    tag: Provenance
+    state: info
+    title: {en: "Content Credentials not checked", fr: "Content Credentials non vérifiés"}
+    text:
+      en: "This file type cannot carry Content Credentials."
+      fr: "Ce type de fichier ne peut pas porter de Content Credentials."
+    detail:
+      en: "So none were checked."
+      fr: "Aucun n’a donc été vérifié."
+    references: [c2pa]
+  credentials_differ:
+    kind: provenance
+    tag: Provenance
+    state: info
+    title: {en: "Credentials and scores differ", fr: "Identifiants et scores divergent"}
+    text:
+      en: "The file declares AI content, yet no model scored it high."
+      fr: "Le fichier déclare un contenu IA, mais aucun modèle ne lui donne un score élevé."
+    detail:
+      en: "The file's Content Credentials declare AI-generated content, but no model gave a high probability of fake: a detector can miss what a file openly declares."
+      fr: "Les Content Credentials du fichier déclarent un contenu généré par IA, mais aucun modèle ne donne une probabilité de faux élevée : un détecteur peut manquer ce qu’un fichier déclare ouvertement."
+    references: [c2pa]
+  context_labelling:
+    kind: context
+    tag: Labelling
+    state: info
+    where: eu
+    title: {en: "Labelling (EU)", fr: "Étiquetage (UE)"}
+    text:
+      en: "In the EU, AI-made or altered videos must be labelled when published."
+      fr: "Dans l’UE, une vidéo faite ou modifiée par IA doit être étiquetée quand elle est publiée."
+    detail:
+      en: "If a video is AI-generated or manipulated and published in the EU, it must be labelled as such."
+      fr: "Si une vidéo est générée ou manipulée par IA et publiée dans l’UE, elle doit être étiquetée comme telle."
+    references: [eu-ai-act-art50]
+    mit: ["3.1", "4.1"]
+  context_intimate_ca:
+    kind: context
+    tag: Intimate deepfakes
+    state: info
+    where: ca
+    title: {en: "Intimate deepfakes (Canada)", fr: "Hypertrucages intimes (Canada)"}
+    text:
+      en: "In Canada, sharing intimate deepfakes without consent is a crime."
+      fr: "Au Canada, partager un hypertrucage intime sans consentement est un crime."
+    detail:
+      en: "If a manipulated video shows a real person in intimate content, sharing it without consent is a crime in Canada."
+      fr: "Si une vidéo manipulée montre une personne réelle dans un contenu intime, la partager sans consentement est un crime au Canada."
+    references: [canada-c16]
+    mit: ["4.3", "1.2"]
+  context_intimate_us:
+    kind: context
+    tag: Intimate deepfakes
+    state: info
+    where: us
+    title: {en: "Intimate deepfakes (US)", fr: "Hypertrucages intimes (États-Unis)"}
+    text:
+      en: "In the US, sharing intimate deepfakes without consent is an offence."
+      fr: "Aux États-Unis, partager un hypertrucage intime sans consentement est une infraction."
+    detail:
+      en: "If a manipulated video shows a real person in intimate content, sharing it without consent is an offence, and platforms must remove it within 48 hours of a valid request."
+      fr: "Si une vidéo manipulée montre une personne réelle dans un contenu intime, la partager sans consentement est une infraction, et les plateformes doivent la retirer dans les 48 heures suivant une demande valide."
+    references: [us-take-it-down]
+    mit: ["4.3", "1.2"]
+  context_risks:
+    kind: context
+    tag: Deepfake risks
+    state: info
+    where: all
+    title: {en: "Deepfake risks", fr: "Risques des hypertrucages"}
+    text:
+      en: "Deepfakes are used for fraud, manipulation and mass influence."
+      fr: "Les hypertrucages servent à la fraude, à la manipulation et à l’influence de masse."
+    detail:
+      en: "Deepfakes are used for fraud and targeted manipulation, and to influence opinion at scale."
+      fr: "Les hypertrucages servent à la fraude, à la manipulation ciblée et à influencer l’opinion à grande échelle."
+    references: [mit-ai-risk]
+    mit: ["4.3", "4.1"]
+  footer:
+    kind: footer
+    tag: Footer
+    state: info
+    title: {en: "About this result", fr: "À propos de ce résultat"}
+    text:
+      en: "MARScope is an educational tool; scores are model outputs."
+      fr: "MARScope est un outil pédagogique; les scores sont des sorties de modèles."
+    detail:
+      en: "Scores are uncalibrated and models can disagree, so MARScope leaves the decision to people. Models: {models}. Run on {devices}."
+      fr: "Les scores ne sont pas calibrés et les modèles peuvent diverger : MARScope laisse la décision aux personnes. Modèles : {models}. Exécution : {devices}."
+    references: [iso-26655, eu-ai-act-annex3, mit-ai-risk]
+    mit: ["5.1", "3.2"]
+
+# The reading at the top of a result: which way the detectors lean.
+# Rule in policy.assess; these are its texts.
+reading:
+  lean_fake: {en: "Detectors lean fake", fr: "Les détecteurs penchent vers le faux"}
+  lean_fake_one: {en: "{m} leans fake", fr: "{m} penche vers le faux"}
+  lean_real: {en: "Detectors lean real", fr: "Les détecteurs penchent vers le vrai"}
+  lean_real_one: {en: "{m} leans real", fr: "{m} penche vers le vrai"}
+  lean_unclear: {en: "No clear lean", fr: "Pas de tendance nette"}
+  all_unusual: {en: "Every model gives a probability of fake well above the usual range for real videos.", fr: "Tous les modèles donnent une probabilité de faux bien au-dessus de la plage habituelle des vraies vidéos."}
+  one_unusual: {en: "{m} gives a probability of fake well above the usual range for real videos.", fr: "{m} donne une probabilité de faux bien au-dessus de la plage habituelle des vraies vidéos."}
+  all_typical: {en: "Every model gives a probability of fake within the usual range for real videos.", fr: "Tous les modèles donnent une probabilité de faux dans la plage habituelle des vraies vidéos."}
+  one_typical: {en: "{m} gives a probability of fake within the usual range for real videos.", fr: "{m} donne une probabilité de faux dans la plage habituelle des vraies vidéos."}
+  split_fake_one: {en: "{m} leans fake.", fr: "{m} penche vers le faux."}
+  split_fake_many: {en: "{m} lean fake.", fr: "{m} penchent vers le faux."}
+  split_real_one: {en: "{m} leans real.", fr: "{m} penche vers le vrai."}
+  split_real_many: {en: "{m} lean real.", fr: "{m} penchent vers le vrai."}
+  split_none_one: {en: "{m} has no clear lean.", fr: "{m} n’a pas de tendance nette."}
+  split_none_many: {en: "{m} have no clear lean.", fr: "{m} n’ont pas de tendance nette."}
+  in_between: {en: "The scores sit between what real and fake videos usually get.", fr: "Les scores se situent entre ce qu’obtiennent d’habitude les vraies et les fausses vidéos."}
+  action_check: {en: "Check the source before acting.", fr: "Vérifiez la source avant d’agir."}
+  action_real: {en: "If it matters, still check where the video comes from.", fr: "Si l’enjeu est important, vérifiez tout de même d’où vient la vidéo."}
+  and: {en: " and ", fr: " et "}
+
+references:
+  mars:
+    label: MARS
+    title: "MARS: Multiscale Appearance-Residual Streams for Video Forgery Detection"
+    url: https://vectorinstitute.github.io/mars/
+  survey:
+    label: Raza et al. 2026
+    title: "Raza, Ho, Radwan, Hafez. Deepfakes in the Foundation-Model Era"
+    url: https://vectorinstitute.github.io/deepfakes-survey-2026/
+  mozaic:
+    label: MOZAIC
+    title: "MOZAIC: An Audio-Video Deepfake Benchmark for Telling What Is Fake"
+    url: https://vectorinstitute.github.io/mozaic/
+  eu-ai-act-art50:
+    label: EU AI Act Art. 50
+    title: "Article 50 and the Code of Practice on marking and labelling"
+    url: https://digital-strategy.ec.europa.eu/en/news/commission-publishes-code-practice-marking-and-labelling-ai-generated-content
+  eu-ai-act-annex3:
+    label: EU AI Act Annex III
+    title: "Annex III, point 6(c)"
+    url: https://artificialintelligenceact.eu/annex/3/
+  canada-c16:
+    label: Canada C-16
+    title: "Bill C-16, Protecting Victims Act"
+    url: https://www.justice.gc.ca/eng/csj-sjc/pl/c16/index.html
+  us-take-it-down:
+    label: TAKE IT DOWN Act
+    title: "S.146, TAKE IT DOWN Act"
+    url: https://www.congress.gov/bill/119th-congress/senate-bill/146
+  c2pa:
+    label: C2PA (ISO 22144)
+    title: "ISO 22144, Content Credentials"
+    url: https://www.iso.org/standard/90726.html
+  jpeg-trust:
+    label: JPEG Trust (ISO/IEC 21617-1)
+    title: "ISO/IEC 21617-1, JPEG Trust"
+    url: https://www.evs.ee/en/combat-deepfakes
+  iso-26655:
+    label: ISO/IEC 26655
+    title: "ISO/IEC AWI 26655, deepfake detection testing and reporting"
+    url: https://iss.rs/en/project/show/iso:proj:94170
+  itu-sem-ddm:
+    label: ITU-T X.sem-ddm
+    title: "Security evaluation of deepfake detection models"
+    url: https://www.itu.int/ITU-T/workprog/wp_item.aspx?isn=24026
+  nist-ai-100-4:
+    label: NIST AI 100-4
+    title: "Reducing Risks Posed by Synthetic Content"
+    url: https://www.nist.gov/publications/reducing-risks-posed-synthetic-content-overview-technical-approaches-digital-content
+  mit-ai-risk:
+    label: MIT AI Risk Repository
+    title: "MIT AI Risk Repository V4 (Slattery et al., arXiv:2408.12622; CC BY 4.0)"
+    url: https://airisk.mit.edu/

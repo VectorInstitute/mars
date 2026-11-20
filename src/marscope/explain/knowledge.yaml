@@ -1,0 +1,312 @@
+# MARScope knowledge cards: short, reviewed answers to general questions, used by Ask.
+# Drawn from our three papers (survey, MARS, MOZAIC); none of them describes MARScope itself, so cards
+# about MARScope cite nothing. Every answer: at most three sentences and sixty words, no numbers, no
+# verdict about a video, written for a reader with no technical background. `source` is for reviewers.
+
+version: "0.1.0"
+
+cards:
+  deepfake:
+    q: {en: "What is a deepfake?", fr: "Qu’est-ce qu’un hypertrucage?"}
+    keywords: [deepfake, definition, meaning, synthetic media, hypertrucage, définition, trucage]
+    answer:
+      en: "A deepfake is a video, image or sound made or altered by AI so that it shows something that did not happen, often a real person saying or doing something. Some change only a face or a voice; others generate the whole scene."
+      fr: "Un hypertrucage est une vidéo, une image ou un son créé ou modifié par l’IA pour montrer quelque chose qui n’a pas eu lieu, souvent une vraie personne qui dit ou fait quelque chose. Certains ne changent qu’un visage ou une voix; d’autres génèrent toute la scène."
+    references: [survey]
+    source: "survey §1 Introduction, §3 Taxonomy"
+  kinds:
+    q: {en: "What kinds of deepfakes are there?", fr: "Quels types d’hypertrucages existe-t-il?"}
+    keywords: [kinds, types, categories, face swap, reenactment, lip sync, generated, sortes, catégories]
+    answer:
+      en: "The main kinds are face swaps, where one person’s face is placed on another’s; reenactment and lip-sync, where a real face is made to move or speak differently; and fully generated videos, where AI makes every pixel. Each leaves different traces for detectors."
+      fr: "Les principaux types sont l’échange de visage, où le visage d’une personne est placé sur une autre; la réanimation et la synchronisation labiale, où un vrai visage bouge ou parle autrement; et les vidéos entièrement générées, où l’IA crée chaque pixel. Chacun laisse des traces différentes."
+    references: [survey]
+    source: "survey §3 Taxonomy"
+  face_swap:
+    q: {en: "What is a face swap?", fr: "Qu’est-ce qu’un échange de visage?"}
+    keywords: [face swap, swapped, faceswap, identity, échange de visage, visage remplacé]
+    answer:
+      en: "A face swap puts one person’s face onto another person in a real video, keeping the pose, expression and scene. Because a generated face is pasted into a real frame, the edge around it can leave traces that some detectors use."
+      fr: "Un échange de visage place le visage d’une personne sur une autre dans une vraie vidéo, en gardant la pose, l’expression et la scène. Comme un visage généré est collé dans une vraie image, son contour peut laisser des traces que certains détecteurs utilisent."
+    references: [survey]
+    source: "survey §3.1 Face swapping"
+  lip_sync:
+    q: {en: "What is lip-sync manipulation?", fr: "Qu’est-ce que la synchronisation labiale truquée?"}
+    keywords: [lip sync, lipsync, mouth, dubbing, words, lèvres, bouche, doublage]
+    answer:
+      en: "Lip-sync changes only the mouth so a real person appears to say different words, usually to match new audio. Because the edit is small, most of the frame stays untouched, and compression can erase its traces first."
+      fr: "La synchronisation labiale ne change que la bouche, pour qu’une vraie personne semble dire d’autres mots, souvent sur un nouvel audio. Comme la modification est petite, l’essentiel de l’image reste intact, et la compression peut effacer ses traces en premier."
+    references: [survey]
+    source: "survey §3.1 Lip-sync manipulation"
+  talking_head:
+    q: {en: "What is a talking-head deepfake?", fr: "Qu’est-ce qu’un hypertrucage de tête parlante?"}
+    keywords: [talking head, photo, portrait, animate, speaking, tête parlante, animer une photo]
+    answer:
+      en: "A talking head turns one photo and a voice recording into a video of the person speaking. There may be no pasted-in face to find, so detectors must look at motion and at whether the lips match the sound."
+      fr: "Une tête parlante transforme une photo et un enregistrement de voix en vidéo de la personne qui parle. Il n’y a parfois aucun visage collé à trouver : les détecteurs doivent regarder le mouvement et l’accord entre les lèvres et le son."
+    references: [survey]
+    source: "survey §3.1 Talking-head synthesis"
+  fully_generated:
+    q: {en: "What is a fully generated video?", fr: "Qu’est-ce qu’une vidéo entièrement générée?"}
+    keywords: [fully generated, text to video, image to video, sora, veo, kling, synthetic video, génération, texte en vidéo]
+    answer:
+      en: "Text-to-video and image-to-video models create every frame from a prompt or a picture, with no real footage underneath. There is no edge between real and generated parts, so detectors that look for a pasted-in face can miss them."
+      fr: "Les modèles texte-vers-vidéo et image-vers-vidéo créent chaque image à partir d’une consigne ou d’une photo, sans vraie séquence dessous. Il n’y a pas de frontière entre parties vraies et générées : les détecteurs qui cherchent un visage collé peuvent les manquer."
+    references: [survey, mars]
+    source: "survey §2 Generative foundations, §7 F2; MARS §1"
+  generators:
+    q: {en: "How are deepfakes made?", fr: "Comment fabrique-t-on un hypertrucage?"}
+    keywords: [made, make, create, generator, gan, diffusion, model, ai tool, fabriquer, créer, générateur]
+    answer:
+      en: "Older tools learned to rebuild one person’s face and paste it onto another. Today most use diffusion models, which turn random noise into a picture or video step by step, often guided by a text prompt or a single photo."
+      fr: "Les anciens outils apprenaient à reconstruire le visage d’une personne et à le coller sur une autre. Aujourd’hui, la plupart utilisent des modèles de diffusion, qui transforment un bruit aléatoire en image ou en vidéo étape par étape, souvent guidés par un texte ou une seule photo."
+    references: [survey]
+    source: "survey §2.2 Generative modelling foundations"
+  voice:
+    q: {en: "Can the voice be faked too?", fr: "Peut-on aussi truquer la voix?"}
+    keywords: [voice, audio, sound, clone, cloning, speech, voix, son, clonage]
+    answer:
+      en: "Yes. Voice cloning and voice conversion can make someone sound like another person while keeping the words and timing. A clip can have a changed picture, a changed voice, or both, and telling which one changed is still hard for current tools."
+      fr: "Oui. Le clonage et la conversion de voix peuvent faire parler quelqu’un avec la voix d’un autre, en gardant les mots et le rythme. Un extrait peut avoir une image changée, une voix changée, ou les deux, et dire laquelle reste difficile pour les outils actuels."
+    references: [mozaic]
+    source: "MOZAIC §1 Introduction"
+  which_part:
+    q: {en: "Why does it matter which part was changed?", fr: "Pourquoi importe-t-il de savoir quelle partie a été changée?"}
+    keywords: [which part, modality, face or voice, both, audio video, quelle partie, visage ou voix]
+    answer:
+      en: "Knowing whether the face, the voice or both were changed shows what a detector is really reacting to, and what to check next. A single real-or-fake answer leaves this out. MARScope checks the picture only."
+      fr: "Savoir si le visage, la voix ou les deux ont été changés montre à quoi un détecteur réagit vraiment, et quoi vérifier ensuite. Une seule réponse vrai ou faux l’omet. MARScope vérifie l’image seulement."
+    references: [mozaic]
+    source: "MOZAIC §1 Introduction"
+  detector:
+    q: {en: "How does a deepfake detector work?", fr: "Comment fonctionne un détecteur d’hypertrucages?"}
+    keywords: [detector, detection, how it works, classifier, spot, détecteur, détection, fonctionne]
+    answer:
+      en: "A detector is an AI model trained on many real and altered videos to learn the patterns that tell them apart, such as fine pixel detail, edges around faces or unnatural motion. Its output is a score, and it only knows the kinds of fakes it learned from."
+      fr: "Un détecteur est un modèle d’IA entraîné sur beaucoup de vidéos vraies et modifiées pour apprendre ce qui les distingue : détails fins, contours de visage, mouvements peu naturels. Il donne un score, et ne connaît que ce qu’il a appris."
+    references: [survey]
+    source: "survey §4 Detection"
+  score_not_proof:
+    q: {en: "How far can I trust a score?", fr: "Jusqu’où se fier à un score?"}
+    keywords: [proof, evidence, trust, reliable, accurate, certain, preuve, fiable, confiance]
+    answer:
+      en: "A score is a model’s estimate, and models make mistakes, especially on videos unlike the ones they learned from. Scores are uncalibrated, models disagree, and sharing a video can change them. Treat a score as one signal next to the source, the context and expert review."
+      fr: "Un score est une estimation de modèle, et les modèles se trompent, surtout sur des vidéos éloignées de leur apprentissage. Les scores ne sont pas des chances calibrées, les modèles divergent, et le partage peut les changer. C’est un signal parmi d’autres, avec la source, le contexte et un expert."
+    references: [survey, nist-ai-100-4]
+    source: "survey §7 Findings, §9 Discussion"
+  no_verdict:
+    q: {en: "Why doesn’t MARScope say real or fake?", fr: "Pourquoi MARScope ne dit-il pas vrai ou faux?"}
+    keywords: [verdict, answer, decide, conclusion, real or fake, yes or no, verdict, décider, vrai ou faux]
+    answer:
+      en: "Because a single verdict would be read as fact, while the scores can be wrong. MARScope shows what each model found, how unusual it is for a real video, and how far to trust it, and leaves the judgement to people who can check the source."
+      fr: "Parce qu’un verdict serait lu comme un fait, alors que les scores peuvent se tromper. MARScope montre ce que chaque modèle a trouvé, à quel point c’est inhabituel pour une vraie vidéo, et jusqu’où s’y fier, et laisse le jugement à ceux qui peuvent vérifier la source."
+    references: [eu-ai-act-annex3]
+    source: "MARScope design; EU AI Act Annex III"
+  base_rate:
+    q: {en: "Why are false alarms a problem?", fr: "Pourquoi les fausses alertes posent-elles problème?"}
+    keywords: [false alarm, false positive, rare, precision, base rate, fausse alerte, faux positif, rare]
+    answer:
+      en: "When altered videos are rare, even an accurate detector flags many real videos for each altered one it catches. So a high score on one video needs confirmation before anyone acts on it. The Learn tab shows this with numbers."
+      fr: "Quand les vidéos modifiées sont rares, même un détecteur précis signale beaucoup de vraies vidéos pour chaque vidéo modifiée trouvée. Un score élevé doit donc être confirmé avant d’agir. L’onglet Comprendre le montre en chiffres."
+    references: [survey]
+    source: "survey §9 Impact (prevalence and precision)"
+  disagree:
+    q: {en: "Why do detectors disagree?", fr: "Pourquoi les détecteurs divergent-ils?"}
+    keywords: [disagree, different, contradict, conflict, compare, divergent, différent, contradiction]
+    answer:
+      en: "Each detector learned different clues: some read whole frames over time, others look at frames one by one or at fine detail. A video unlike their training videos can push them in different directions, so the next step is to check the source."
+      fr: "Chaque détecteur a appris des indices différents : certains lisent l’image entière dans le temps, d’autres chaque image ou les détails fins. Une vidéo éloignée de leur apprentissage peut les pousser dans des sens différents : l’étape suivante est de vérifier la source."
+    references: [survey, mars]
+    source: "survey §2.3 A3, §9; MARS §2"
+  new_generators:
+    q: {en: "Can detectors catch fakes from new AI tools?", fr: "Les détecteurs repèrent-ils les faux des nouveaux outils d’IA?"}
+    keywords: [new generator, new tool, unseen, latest, sora, veo, generalize, nouveau générateur, nouvel outil]
+    answer:
+      en: "Not reliably. New generators appear faster than detectors are retrained, and each can leave different traces. A detector can do well on known tools and poorly on a new one, which is why MARScope shows how each model does on generators it never saw."
+      fr: "Pas de façon fiable. De nouveaux générateurs sortent plus vite que les détecteurs ne sont réentraînés, et chacun peut laisser des traces différentes. Un détecteur peut bien faire sur des outils connus et mal sur un nouveau; MARScope montre donc les résultats de chaque modèle sur des générateurs jamais vus."
+    references: [survey, mars]
+    source: "survey §9 Q3, §7 F4; MARS §5"
+  sharing:
+    q: {en: "Why does sharing a video matter?", fr: "Pourquoi le partage d’une vidéo compte-t-il?"}
+    keywords: [sharing, shared, social media, compression, upload, repost, whatsapp, tiktok, score change, partage, compression, réseaux sociaux]
+    answer:
+      en: "Social media platforms compress, resize and re-encode videos every time they are uploaded. That can wipe out the fine traces detectors look for, so an altered video that is easy to spot as an original can pass once it has been shared many times."
+      fr: "Les réseaux sociaux compressent, redimensionnent et réencodent les vidéos à chaque téléversement. Cela peut effacer les traces fines que cherchent les détecteurs : une vidéo modifiée facile à repérer à l’origine peut passer une fois partagée de nombreuses fois."
+    references: [survey]
+    source: "survey §2.1 Dissemination, §5 Distribution I"
+  assumptions:
+    q: {en: "What are the five assumptions, A1 to A5?", fr: "Quelles sont les cinq hypothèses, A1 à A5?"}
+    keywords: [assumption, assumptions, a1, a2, a3, a4, a5, checks, tests, hypothèse, hypothèses, essais]
+    answer:
+      en: "Detectors quietly assume that an altered video leaves an edge, that each generator leaves a fingerprint, that new videos look like the training videos, that traces survive sharing, and that fine pixel detail is enough. MARScope tests these for each model, because a detector fails when its assumption fails."
+      fr: "Les détecteurs supposent qu’une vidéo modifiée laisse un contour, que chaque générateur laisse une empreinte, que les nouvelles vidéos ressemblent aux vidéos d’apprentissage, que les traces survivent au partage et que les détails fins suffisent. MARScope les teste pour chaque modèle, car un détecteur échoue quand son hypothèse tombe."
+    references: [survey]
+    source: "survey §2.3 Framework for forensic assumptions"
+  fingerprint:
+    q: {en: "What is a generator fingerprint?", fr: "Qu’est-ce que l’empreinte d’un générateur?"}
+    keywords: [fingerprint, signature, pattern, attribution, which tool, empreinte, signature, attribution]
+    answer:
+      en: "Many AI generators leave a faint, repeating pattern in what they make, a bit like a signature. Detectors can learn it, but it changes when the generator is updated, fine-tuned or replaced, so a detector trained on one may miss another."
+      fr: "Beaucoup de générateurs d’IA laissent un motif discret et répété dans ce qu’ils créent, comme une signature. Les détecteurs peuvent l’apprendre, mais il change quand le générateur est mis à jour, ajusté ou remplacé : un détecteur entraîné sur l’un peut manquer l’autre."
+    references: [survey]
+    source: "survey §2.3 A2"
+  fine_detail:
+    q: {en: "What are low-level clues?", fr: "Qu’est-ce que les indices de bas niveau?"}
+    keywords: [low level, fine detail, pixels, texture, frequency, noise, artifacts, détails fins, pixels, artefacts]
+    answer:
+      en: "Low-level clues are tiny pixel patterns, textures and frequencies that people cannot see but detectors can measure. They are useful, but compression, resizing and filters erase them, and they say nothing about whether the scene itself makes sense."
+      fr: "Les indices de bas niveau sont de minuscules motifs de pixels, textures et fréquences, invisibles à l’œil mais mesurables par les détecteurs. Ils sont utiles, mais la compression, le redimensionnement et les filtres les effacent, et ils ne disent rien du sens de la scène."
+    references: [survey]
+    source: "survey §2.3 A5"
+  mars:
+    q: {en: "What is MARS?", fr: "Qu’est-ce que MARS?"}
+    keywords: [mars, model, detector, residual, appearance, multiscale, modèle, détecteur]
+    answer:
+      en: "MARS is a video deepfake detector from the Vector Institute. It reads whole frames over time in two ways at once, the overall appearance and small differences in detail and motion at several scales, and combines them. It also shows which frames and areas raised its score."
+      fr: "MARS est un détecteur d’hypertrucages vidéo de l’Institut Vecteur. Il lit l’image entière dans le temps de deux façons à la fois, l’apparence générale et de petites différences de détail et de mouvement à plusieurs échelles, puis les combine. Il montre aussi quelles images et zones ont fait monter son score."
+    references: [mars]
+    source: "MARS abstract, §3 Method"
+  mars_quality:
+    q: {en: "How good is MARS?", fr: "MARS est-il performant?"}
+    keywords: [accuracy, performance, how good, results, best, strengths, weaknesses, précision, performance, résultats]
+    answer:
+      en: "In its paper, MARS had the best average results across seven test sets among the detectors compared, and learned to spot fully generated videos from face-swap training alone. It is weaker on noisy, strongly blurred or very small videos."
+      fr: "Dans son article, MARS obtient les meilleurs résultats moyens sur sept jeux de test parmi les détecteurs comparés, et repère des vidéos entièrement générées après un entraînement sur des échanges de visage seulement. Il est plus faible sur les vidéos bruitées, très floues ou très petites."
+    references: [mars]
+    source: "MARS abstract, §5 Robustness, §6 Conclusion"
+  other_models:
+    q: {en: "What are GenD and DFD-HR?", fr: "Que sont GenD et DFD-HR?"}
+    keywords: [gend, dfd-hr, dfdhr, other models, baselines, autres modèles]
+    answer:
+      en: "GenD and DFD-HR are two other detectors that look at frames one by one. Both adapt a large pretrained image model: GenD tunes a few of its settings, while DFD-HR chooses which parts of the model to use. MARScope runs them next to MARS so you can compare."
+      fr: "GenD et DFD-HR sont deux autres détecteurs qui regardent chaque image séparément. Tous deux adaptent un grand modèle d’images préentraîné : GenD règle quelques paramètres, DFD-HR choisit quelles parties du modèle utiliser. MARScope les fait tourner à côté de MARS pour comparer."
+    references: [mars]
+    source: "MARS §2 Related work"
+  evidence_maps:
+    q: {en: "What do the highlighted areas mean?", fr: "Que signifient les zones surlignées?"}
+    keywords: [highlighted, map, heatmap, areas, evidence, overlay, zones, carte, surligné]
+    answer:
+      en: "They show which parts of the frame raised a model’s score; an edit may be elsewhere. You can test them: hide those areas and compare with hiding random ones. If the score drops much more, the model was using them."
+      fr: "Elles montrent quelles parties de l’image ont fait monter le score d’un modèle; une modification peut se trouver ailleurs. Vous pouvez les tester : cachez ces zones et comparez avec des zones au hasard. Si le score baisse beaucoup plus, le modèle les utilisait."
+    references: [mars]
+    source: "MARS §3.5 Post-hoc evidence, §5 Faithfulness"
+  c2pa:
+    q: {en: "What are Content Credentials (C2PA)?", fr: "Que sont les Content Credentials (C2PA)?"}
+    keywords: [c2pa, content credentials, provenance, metadata, signed, manifest, identifiants de contenu, métadonnées]
+    answer:
+      en: "Content Credentials are a signed record attached to a file that says who made it and how it was edited, defined by the C2PA standard. They are only as trustworthy as whoever signed them, and they are often stripped when a video is re-uploaded, so missing credentials prove nothing."
+      fr: "Les Content Credentials sont un registre signé, joint à un fichier, qui dit qui l’a créé et comment il a été modifié, selon la norme C2PA. Ils ne valent que la confiance accordée au signataire, et disparaissent souvent au téléversement : leur absence ne prouve rien."
+    references: [c2pa, survey]
+    source: "survey §5 Provenance (signed metadata)"
+  watermark:
+    q: {en: "What is a watermark for AI content?", fr: "Qu’est-ce qu’un filigrane pour le contenu d’IA?"}
+    keywords: [watermark, watermarking, hidden mark, synthid, label, filigrane, marque]
+    answer:
+      en: "A watermark is a hidden signal placed in AI-generated content so it can be recognised later. It only works if the generator adds one, it can be weakened by compression or removed by regenerating the content, and it can even be copied onto real media."
+      fr: "Un filigrane est un signal caché placé dans un contenu généré par IA pour le reconnaître plus tard. Il ne marche que si le générateur en ajoute un, peut être affaibli par la compression ou retiré en régénérant le contenu, et peut même être copié sur un vrai média."
+    references: [survey]
+    source: "survey §5 Watermarking, removal and forgery"
+  provenance_vs_detection:
+    q: {en: "What is the difference between detection and provenance?", fr: "Quelle différence entre détection et provenance?"}
+    keywords: [provenance, detection, difference, origin, source, record, provenance, origine, différence]
+    answer:
+      en: "Detection estimates from the video itself whether it was altered. Provenance records where a file came from at the moment it is made or edited. They complement each other: provenance only covers content whose maker recorded it, and detection weakens as videos are shared."
+      fr: "La détection estime, à partir de la vidéo elle-même, si elle a été modifiée. La provenance enregistre d’où vient un fichier au moment où il est créé ou modifié. Elles se complètent : la provenance ne couvre que les contenus enregistrés par leur auteur, et la détection faiblit avec le partage."
+    references: [survey, c2pa]
+    source: "survey §5 Provenance, §7 consequences"
+  eu_law:
+    q: {en: "What does EU law say about deepfakes?", fr: "Que dit le droit de l’UE sur les hypertrucages?"}
+    keywords: [eu, europe, law, ai act, regulation, label, disclose, ue, europe, loi, règlement, étiquetage]
+    answer:
+      en: "Under the EU AI Act, AI-generated or manipulated content must be marked as such in a machine-readable way, and people who publish deepfakes must disclose that the content is artificial. Tools used to judge evidence face stricter rules, one reason MARScope is a study tool."
+      fr: "Selon l’AI Act de l’UE, un contenu généré ou manipulé par IA doit être marqué comme tel de façon lisible par machine, et qui publie un hypertrucage doit signaler qu’il est artificiel. Les outils servant à juger des preuves ont des règles plus strictes; c’est une raison pour laquelle MARScope est un outil d’étude."
+    references: [eu-ai-act-art50, eu-ai-act-annex3]
+    source: "survey §5 Governance; EU AI Act Art. 50, Annex III"
+  intimate_laws:
+    q: {en: "What do Canada and the US say about intimate deepfakes?", fr: "Que disent le Canada et les États-Unis sur les hypertrucages intimes?"}
+    keywords: [canada, us, usa, united states, intimate, sexual, consent, take it down, intime, consentement]
+    answer:
+      en: "Both treat sharing intimate images of a real person without consent, including AI-made ones, as an offence. In the US, covered platforms must also remove such content soon after a valid request."
+      fr: "Les deux font du partage d’images intimes d’une vraie personne sans consentement, y compris générées par IA, une infraction. Aux États-Unis, les plateformes visées doivent aussi retirer ce contenu peu après une demande valide."
+    references: [canada-c16, us-take-it-down]
+    source: "survey §5 Governance"
+  risks:
+    q: {en: "Why are deepfakes a risk?", fr: "Pourquoi les hypertrucages sont-ils un risque?"}
+    keywords: [risk, harm, danger, fraud, scam, misinformation, harassment, risque, fraude, arnaque, désinformation]
+    answer:
+      en: "Deepfakes are used for fraud, such as impersonating someone in a call, for intimate-image abuse and harassment, and for misinformation at scale. The MIT AI Risk Repository lists these among the main harms of synthetic media."
+      fr: "Les hypertrucages servent à la fraude, comme se faire passer pour quelqu’un lors d’un appel, aux abus d’images intimes et au harcèlement, et à la désinformation à grande échelle. Le MIT AI Risk Repository les classe parmi les principaux méfaits des médias synthétiques."
+    references: [mit-ai-risk, survey]
+    source: "MIT AI Risk Repository; survey §1"
+  org_steps:
+    q: {en: "What should an organization do with a suspicious video?", fr: "Que doit faire une organisation face à une vidéo suspecte?"}
+    keywords: [what should we do, organization, company, team, communications, response, steps, action, entreprise, équipe, que faire]
+    answer:
+      en: "Do not act on a detector score alone. Check where the video came from and ask for the original file, look for Content Credentials, and compare several detectors and signals. Bring in a forensic expert before any public statement or decision about a person."
+      fr: "N’agissez pas sur un seul score de détecteur. Vérifiez d’où vient la vidéo et demandez le fichier original, cherchez des Content Credentials, et comparez plusieurs détecteurs et signaux. Faites appel à un expert avant toute déclaration publique ou décision concernant une personne."
+    references: [survey, nist-ai-100-4]
+    source: "survey §9 Impact (platforms and governance)"
+  by_eye:
+    q: {en: "Can people spot deepfakes by eye?", fr: "Peut-on repérer un hypertrucage à l’œil nu?"}
+    keywords: [by eye, human, look, spot, tell, notice, signs, à l’œil, repérer, signes]
+    answer:
+      en: "Not reliably. Modern generators produce realistic faces, lighting and motion, and many traces are invisible or erased by compression. Look at the context instead: who shared it, when, whether the original exists, and whether trusted sources report the same event."
+      fr: "Pas de façon fiable. Les générateurs récents produisent des visages, lumières et mouvements réalistes, et beaucoup de traces sont invisibles ou effacées par la compression. Regardez plutôt le contexte : qui l’a partagée, quand, si l’original existe et si des sources fiables rapportent le même fait."
+    references: [survey]
+    source: "survey §2 Generation, §5 Distribution"
+  lifecycle:
+    q: {en: "What happens to a deepfake after it is posted?", fr: "Que devient un hypertrucage une fois publié?"}
+    keywords: [posted, lifecycle, platform, spread, viral, removed, labelled, publié, plateforme, propagation, retiré]
+    answer:
+      en: "It is compressed by the platform, promoted or not by recommendation algorithms, reposted across sites, reported, reviewed, and labelled or removed. Each step can weaken the traces a detector needs, so checking the original file gives the most reliable result."
+      fr: "La plateforme la compresse, les algorithmes la recommandent ou non, elle est republiée ailleurs, signalée, examinée, puis étiquetée ou retirée. Chaque étape peut affaiblir les traces dont un détecteur a besoin : vérifier le fichier original donne le résultat le plus fiable."
+    references: [survey]
+    source: "survey §1, §5 Lifecycle"
+  chatbots:
+    q: {en: "Can a chatbot tell if a video is fake?", fr: "Un agent conversationnel peut-il dire si une vidéo est fausse?"}
+    keywords: [chatbot, chatgpt, gpt, claude, gemini, llm, assistant, ai assistant, agent conversationnel]
+    answer:
+      en: "General AI assistants can notice some visible oddities, but they are less accurate than specialised detectors, miss most cloned voices, and can give convincing yet wrong explanations. Treat them as one extra opinion among others."
+      fr: "Les assistants d’IA généralistes repèrent certaines bizarreries visibles, mais sont moins précis que les détecteurs spécialisés, manquent la plupart des voix clonées, et peuvent donner des explications convaincantes mais fausses. Voyez-les comme un avis parmi d’autres."
+    references: [survey, mozaic]
+    source: "survey §4 Reasoning-based detection; MOZAIC §1"
+  marscope:
+    q: {en: "What is MARScope?", fr: "Qu’est-ce que MARScope?"}
+    keywords: [marscope, this tool, app, application, outil]
+    answer:
+      en: "MARScope is a study tool from the Vector Institute that runs up to three deepfake detectors on a video on your own machine. It shows each score in context, what each model used, and how far to trust it, and never gives a verdict."
+      fr: "MARScope est un outil d’étude de l’Institut Vecteur qui fait tourner jusqu’à trois détecteurs d’hypertrucages sur une vidéo, sur votre propre machine. Il montre chaque score en contexte, ce que chaque modèle a utilisé et jusqu’où s’y fier, sans jamais donner de verdict."
+    references: []
+    source: "MARScope"
+  privacy:
+    q: {en: "Does MARScope send my video anywhere?", fr: "MARScope envoie-t-il ma vidéo quelque part?"}
+    keywords: [privacy, upload, uploaded, send, data, stored, cloud, confidential, leave, confidentialité, envoyer, données]
+    answer:
+      en: "No. The video and its frames stay on the machine running MARScope and are deleted when you leave the result. Only a text summary goes to a language model, and only if one is set up."
+      fr: "Non. La vidéo et ses images restent sur la machine qui fait tourner MARScope et sont supprimées quand vous quittez le résultat. Seul un résumé textuel part vers un modèle de langage, et seulement s’il est configuré."
+    references: []
+    source: "MARScope"
+  training_data:
+    q: {en: "What were the models trained on?", fr: "Sur quoi les modèles ont-ils été entraînés?"}
+    keywords: [trained, training, data, dataset, faceforensics, gta, learned, entraînés, données, apprentissage]
+    answer:
+      en: "All three models were trained the same way, on face-swap videos from FaceForensics++ and on rendered game footage from GTA-V. Videos that differ a lot from these, such as ones with no face or from a new generator, give less reliable scores."
+      fr: "Les trois modèles ont été entraînés de la même façon, sur des vidéos d’échange de visage de FaceForensics++ et des images de jeu rendues de GTA-V. Les vidéos très différentes, sans visage ou d’un nouveau générateur, donnent des scores moins fiables."
+    references: [mars]
+    source: "MARS §4 Data, training and selection"
+  out_of_100:
+    q: {en: "What does “out of 100” mean on the model cards?", fr: "Que veut dire « sur 100 » dans les fiches des modèles?"}
+    keywords: [out of 100, auroc, auc, model cards, rating, metric, sur 100, fiches, mesure]
+    answer:
+      en: "It measures how well a model ranks altered videos above real ones on a test set: a full score means always, and half means no better than a coin toss. It summarises many videos and says nothing about how sure the model is about yours."
+      fr: "Elle mesure à quel point un modèle classe les vidéos modifiées au-dessus des vraies sur un jeu de test : le maximum veut dire toujours, la moitié pas mieux que pile ou face. C’est un résumé sur beaucoup de vidéos, qui ne dit rien de la confiance du modèle pour la vôtre."
+    references: [mars]
+    source: "MARS §4 Evaluation protocol"
+  audio_check:
+    q: {en: "Does MARScope check the audio?", fr: "MARScope vérifie-t-il le son?"}
+    keywords: [audio, sound, voice, check audio, son, voix]
+    answer:
+      en: "No, it checks the picture only. A real video with a cloned voice would not be caught by its models, so for calls and speeches, check the voice separately."
+      fr: "Non, il vérifie l’image seulement. Une vraie vidéo avec une voix clonée ne serait pas repérée par ses modèles : pour des appels ou des discours, vérifiez la voix séparément."
+    references: [mozaic]
+    source: "MOZAIC §1; MARScope scope"

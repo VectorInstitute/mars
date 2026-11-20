@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MARScope · Vector Institute</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/shell.css">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/shell.js"></script>
+</head>
+<body data-view="start">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-left">
+    <a class="logo" href="index.html" aria-label="MARScope home"><span class="logo-mar">MAR</span><span class="logo-scope">Scope</span></a>
+  </div>
+  <div class="header-right">
+    <div class="switcher" data-switch="lang"><button type="button" class="switch-trigger" aria-expanded="false">EN</button><div class="switch-menu" role="listbox" hidden></div></div>
+    <span class="sep nav-sep" aria-hidden="true">/</span>
+    <div class="switcher" data-switch="theme"><button type="button" class="switch-trigger" aria-expanded="false">Light</button><div class="switch-menu" role="listbox" hidden></div></div>
+    <span class="sep nav-sep" aria-hidden="true">/</span>
+    <nav class="topnav" aria-label="Site links">
+      <a href="https://vectorinstitute.github.io/marscope/" target="_blank" rel="noopener noreferrer" data-i18n="docs">Docs</a>
+      <span class="sep" aria-hidden="true">/</span>
+      <a href="index.html#faq" data-i18n="faq">FAQ</a>
+    </nav>
+    <a class="vector-link" href="https://vectorinstitute.ai/" target="_blank" rel="noopener noreferrer" aria-label="Vector Institute">
+      <img class="vector-logo on-light" src="img/vector-logo.png" alt="Vector Institute">
+      <img class="vector-logo on-dark" src="img/vector-logo-white.svg" alt="Vector Institute">
+    </a>
+  </div>
+</header>
+
+<main id="main" style="flex:1">
+  <!-- Warming up (as UnBias-Plus loading.html): shown until the server reports ready -->
+  <section class="loading-card" id="warm" aria-live="polite">
+    <div class="spinner" id="warm-spin" aria-hidden="true"></div>
+    <div>
+      <p class="loading-title" id="warm-title" data-i18n="warmTitle">Warming up</p>
+      <p class="loading-sub" id="warm-sub" data-i18n="warmSub">The detectors are loading. This takes a few seconds the first time.</p>
+    </div>
+    <div class="loading-status"><span class="status-dot" aria-hidden="true"></span><span id="warm-status" data-i18n="connecting">Connecting…</span></div>
+  </section>
+
+  <!-- The app: the toolkit prototype, on real data -->
+  <div id="app-root" hidden>
+
+
+  <!-- START -->
+  <section id="view-start" class="start" aria-labelledby="start-h">
+    <h1 id="start-h" data-i18n="heroTitle">See what a detector sees.</h1>
+    <p class="sub" data-i18n="heroSub">Open a video. Three detectors score every clip. Then test what they rely on.</p>
+
+    <div class="drop" id="drop">
+      <svg class="glyph" width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.5 9.5l4 2.5-4 2.5z"/></svg>
+      <button type="button" class="btn btn-primary btn-lg" id="choose" data-i18n="chooseVideo">Choose video</button>
+      <p class="secondary" id="drop-help" data-i18n="dropHelp">or drop it here · up to 2 minutes</p>
+      <div class="picked" id="picked" hidden>
+        <video id="picked-v" muted playsinline preload="metadata" aria-hidden="true"></video>
+        <div class="picked-t"><b id="picked-name"></b><span class="secondary" id="picked-meta"></span></div>
+        <button type="button" class="linkish" id="picked-change" data-i18n="change">Change</button>
+      </div>
+      <input type="file" id="file" accept="video/mp4,video/quicktime,video/webm" aria-describedby="drop-help file-error" hidden>
+    </div>
+    <p class="error" id="file-error" role="alert" hidden></p>
+
+
+    <div class="prefs">
+      <div class="pick-wrap"><span class="pick-label" id="pick-label" data-i18n="chooseModels">Choose models</span><div class="seg seg-multi seg-quiet" role="group" aria-labelledby="pick-label" id="pick"></div></div>
+      <label class="switch"><input type="checkbox" role="switch" id="opt-guess" checked><span class="track" aria-hidden="true"></span><span data-i18n="guessFirst">Guess first</span></label>
+    </div>
+    <p class="hw" id="hw"></p>
+    <button type="button" class="btn btn-primary btn-lg go" id="go" data-i18n="analyzeGo" hidden>Analyze</button>
+  </section>
+
+  <!-- RUN -->
+  <section id="view-run" class="run" aria-labelledby="run-h" hidden>
+    <div class="run-head">
+      <h1 id="run-h" class="run-title"></h1>
+      <p class="secondary" id="run-step" aria-live="polite"></p>
+      <div class="progress" role="progressbar" aria-labelledby="run-h" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="run-bar"></i></div>
+    </div>
+    <div class="live">
+      <figure class="live-stage"><img id="live-img" alt=""><figcaption id="live-cap"></figcaption></figure>
+      <div class="live-models" id="live-models"></div>
+    </div>
+    <div class="btns" style="justify-content:center"><button type="button" class="btn" id="run-back" data-i18n="back" hidden>Back</button></div>
+  </section>
+
+  <!-- ANALYZE -->
+  <section id="view-analyze" class="analyze" aria-labelledby="an-h" hidden>
+    <div class="toolbar">
+      <button type="button" class="btn btn-plain" data-nav="start">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="ic"><path d="M15 18l-6-6 6-6"/></svg><span data-i18n="videos">Videos</span>
+      </button>
+      <div class="titles">
+        <h1 id="an-h"></h1>
+        <p class="secondary" id="meta"><span id="meta-text"></span> · <button type="button" class="linkish" id="cred-open"></button></p>
+      </div>
+      <button type="button" class="btn btn-primary" id="open-report" data-i18n="report">Report</button>
+    </div>
+
+    <div class="workspace">
+      <div class="player" id="player">
+        <canvas id="frame" width="960" height="540" role="img" aria-label="Video frame"></canvas>
+        <div class="patches" id="patches" aria-hidden="true"></div>
+        <div class="split-line" id="split-line" hidden aria-hidden="true"><span data-i18n="original">Original</span><span data-i18n="edited">Edited</span></div>
+        <p class="badge" id="badge" hidden></p>
+        <div class="hud">
+          <button type="button" class="hud-btn" id="prev" data-i18n-aria="prevFrame"><svg width="18" height="18" viewBox="0 0 24 24" class="ic" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button type="button" class="hud-btn" id="play" data-i18n-aria="play"><svg width="18" height="18" viewBox="0 0 24 24" class="ic fill" aria-hidden="true" id="play-ic"><path d="M8 5.5v13l10.5-6.5z"/></svg></button>
+          <button type="button" class="hud-btn" id="next" data-i18n-aria="nextFrame"><svg width="18" height="18" viewBox="0 0 24 24" class="ic" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+          <output id="time" class="num"></output>
+          <span class="hud-gap"></span>
+          <button type="button" class="hud-btn" id="compare" aria-pressed="false" data-i18n-aria="compare" hidden><svg width="18" height="18" viewBox="0 0 24 24" class="ic" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M12 3v18"/></svg></button>
+          <button type="button" class="hud-btn" id="map" aria-pressed="true" data-i18n-aria="evidenceMap"><svg width="18" height="18" viewBox="0 0 24 24" class="ic" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M4 15h16M10 4v16M15 4v16"/></svg></button>
+        </div>
+      </div>
+
+      <section class="timeline" aria-labelledby="tl-h">
+        <div class="tl-head">
+          <h2 id="tl-h" data-i18n="timeline">Timeline</h2>
+          <div class="seg seg-small" role="group" data-i18n-aria="zoom" id="zoom">
+            <button type="button" data-z="video" aria-pressed="true" data-i18n="wholeVideo">Whole video</button>
+            <button type="button" data-z="clip" aria-pressed="false" id="zoom-clip">Clip</button>
+          </div>
+          <p class="secondary key"><span class="sw sw-real" aria-hidden="true"></span><span data-i18n="real">Real</span><span class="sw sw-fake" aria-hidden="true"></span><span data-i18n="fake">Fake</span></p>
+        </div>
+        <div class="tl" id="tl">
+          <div class="tl-row"><span class="tl-label"></span><div class="ruler" id="ruler" aria-hidden="true"></div></div>
+          <div class="tl-row"><span class="tl-label" data-i18n="video">Video</span><div class="film" id="film"></div></div>
+          <div id="lanes" role="grid" aria-labelledby="tl-h"></div>
+          <span class="playhead" id="playhead" aria-hidden="true"></span>
+        </div>
+        <p class="secondary tl-hint" id="tl-hint"></p>
+      </section>
+
+      <aside class="inspector" data-i18n-aria="inspector">
+
+        <section class="group" aria-labelledby="lk-h">
+          <div class="group-head"><h2 id="lk-h" data-i18n="resultH">Result</h2></div>
+          <div class="guess" id="guess" hidden>
+            <p class="guess-q" id="guess-q" data-i18n="yourCall">Your call?</p>
+            <div class="seg" role="group" aria-labelledby="guess-q">
+              <button type="button" data-guess="real" data-i18n="real">Real</button>
+              <button type="button" data-guess="unsure" data-i18n="notSure">Not sure</button>
+              <button type="button" data-guess="fake" data-i18n="fake">Fake</button>
+            </div>
+          </div>
+          <div class="reading" id="reading" aria-live="polite"></div>
+          <div class="list" id="models"></div>
+          <div class="row strength" id="strength-row" hidden><span data-i18n="overall">Overall</span><span class="val" id="strength"></span></div>
+          <p class="foot" id="agree" aria-live="polite"></p>
+          <div class="trust-sum" id="trust-sum"></div>
+        </section>
+
+        <div class="seg seg-tabs" role="tablist" data-i18n-aria="tools" id="tabs">
+          <button type="button" role="tab" id="tab-evidence" aria-controls="p-evidence" aria-selected="true" data-i18n="tabEvidence">Evidence</button>
+          <button type="button" role="tab" id="tab-notes" aria-controls="p-notes" aria-selected="false" tabindex="-1" data-i18n="tabNotes">Notes</button>
+          <button type="button" role="tab" id="tab-whatif" aria-controls="p-whatif" aria-selected="false" tabindex="-1" data-i18n="tabWhatIf">What if</button>
+          <button type="button" role="tab" id="tab-learn" aria-controls="p-learn" aria-selected="false" tabindex="-1" data-i18n="tabLearn">Learn</button>
+        </div>
+
+        <div role="tabpanel" id="p-evidence" aria-labelledby="tab-evidence" class="panel">
+          <section class="group test" aria-labelledby="test-q">
+            <div class="test-top">
+              <div class="seg seg-small" role="group" data-i18n-aria="testWhat">
+                <button type="button" data-test="frames" aria-pressed="true" data-i18n="frames">Frames</button>
+                <button type="button" data-test="areas" aria-pressed="false" data-i18n="areas">Areas</button>
+              </div>
+              <span class="secondary" id="test-ctx"></span>
+            </div>
+            <h3 class="test-q" id="test-q"></h3>
+            <div class="test-act"><button type="button" class="btn btn-primary" id="test-run"></button></div>
+            <div class="test-res" id="test-res" aria-live="polite" hidden>
+              <div class="cmp" id="test-cmp"></div>
+              <p class="test-say" id="test-say"></p>
+              <div class="test-act"><button type="button" class="btn btn-plain" id="test-undo" data-i18n="undo">Undo</button></div>
+            </div>
+          </section>
+          <details class="disc group" id="ev-more">
+            <summary data-i18n="moreDetail">More detail</summary>
+            <div class="row"><label for="method" data-i18n="map">Highlights</label><select id="method" class="select"></select></div>
+            <div class="row"><span data-i18n="sharedTop">Areas all detectors mark</span><span class="val num" id="overlap"></span></div>
+            <figure class="mini"><figcaption class="secondary" data-i18n="curveCap">Score as more frames are hidden</figcaption><svg id="curve" viewBox="0 0 300 110" role="img" aria-labelledby="curve-desc"></svg><p class="visually-hidden" id="curve-desc"></p></figure>
+            <div class="row"><span id="cur-frame"></span><span class="val num" id="d-cur"></span><button type="button" class="btn btn-small" id="rm-cur"></button></div>
+          </details>
+          <p class="foot" data-i18n="mapsNote">Highlights show what a model relies on, not where a forgery is.</p>
+        </div>
+
+        <div role="tabpanel" id="p-notes" aria-labelledby="tab-notes" class="panel" hidden>
+          <section class="group" aria-labelledby="notes-h">
+            <div class="group-head"><h3 id="notes-h" data-i18n="notesH">Policy notes</h3></div>
+            <div id="notes"></div>
+          </section>
+          <p class="foot" id="notes-foot"></p>
+        </div>
+
+        <div role="tabpanel" id="p-whatif" aria-labelledby="tab-whatif" class="panel" hidden>
+          <section class="group test" aria-labelledby="share-q">
+            <h3 class="test-q" id="share-q" data-i18n="shareQ">What if the video gets shared?</h3>
+            <div class="slider share">
+              <label for="s-share" class="visually-hidden" data-i18n="shareQ">What if the video gets shared?</label>
+              <output id="o-share"></output><span class="secondary" id="share-ctx"></span>
+              <input type="range" id="s-share" min="0" max="3" step="1" value="0">
+              <div class="ticks" aria-hidden="true"><span data-i18n="share0">Original</span><span data-i18n="share3">Shared many times</span></div>
+            </div>
+            <div class="test-res" id="share-res" aria-live="polite">
+              <div class="cmp" id="share-cmp"></div>
+              <p class="test-say" id="share-say"></p>
+            </div>
+          </section>
+          <details class="disc group" id="wi-more">
+            <summary data-i18n="adjustEach">Adjust each setting</summary>
+            <div class="slider"><label for="s-jpeg" data-i18n="quality">Quality</label><output id="o-jpeg" class="num"></output><input type="range" id="s-jpeg" min="10" max="100" step="5" value="100"></div>
+            <div class="slider"><label for="s-scale" data-i18n="resolution">Resolution</label><output id="o-scale" class="num"></output><input type="range" id="s-scale" min="25" max="100" step="5" value="100"></div>
+            <div class="slider"><label for="s-blur" data-i18n="blur">Blur</label><output id="o-blur" class="num"></output><input type="range" id="s-blur" min="0" max="3" step="0.5" value="0"></div>
+            <div class="slider"><label for="s-noise" data-i18n="noise">Noise</label><output id="o-noise" class="num"></output><input type="range" id="s-noise" min="0" max="0.1" step="0.01" value="0"></div>
+            <figure class="mini"><figcaption class="secondary" id="wi-cap"></figcaption><svg id="wi-chart" viewBox="0 0 300 130" role="img" aria-labelledby="wi-desc"></svg><p class="visually-hidden" id="wi-desc"></p></figure>
+          </details>
+        </div>
+
+        <div role="tabpanel" id="p-learn" aria-labelledby="tab-learn" class="panel" hidden>
+          <section class="group ask" aria-labelledby="ask-h">
+            <div class="group-head"><h3 id="ask-h" data-i18n="askH">Ask about this result</h3></div>
+            <div class="chips" id="ask-chips"></div>
+            <form class="ask-form" id="ask-form">
+              <label class="visually-hidden" for="ask-q" data-i18n="question">Question</label>
+              <input id="ask-q" class="search" autocomplete="off" maxlength="500" aria-describedby="ask-hint">
+              <button type="submit" class="btn btn-small" id="ask-send" data-i18n="ask">Ask</button>
+            </form>
+            <p class="foot pad ask-hint" id="ask-hint" hidden></p>
+            <div class="answer" id="answer" aria-live="polite" hidden></div>
+          </section>
+          <section class="group" aria-labelledby="as-h"><div class="group-head"><h3 id="as-h" data-i18n="assumeH">The five assumptions (A1–A5)</h3></div><div class="list" id="assume"></div></section>
+          <section class="group" aria-labelledby="mit-h"><div class="group-head"><h3 id="mit-h" data-i18n="mitH">Deepfakes in the MIT AI Risk Repository</h3></div><div class="list" id="mit"></div></section>
+          <section class="group" aria-labelledby="br-h">
+            <div class="group-head"><h3 id="br-h" data-i18n="noVerdictH">Why there is no verdict</h3></div>
+            <div class="baserate"><p class="br-big" id="br-big"></p><p class="secondary" id="br-text"></p><div class="seg seg-small" role="group" data-i18n-aria="howCommon" id="br-seg"></div></div>
+          </section>
+          <section class="group">
+            <button type="button" class="rowbtn" id="cards-open"><span data-i18n="modelCards">Model cards</span><span class="secondary" data-i18n="modelCardsSub">Scores by test set and generator</span></button>
+            <details class="disc"><summary data-i18n="references">References</summary><ul class="refs" id="refs"></ul></details>
+          </section>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p class="footer-definition" data-i18n-html="definition"></p>
+  <p class="footer-legal" data-i18n="legal"></p>
+  <p class="footer-copyright"><span data-i18n="copyright"></span> · <a href="https://github.com/VectorInstitute/marscope" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+</footer>
+
+<!-- report sheet -->
+<dialog class="sheet sheet-report" id="sheet" aria-labelledby="sheet-h">
+  <div class="sheet-head"><h2 id="sheet-h" data-i18n="report">Report</h2><button type="button" class="btn btn-plain" data-close data-i18n="done">Done</button></div>
+  <div class="sheet-body">
+    <p class="secondary" id="report-by" aria-live="polite"></p>
+    <div class="skeleton" id="sk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <article class="report" id="report" aria-live="polite" hidden></article>
+    <details class="disc box" id="payload-box" hidden><summary data-i18n="sentToLlm">Sent to the language model</summary><p class="secondary" data-i18n="sentNote">The result in words, the notes and your tests. Never the video or its frames.</p><pre id="payload"></pre></details>
+  </div>
+  <div class="sheet-foot">
+    <label class="check"><input type="checkbox" id="card-frame"> <span data-i18n="cardFrame">Include the current frame (card, PDF, HTML)</span></label>
+    <div class="btns">
+      <button type="button" class="btn" id="copy" data-i18n="copy">Copy</button>
+      <details class="menu" id="dl">
+        <summary class="btn" data-i18n="download">Download</summary>
+        <div class="menu-list" role="group">
+          <button type="button" data-fmt="pdf">PDF</button>
+          <button type="button" data-fmt="html">HTML</button>
+          <button type="button" data-fmt="markdown">Markdown</button>
+          <button type="button" id="export" data-i18n="exportSession">Session (JSON)</button>
+        </div>
+      </details>
+      <button type="button" class="btn" id="card-png" data-i18n="evidenceCard">Evidence card</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- model cards sheet -->
+<dialog class="sheet sheet-wide" id="cards" aria-labelledby="cards-h">
+  <div class="sheet-head"><h2 id="cards-h" data-i18n="modelCards">Model cards</h2><button type="button" class="btn btn-plain" data-close data-i18n="done">Done</button></div>
+  <div class="sheet-body" id="cards-body"></div>
+</dialog>
+
+<!-- credentials sheet -->
+<dialog class="sheet" id="cred" aria-labelledby="cred-h">
+  <div class="sheet-head"><h2 id="cred-h" data-i18n="credH">Content Credentials</h2><button type="button" class="btn btn-plain" data-close data-i18n="done">Done</button></div>
+  <div class="sheet-body" id="cred-body"></div>
+</dialog>
+
+<script>
+(function () {
+  "use strict";
+  const MS = window.MS;
+  MS.addStrings({
+    en: { warmTitle: "Warming up", warmSub: "The detectors are loading. This takes a few seconds the first time.", connecting: "Connecting…",
+      loadingModel: "Loading {m}…", ready: "Ready", noServerTitle: "Start MARScope", noServerSub: "This page needs the local server. In a terminal, run:", noServerStatus: "marscope --serve" },
+    fr: { warmTitle: "Préparation", warmSub: "Les détecteurs se chargent. Cela prend quelques secondes la première fois.", connecting: "Connexion…",
+      loadingModel: "Chargement de {m}…", ready: "Prêt", noServerTitle: "Lancez MARScope", noServerSub: "Cette page a besoin du serveur local. Dans un terminal, lancez :", noServerStatus: "marscope --serve" },
+  });
+  const NAMES = { mars: "MARS", gend: "GenD", "dfd-hr": "DFD-HR" };
+  const $ = (s) => document.querySelector(s);
+  let state = "connecting", model = null, misses = 0;
+
+  function render() {
+    const t = MS.t;
+    if (state === "offline") {
+      $("#warm-title").textContent = t("noServerTitle"); $("#warm-sub").textContent = t("noServerSub");
+      $("#warm-status").textContent = t("noServerStatus"); $("#warm-spin").hidden = true; return;
+    }
+    $("#warm-title").textContent = t("warmTitle"); $("#warm-sub").textContent = t("warmSub"); $("#warm-spin").hidden = false;
+    $("#warm-status").textContent = state === "loading" && model ? t("loadingModel", { m: NAMES[model] || model }) : state === "ready" ? t("ready") : t("connecting");
+  }
+
+  async function poll() {
+    if (location.protocol === "file:") { state = "offline"; render(); return; }
+    try {
+      const res = await fetch("health", { cache: "no-store" });
+      const h = await res.json();
+      misses = 0;
+      if (h.status === "ok") {
+        state = "ready"; render();
+        $("#warm").hidden = true; $("#app-root").hidden = false;
+        document.dispatchEvent(new CustomEvent("marscope:ready", { detail: h }));
+        return;
+      }
+      state = "loading"; model = h.loading_model; render();
+    } catch (_) {
+      misses += 1;
+      if (misses >= 3) { state = "offline"; render(); }
+    }
+    setTimeout(poll, 1000);
+  }
+  MS.onChange((what) => { if (what === "lang") render(); });
+  document.addEventListener("DOMContentLoaded", () => { render(); poll(); });
+})();
+</script>
+<script src="js/i18n.js"></script>
+<script src="js/mit.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

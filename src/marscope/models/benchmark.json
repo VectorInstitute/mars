@@ -1,0 +1,127 @@
+{
+ "sets": [
+  "FF++",
+  "CelebDF",
+  "DF-TIMIT",
+  "UADFV",
+  "HiFiFace",
+  "GenVideo",
+  "DF26"
+ ],
+ "models": {
+  "mars": {
+   "sets": [
+    98.98,
+    91.22,
+    99.95,
+    96.58,
+    84.05,
+    93.44,
+    75.81
+   ],
+   "avg": 91.43,
+   "gens": {
+    "genvideo": {
+     "Crafter": 98.3,
+     "Gen2": 94.4,
+     "HotShot": 85.52,
+     "Lavie": 93.32,
+     "ModelScope": 95.5,
+     "MoonValley": 96.07,
+     "MorphStudio": 93.01,
+     "Show_1": 87.31,
+     "Sora": 80.56,
+     "WildScrape": 93.18
+    },
+    "df26": {
+     "Grok_Imagine": 72.2,
+     "HunyuanVideo_1.5_14b_i2v": 74.45,
+     "HunyuanVideo_1.5_14b_t2v": 86.49,
+     "Kling_3.0": 81.57,
+     "LTX_2.3_distilled_i2v": 73.37,
+     "LTX_2.3_distilled_t2v": 65.89,
+     "Veo_3.1": 78.12,
+     "Wan_2.2_14b_i2v": 72.19,
+     "Wan_2.2_14b_t2v": 72.95,
+     "Wan_2.6": 84.45
+    }
+   }
+  },
+  "gend": {
+   "sets": [
+    96.68,
+    84.09,
+    95.08,
+    97.0,
+    76.42,
+    80.49,
+    89.44
+   ],
+   "avg": 88.46,
+   "gens": {
+    "genvideo": {
+     "Crafter": 98.85,
+     "Gen2": 98.39,
+     "HotShot": 64.86,
+     "Lavie": 66.44,
+     "ModelScope": 84.48,
+     "MoonValley": 88.91,
+     "MorphStudio": 82.0,
+     "Show_1": 38.71,
+     "Sora": 86.79,
+     "WildScrape": 80.47
+    },
+    "df26": {
+     "Grok_Imagine": 93.79,
+     "HunyuanVideo_1.5_14b_i2v": 87.42,
+     "HunyuanVideo_1.5_14b_t2v": 93.59,
+     "Kling_3.0": 93.47,
+     "LTX_2.3_distilled_i2v": 90.74,
+     "LTX_2.3_distilled_t2v": 92.27,
+     "Veo_3.1": 88.13,
+     "Wan_2.2_14b_i2v": 86.03,
+     "Wan_2.2_14b_t2v": 79.45,
+     "Wan_2.6": 92.1
+    }
+   }
+  },
+  "dfd-hr": {
+   "sets": [
+    99.8,
+    93.89,
+    99.59,
+    96.25,
+    86.26,
+    79.48,
+    74.95
+   ],
+   "avg": 90.03,
+   "gens": {
+    "genvideo": {
+     "Crafter": 93.46,
+     "Gen2": 85.03,
+     "HotShot": 57.81,
+     "Lavie": 73.93,
+     "ModelScope": 86.7,
+     "MoonValley": 66.71,
+     "MorphStudio": 81.57,
+     "Show_1": 76.17,
+     "Sora": 71.22,
+     "WildScrape": 79.41
+    },
+    "df26": {
+     "Grok_Imagine": 59.65,
+     "HunyuanVideo_1.5_14b_i2v": 62.85,
+     "HunyuanVideo_1.5_14b_t2v": 87.61,
+     "Kling_3.0": 81.42,
+     "LTX_2.3_distilled_i2v": 89.92,
+     "LTX_2.3_distilled_t2v": 76.16,
+     "Veo_3.1": 63.98,
+     "Wan_2.2_14b_i2v": 80.27,
+     "Wan_2.2_14b_t2v": 65.79,
+     "Wan_2.6": 77.26
+    }
+   }
+  }
+ }
+}
