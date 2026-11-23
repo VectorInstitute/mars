@@ -7,7 +7,7 @@ authors = [ {name = "Vector AI Engineering", email = "ai_engineering@vectorinsti
 license = "Apache-2.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "numpy>=1.26",
+    "numpy>=2.5.5",
     # --- models ---
     "torch==2.11.0",
     "torchvision==0.26.0",
